@@ -1,4 +1,10 @@
+
+
 print "Hello, World"
+assert true, "Assert Called!"
+print '\n', test
+
+// test
 
 if true
 {
