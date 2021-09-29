@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/IrishBruse/iblang/lexer"
+	"github.com/IrishBruse/iblang/parser"
 )
 
 var printTokensFlag bool
@@ -13,7 +14,7 @@ var printAstFlag bool
 
 func init() {
 	flag.BoolVar(&printTokensFlag, "PrintTokens", false, "Toggle printing the token stream from the lexer")
-	flag.BoolVar(&printAstFlag, "PrintAST", false, "Toggle printing AST from the parser")
+	flag.BoolVar(&printAstFlag, "PrintAst", false, "Toggle printing AST from the parser")
 	flag.Parse()
 }
 
@@ -25,5 +26,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	lexer.Tokenize(file, printTokensFlag)
+	tokens := lexer.Tokenize(file, printTokensFlag)
+	parser.Parse(tokens, printAstFlag)
 }

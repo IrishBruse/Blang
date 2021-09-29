@@ -1,0 +1,21 @@
+Program:
+    Namespace:
+        ident: foo
+    Print:
+        any: ["Hello, World"]
+    Assert:
+        bool: true
+        operator: ,
+        message: "Assert Called!"
+    Print:
+        any: [
+            '\n',
+            ident: test
+        ]
+    If:
+        bool: true
+        block: null
+    Func:
+        ident: main
+        params: null
+        block: null

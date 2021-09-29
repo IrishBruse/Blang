@@ -21,6 +21,7 @@ func (reader *sourceCodeReader) readChar() rune {
 
 	if err == io.EOF {
 		reader.EOF = true
+		return ' '
 	}
 
 	reader.Index++
@@ -47,7 +48,7 @@ func (reader *sourceCodeReader) peekRune() rune {
 
 	if err != nil {
 		reader.EOF = true
-		return 't'
+		return ' '
 	}
 
 	return rune(r[0])

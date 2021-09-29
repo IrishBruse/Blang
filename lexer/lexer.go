@@ -16,29 +16,47 @@ func Tokenize(file *os.File, showTokens bool) []Token {
 	tokens := make([]Token, 0)
 
 	w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
+	var oldTok *Token
 	for tok := readToken(&reader); reader.EOF == false; tok = readToken(&reader) {
 		if showTokens {
 			fmt.Fprintf(w, "./%s:%d:%d\t%s\t%s\n", reader.File, tok.Line, tok.Index, tok.ID, tok.Data)
 		}
-		tokens = append(tokens, *tok)
+
+		if oldTok == nil || !(tok.ID == EOL && oldTok.ID == EOL) {
+			tokens = append(tokens, *tok)
+			oldTok = tok
+		}
 	}
 	w.Flush()
+
+	tokens = append(tokens, Token{ID: EOF, Data: "EOF", Line: reader.Line, Index: reader.Index})
 
 	return tokens
 }
 
 func readToken(reader *sourceCodeReader) *Token {
-	// Skip all whitespace
-	if unicode.IsSpace(reader.peekRune()) {
-		for unicode.IsSpace(reader.peekRune()) {
-			reader.readChar()
-		}
-	}
+	tok := Token{Line: reader.Line, Index: reader.Index}
 
 	peek := reader.peekRune()
 
 	if reader.EOF {
-		return nil
+		tok.ID = EOF
+		tok.Data = "EOF"
+		return &tok
+	}
+
+	// Skip all whitespace
+	if unicode.IsSpace(peek) {
+		for unicode.IsSpace(reader.peekRune()) {
+			c := reader.readChar()
+			if c == '\n' {
+				tok.ID = EOL
+				tok.Data = "EOL"
+				return &tok
+			}
+		}
+
+		peek = reader.peekRune()
 	}
 
 	// Comment
@@ -51,8 +69,6 @@ func readToken(reader *sourceCodeReader) *Token {
 
 		logSyntaxError(reader, "Malformed comment")
 	}
-
-	tok := Token{Line: reader.Line, Index: reader.Index}
 
 	// String constants TODO: added error for no closing "
 	if peek == '"' {
@@ -95,6 +111,7 @@ func readToken(reader *sourceCodeReader) *Token {
 	// Words
 	if isIdentifierStart(peek) {
 		data := string(reader.readChar())
+
 		for r := reader.peekRune(); unicode.IsLetter(r) || unicode.IsNumber(r) || r == '_'; r = reader.peekRune() {
 			data += string(reader.readChar())
 		}
@@ -170,11 +187,12 @@ func isIdentifierRest(r rune) bool {
 
 func logSyntaxError(reader *sourceCodeReader, message string) {
 	msg := fmt.Sprintf("./%s:%d:%d ", reader.File, reader.Line, reader.Index)
+	reader.readChar()
 	logError(msg + reader.CurrentLine)
 
 	indicator := ""
-	for i := 0; i < len(msg)+reader.Index-1; i++ {
-		indicator += "~"
+	for i := 0; i < len(msg)+reader.Index-2; i++ {
+		indicator += " "
 	}
 	indicator += "^"
 
