@@ -1,10 +1,10 @@
-
+namespace foo
 
 print "Hello, World"
-assert true, "Assert Called!"
+assert TRUE, "Assert Called!"
 print '\n', test
 
-// test
+// Should not make tokens print '\n', test, "hello world"
 
 if true
 {

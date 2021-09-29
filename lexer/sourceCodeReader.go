@@ -6,9 +6,9 @@ import (
 	"os"
 )
 
-func newTokenReader(file *os.File) tokenReader {
+func newTokenReader(file *os.File) sourceCodeReader {
 	fi, _ := file.Stat()
-	return tokenReader{
+	return sourceCodeReader{
 		buf:   *bufio.NewReader(file),
 		File:  fi.Name(),
 		Line:  1,
@@ -16,7 +16,7 @@ func newTokenReader(file *os.File) tokenReader {
 	}
 }
 
-func (reader *tokenReader) readChar() rune {
+func (reader *sourceCodeReader) readChar() rune {
 	r, _, err := reader.buf.ReadRune()
 
 	if err == io.EOF {
@@ -34,7 +34,7 @@ func (reader *tokenReader) readChar() rune {
 	return r
 }
 
-func (reader *tokenReader) readLine() string {
+func (reader *sourceCodeReader) readLine() string {
 	result := ""
 	for reader.peekRune() != '\n' && reader.peekRune() != '\r' {
 		result += string(reader.readChar())
@@ -42,7 +42,7 @@ func (reader *tokenReader) readLine() string {
 	return result
 }
 
-func (reader *tokenReader) peekRune() rune {
+func (reader *sourceCodeReader) peekRune() rune {
 	r, err := reader.buf.Peek(1)
 
 	if err != nil {

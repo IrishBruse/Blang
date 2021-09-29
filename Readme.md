@@ -1,4 +1,6 @@
-# EC Language
+# iblang
+
+IB Language
 
 Planned Features:
 - Compiled
