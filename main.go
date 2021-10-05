@@ -7,6 +7,7 @@ import (
 
 	"github.com/IrishBruse/iblang/lexer"
 	"github.com/IrishBruse/iblang/parser"
+	"github.com/IrishBruse/iblang/walker"
 )
 
 var printTokensFlag bool
@@ -27,5 +28,15 @@ func main() {
 	}
 
 	tokens := lexer.Tokenize(file, printTokensFlag)
-	parser.Parse(tokens, printAstFlag)
+
+	ast := parser.Parse(tokens, printAstFlag)
+
+	nasmWalker := parser.Walker{}
+
+	nasmWalker.VisitFunc = walker.WalkNasm
+
+	f, _ := os.Create("./test.asm")
+	nasmWalker.SrcFile = f
+
+	ast.WalkTree(nasmWalker)
 }

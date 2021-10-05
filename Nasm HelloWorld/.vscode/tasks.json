@@ -1,0 +1,12 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run",
+            "command": "nasm.exe -f win64 hello.asm &&            golink /console /entry main hello.obj Kernel32.dll User32.dll &&            Write-Host \"--------- Start Output ----------\" &&./hello.exe && Write-Host \"--------- End Output ----------\"",
+            "type": "shell",
+            "args": [],
+            "group": "build"
+        }
+    ]
+}

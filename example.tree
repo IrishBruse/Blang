@@ -1,21 +1,28 @@
-Program:
+Ast:
     Namespace:
-        ident: foo
-    Print:
-        any: ["Hello, World"]
-    Assert:
-        bool: true
-        operator: ,
-        message: "Assert Called!"
-    Print:
-        any: [
-            '\n',
-            ident: test
+        ident: "foo"
+    Import:
+        ident: "system"
+    FuncDef:
+        ident: "main"
+        params: [
+            string[]: "args"
         ]
-    If:
-        bool: true
-        block: null
-    Func:
-        ident: main
-        params: null
-        block: null
+    FuncBlock: [
+        FuncCall:
+            ident: "print"
+            params: ["Hello, World"]
+        IfStatement:
+            cond: true
+            block: [
+            FuncCall:
+                ident: "print"
+                params: [
+                    '\n',
+                    ident: test
+                ]
+            ]
+        FuncCall:
+            ident: "assert"
+            params: [true, "Assert called!"]
+    ]

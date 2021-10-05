@@ -1,0 +1,9 @@
+Ast:
+    FuncDef:
+        ident: "main"
+        params: []
+    FuncBlock: [
+        FuncCall:
+            ident: "print"
+            params: ["Hello, World!"]
+    ]

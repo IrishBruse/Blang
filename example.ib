@@ -1,17 +1,16 @@
 namespace foo
 
-print "Hello, World"
-assert TRUE, "Assert Called!"
-print '\n', test
+import system
 
-// Should not make tokens print '\n', test, "hello world"
-
-if true
+// Test comment
+func main(string[] args)
 {
+	print("Hello, World")
 
-}
+	if true
+	{
+		print('\n', test)
+	}
 
-func main()
-{
-
+	assert(true, "Assert Called!")
 }
