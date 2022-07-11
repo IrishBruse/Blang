@@ -1,0 +1,4 @@
+func Main()
+{
+	PrintLine("Hello, World!")
+}
