@@ -1,9 +1,19 @@
-Ast:
-    FuncDef:
-        ident: "main"
-        params: []
-    FuncBlock: [
-        FuncCall:
-            ident: "print"
-            params: ["Hello, World!"]
-    ]
+[
+    {
+        "Type": "FunctionDeclaration",
+        "Identiefier": "Main",
+        "Params": [],
+        "Body": [
+            {
+                "Type": "FunctionCall",
+                "Identifier": "PrintLine",
+                "Params": [
+                    {
+                        "Type": "StringLiteral",
+                        "Value": "Hello World!"
+                    }
+                ]
+            }
+        ]
+    }
+]
