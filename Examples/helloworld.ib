@@ -1,4 +1,4 @@
-func Main()
+func Main(args)
 {
-	PrintLine("Hello, World!")
+    PrintLine("Hello, World!")
 }
