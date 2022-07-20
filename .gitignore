@@ -1,2 +1,7 @@
 **/obj/
 **/bin/
+
+.vscode
+
+*.exe
+*.pdb

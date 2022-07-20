@@ -10,7 +10,11 @@ public enum TokenType
     StringLiteral,
     CharLiteral,
 
-    Keyword,
+    Keyword_Func,
+    Keyword_If,
+    Keyword_Else,
+    Keyword_Return,
+
     Operator,
 
     Bracket,

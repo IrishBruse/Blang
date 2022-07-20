@@ -6,7 +6,7 @@
         "Body": [
             {
                 "Type": "FunctionCall",
-                "Identifier": "PrintLine",
+                "Identifier": "Print",
                 "Params": [
                     {
                         "Type": "StringLiteral",

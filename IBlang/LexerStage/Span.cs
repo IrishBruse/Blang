@@ -1,18 +1,3 @@
-namespace IBlang;
+namespace IBlang.LexerStage;
 
-public struct Span
-{
-    public int Start;
-    public int End;
-
-    public Span(int start, int end)
-    {
-        Start = start;
-        End = end;
-    }
-
-    public override string ToString()
-    {
-        return $"{Start}-{End}";
-    }
-}
+public record struct Loc(int Start, int End, int Line, int Column);

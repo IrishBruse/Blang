@@ -1,10 +1,9 @@
 namespace IBlang.LexerStage;
 
-public record Token(TokenType Type, string Value, Span Span)
+public record Token(TokenType Type, string Value, Loc Span)
 {
     public override string ToString()
     {
-        return $"({Type} \"{Value}\" {Span})";
-        // return $"{Value}";
+        return $"{Span.Line}:{Span.Column} {Type} \"{Value}\"";
     }
 }
