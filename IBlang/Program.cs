@@ -4,59 +4,105 @@ using System.Diagnostics;
 
 using IBlang.LexerStage;
 using IBlang.ParserStage;
-using IBlang.TreeEmitterStage;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static void Main()
     {
-        const string currentFile = @"../Examples/helloworld.ib";
-        const string outputFile = "../Examples/test.c";
+        string currentFile = Path.GetFullPath("../Examples/helloworld.ib");
+        string outputFile = Path.GetFullPath(currentFile.Replace(".ib", ".c"));
 
         Context ctx = new(new[] { currentFile });
 
-        Token[] tokens = new Lexer(ctx).Lex();
+        Token[] tokens = Tokenize(ctx);
+        Ast ast = Parse(ctx, tokens);
+        Emit(outputFile, ast);
+        ClangFormat(outputFile);
+        RunWithTcc(outputFile);
+    }
+
+    private static void ClangFormat(string outputFile)
+    {
+        Process? clangfmt = RunCommand("clang-format", outputFile, "-i");
+        if (clangfmt != null)
+        {
+            while (!clangfmt.HasExited)
+            {
+                string value = clangfmt.StandardOutput.ReadToEnd();
+                if (!string.IsNullOrEmpty(value))
+                {
+                    Console.WriteLine(value);
+                }
+            }
+        }
+    }
+
+    private static void Emit(string outputFile, Ast ast)
+    {
+        File.Delete(path: outputFile);
+        StreamWriter writer = new(File.OpenWrite(outputFile));
+        new Visitor(writer).Visit(ast);
+        writer.Close();
+        Console.WriteLine();
+    }
+
+    private static Ast Parse(Context ctx, Token[] tokens)
+    {
+        Ast ast = new Parser(ctx, tokens).Parse();
+        return ast;
+    }
+
+    private static void RunWithTcc(string outputFile)
+    {
+        Process? tcc = RunCommand("tcc", "-run", outputFile);
 
         Console.WriteLine();
-        Console.WriteLine("-- Tokens Output --");
+        if (tcc != null)
+        {
+            while (!tcc.HasExited)
+            {
+                string text = tcc.StandardOutput.ReadToEnd();
+                if (text.StartsWith("tcc: error:"))
+                {
+                    Log.Error(text);
+                }
+                else
+                {
+                    Console.Write(text);
+                }
+            }
+        }
+    }
+
+    private static Token[] Tokenize(Context ctx)
+    {
+        Token[] tokens = new Lexer(ctx).Lex();
 
         foreach (Token token in tokens)
         {
-            Console.WriteLine(currentFile + ":" + token);
+            Console.WriteLine(token);
         }
 
         Console.WriteLine();
-        Console.WriteLine("-- Ast Output --");
+        return tokens;
+    }
 
-        Ast ast = new Parser(ctx, tokens).Parse();
-        new Emitter(outputFile).Emit(ast);
+    private static Process? RunCommand(string exe, params string[] args)
+    {
+        Console.WriteLine($"> {exe} {string.Join(' ', args)}");
 
-        System.Diagnostics.Process.Start(new ProcessStartInfo
+        Process? command = Process.Start(new ProcessStartInfo
         {
-            FileName = "clang-format",
-            Arguments = outputFile + " -i",
-        })?.WaitForExit();
-
-        Console.WriteLine();
-        Console.WriteLine("-- Tcc Output --");
-
-        var tcc = System.Diagnostics.Process.Start(new ProcessStartInfo
-        {
-            FileName = "tcc",
-            Arguments = " -run " + outputFile,
+            FileName = exe,
+            Arguments = string.Join(' ', args),
             RedirectStandardOutput = true,
         });
 
-        if (tcc == null)
+        if (command == null)
         {
-            Console.WriteLine("tcc not found");
-            return;
+            Log.Error($"{exe} not found in Path");
         }
 
-        while (!tcc.HasExited)
-        {
-            var text = tcc.StandardOutput.ReadToEnd();
-            Console.WriteLine(text);
-        }
+        return command;
     }
 }

@@ -1,13 +1,10 @@
 namespace IBlang.LexerStage;
 
-public class Lexer : IDisposable
+public class Lexer
 {
     private StreamReader file;
     private int lineNumber = 1;
     private int columnNumber = 1;
-
-    private int startLineNumber = 1;
-    private int startColumnNumber = 1;
 
     private int index = 1;
     private Context ctx;
@@ -21,7 +18,7 @@ public class Lexer : IDisposable
     public Lexer(Context ctx)
     {
         this.ctx = ctx;
-        file = File.OpenText(ctx.files[0]);
+        file = File.OpenText(ctx.Files[0]);
     }
 
     public Token[] Lex()
@@ -36,7 +33,7 @@ public class Lexer : IDisposable
                 _ = NextChar();
                 if (file.EndOfStream)
                 {
-                    tokens.Add(new Token(TokenType.Eof, "EOF", new(index - 1, index, lineNumber, columnNumber)));
+                    tokens.Add(new Token(TokenType.Eof, "EOF", new(index - 1, index)));
 
                     file.Close();
                     return tokens.ToArray();
@@ -44,42 +41,40 @@ public class Lexer : IDisposable
             }
 
             int start = index;
-            startLineNumber = lineNumber;
-            startColumnNumber = columnNumber;
 
             char c = PeekChar();
 
             Token token = c switch
             {
-                '(' => new Token(TokenType.OpenParenthesis, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                ')' => new Token(TokenType.CloseParenthesis, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '[' => new Token(TokenType.OpenBracket, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                ']' => new Token(TokenType.CloseBracket, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '{' => new Token(TokenType.OpenScope, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '}' => new Token(TokenType.CloseScope, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
+                '(' => new Token(TokenType.OpenParenthesis, NextChar().ToString(), new(start, index)),
+                ')' => new Token(TokenType.CloseParenthesis, NextChar().ToString(), new(start, index)),
+                '[' => new Token(TokenType.OpenBracket, NextChar().ToString(), new(start, index)),
+                ']' => new Token(TokenType.CloseBracket, NextChar().ToString(), new(start, index)),
+                '{' => new Token(TokenType.OpenScope, NextChar().ToString(), new(start, index)),
+                '}' => new Token(TokenType.CloseScope, NextChar().ToString(), new(start, index)),
 
-                '.' => new Token(TokenType.Dot, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                ',' => new Token(TokenType.Comma, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
+                '.' => new Token(TokenType.Dot, NextChar().ToString(), new(start, index)),
+                ',' => new Token(TokenType.Comma, NextChar().ToString(), new(start, index)),
 
-                '<' => new Token(TokenType.LessThan, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '>' => new Token(TokenType.GreaterThan, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '~' => new Token(TokenType.Tilda, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                ':' => new Token(TokenType.Colon, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '?' => new Token(TokenType.Question, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
+                '<' => new Token(TokenType.LessThan, NextChar().ToString(), new(start, index)),
+                '>' => new Token(TokenType.GreaterThan, NextChar().ToString(), new(start, index)),
+                '~' => new Token(TokenType.Tilda, NextChar().ToString(), new(start, index)),
+                ':' => new Token(TokenType.Colon, NextChar().ToString(), new(start, index)),
+                '?' => new Token(TokenType.Question, NextChar().ToString(), new(start, index)),
 
-                '+' => new Token(TokenType.Plus, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '-' => new Token(TokenType.Minus, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '*' => new Token(TokenType.Multiply, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '/' => new Token(TokenType.Divide, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '^' => new Token(TokenType.Caret, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '&' => new Token(TokenType.And, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '|' => new Token(TokenType.Pipe, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '%' => new Token(TokenType.Module, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '!' => new Token(TokenType.Exclemation, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                '=' => new Token(TokenType.Equal, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
+                '+' => new Token(TokenType.Plus, NextChar().ToString(), new(start, index)),
+                '-' => new Token(TokenType.Minus, NextChar().ToString(), new(start, index)),
+                '*' => new Token(TokenType.Multiply, NextChar().ToString(), new(start, index)),
+                '/' => new Token(TokenType.Divide, NextChar().ToString(), new(start, index)),
+                '^' => new Token(TokenType.Caret, NextChar().ToString(), new(start, index)),
+                '&' => new Token(TokenType.And, NextChar().ToString(), new(start, index)),
+                '|' => new Token(TokenType.Pipe, NextChar().ToString(), new(start, index)),
+                '%' => new Token(TokenType.Module, NextChar().ToString(), new(start, index)),
+                '!' => new Token(TokenType.Exclemation, NextChar().ToString(), new(start, index)),
+                '=' => new Token(TokenType.Equal, NextChar().ToString(), new(start, index)),
 
-                '$' => new Token(TokenType.Dollar, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
-                ';' => new Token(TokenType.Semicolon, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
+                '$' => new Token(TokenType.Dollar, NextChar().ToString(), new(start, index)),
+                ';' => new Token(TokenType.Semicolon, NextChar().ToString(), new(start, index)),
 
                 '"' => LexString(),
                 '\'' => LexChar(),
@@ -87,7 +82,7 @@ public class Lexer : IDisposable
                 char digit when char.IsDigit(digit) => LexNumber(),
                 char letter when char.IsLetter(letter) => LexIdentifierOrKeyword(),
 
-                _ => new Token(TokenType.Garbage, NextChar().ToString(), new(start, index, startLineNumber, startColumnNumber)),
+                _ => new Token(TokenType.Garbage, NextChar().ToString(), new(start, index)),
             };
 
             tokens.Add(token);
@@ -101,8 +96,6 @@ public class Lexer : IDisposable
     private Token LexNumber()
     {
         int start = index;
-        startLineNumber = lineNumber;
-        startColumnNumber = columnNumber;
 
         string numberLiteral = "";
         while (char.IsDigit(PeekChar()))
@@ -110,15 +103,13 @@ public class Lexer : IDisposable
             numberLiteral += NextChar();
         }
 
-        return new Token(TokenType.NumberLiteral, numberLiteral, new(start, index, startLineNumber, startColumnNumber));
+        return new Token(TokenType.NumberLiteral, numberLiteral, new(start, index));
 
     }
 
     private Token LexString()
     {
         int start = index;
-        startLineNumber = lineNumber;
-        startColumnNumber = columnNumber;
 
         Log.Assert('"' == NextChar());// Eat the quote
 
@@ -130,14 +121,12 @@ public class Lexer : IDisposable
 
         Log.Assert('"' == NextChar());// Eat the quote
 
-        return new Token(TokenType.StringLiteral, stringLiteral, new(start, index, startLineNumber, startColumnNumber));
+        return new Token(TokenType.StringLiteral, stringLiteral, new(start, index));
     }
 
     private Token LexChar()
     {
         int start = index;
-        startLineNumber = lineNumber;
-        startColumnNumber = columnNumber;
 
         char charLiteral;
         Log.Assert('\'' == NextChar());// Eat the quote
@@ -157,7 +146,7 @@ public class Lexer : IDisposable
                 case 'n': charLiteral = '\n'; break;
                 case '0': charLiteral = '\0'; break;
                 case '\\': charLiteral = '\\'; break;
-                default: return new Token(TokenType.CharLiteral, string.Empty, new(start, index, startLineNumber, startColumnNumber));
+                default: return new Token(TokenType.CharLiteral, string.Empty, new(start, index));
             };
         }
         else
@@ -166,14 +155,12 @@ public class Lexer : IDisposable
         }
         Log.Assert('\'' == NextChar());// Eat the quote
 
-        return new Token(TokenType.CharLiteral, charLiteral.ToString(), new(start, index, startLineNumber, startColumnNumber));
+        return new Token(TokenType.CharLiteral, charLiteral.ToString(), new(start, index));
     }
 
     private Token LexIdentifierOrKeyword()
     {
         int start = index;
-        startLineNumber = lineNumber;
-        startColumnNumber = columnNumber;
 
         string identifier = "";
         while (char.IsLetter(PeekChar()))
@@ -183,11 +170,11 @@ public class Lexer : IDisposable
 
         if (Keywords.TryGetValue(identifier, out TokenType type))
         {
-            return new Token(type, identifier, new(start, index, startLineNumber, startColumnNumber));
+            return new Token(type, identifier, new(start, index));
         }
         else
         {
-            return new Token(TokenType.Identifier, identifier, new(start, index, startLineNumber, startColumnNumber));
+            return new Token(TokenType.Identifier, identifier, new(start, index));
         }
     }
 
@@ -210,11 +197,5 @@ public class Lexer : IDisposable
     private char PeekChar()
     {
         return (char)file.Peek();
-    }
-
-    public void Dispose()
-    {
-        GC.SuppressFinalize(this);
-        file.Close();
     }
 }

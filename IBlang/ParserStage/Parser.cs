@@ -27,7 +27,7 @@ public partial class Parser
                 case TokenType.Keyword_Func: functions.Add(ParseFuncDecleration()); break;
 
                 default:
-                Log.Error($"{ctx.files[0]}:{PeekToken.Span.Line}:{PeekToken.Span.Column} Unhandled token of type {PeekToken.Type}");
+                Log.Error($"{ctx.Files[0]} Unhandled token of type {PeekToken.Type}");
                 NextToken();
                 break;
             }
@@ -50,7 +50,7 @@ public partial class Parser
 
             if (PeekToken.Type == TokenType.Comma)
             {
-                Log.Error($"{ctx.files[0]}:{PeekToken.Span.Line}:{PeekToken.Span.Column} TODO: add comma handling");
+                Log.Error($" TODO: add comma handling");
             }
         }
 
@@ -66,7 +66,7 @@ public partial class Parser
             Node expr = ParseExpressions();
             if (expr is GarbageExpression garbageExpression)
             {
-                Log.Error($"{ctx.files[0]}:{garbageExpression.ErrorToken.Span.Line}:{garbageExpression.ErrorToken.Span.Column} GarbageExpression Encountered! {garbageExpression.ErrorToken}");
+                Log.Error($" GarbageExpression Encountered! {garbageExpression.ErrorToken}");
                 return new FunctionDecleration(identifier, parameters.ToArray(), exprs.ToArray());
             }
             exprs.Add(expr);

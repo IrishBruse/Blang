@@ -1,7 +1,6 @@
-#include <stdio.h>
-
-int main(int argc, char *argv[])
-{
-    printf("Hello, World!\n");
-    int test = 123;
+#define IBLANG_IMPLEMENTATION
+#include "IBlang.h"
+int main() {
+  Print("Hello, World!\n");
+  int test = 123;
 }

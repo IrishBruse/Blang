@@ -1,6 +1,7 @@
 func Main()
 {
-    PrintLine(Fibonacci(10))
+    result = Fibonacci(10)
+    Print(result)
 }
 
 func Fibonacci(n)

@@ -18,12 +18,12 @@ public partial class Parser
         }
     }
 
-    private Token EatToken(TokenType expected, [CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0)
+    private Token EatToken(TokenType expected, [CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string method = "")
     {
         Token got = NextToken();
         if (got.Type != expected)
         {
-            Log.Error($"Expected '{expected}' but got '{got}'", file, lineNumber);
+            Log.Error($"Expected '{expected}' but got '{got}' in {method}()");
         }
 
         return got;
