@@ -1,8 +1,15 @@
 #define IBLANG_IMPLEMENTATION
 #include "IBlang.h"
-int main() {
-  int result = Fibonacci("10");
-  ;
-  Print("result");
+
+int Fibonacci(int n) {
+  if (n <= 1) {
+    return n;
+  } else {
+    return Fibonacci(n - 1) + Fibonacci(n - 2);
+  };
 }
-Fibonacci(int n) {}
+int main() {
+  int result = Fibonacci(10);
+  PrintNumber(result);
+  return 1;
+}

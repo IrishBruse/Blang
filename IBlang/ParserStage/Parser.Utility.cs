@@ -1,4 +1,4 @@
-namespace IBlang.ParserStage;
+﻿namespace IBlang.ParserStage;
 
 using System.Runtime.CompilerServices;
 
@@ -6,65 +6,84 @@ using IBlang.LexerStage;
 
 public partial class Parser
 {
-    private Token[] tokens;
-    int currentTokenIndex;
+    private readonly Token[] tokens;
+    private int currentTokenIndex;
     private Token PeekToken { get; set; }
 
-    private void EatOptionalToken(TokenType expected, [CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0)
-    {
-        if (PeekToken.Type == expected)
-        {
-            EatToken(expected, file, lineNumber);
-        }
-    }
-
-    private Token EatToken(TokenType expected, [CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string method = "")
+    private void EatToken(TokenType expected, [CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string method = "")
     {
         Token got = NextToken();
+
         if (got.Type != expected)
         {
-            Log.Error($"Expected '{expected}' but got '{got}' in {method}()");
+            Log.Error($"Expected '{string.Join(' ', expected)}' but got '{got}'", file, lineNumber, method);
         }
-
-        return got;
     }
 
-    private string EatIdentifier()
+    private string EatIdentifier([CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string method = "")
     {
-        string identifier = PeekToken.Value;
-
-        TokenType got = NextToken().Type;
+        Token got = NextToken();
         const TokenType expected = TokenType.Identifier;
-        if (got != expected)
+        if (got.Type != expected)
         {
-            Log.Error($"Expected '{expected}' but got '{got}'");
+            Log.Error($"Expected '{expected}' but got '{got}'", file, lineNumber, method);
         }
-
-        return identifier;
+        return got.Value;
     }
 
-    private string EatLiteral()
+    private ValueLiteral EatConstant()
     {
-        string identifier = PeekToken.Value;
+        string value = PeekToken.Value;
 
         TokenType got = NextToken().Type;
 
         switch (got)
         {
-            case TokenType.StringLiteral: return identifier;
-            case TokenType.CharLiteral: return identifier;
-            case TokenType.NumberLiteral: return identifier;
+            case TokenType.StringLiteral: return new(ValueType.String, value);
+            case TokenType.CharLiteral: return new(ValueType.Char, value);
+            case TokenType.IntegerLiteral: return new(ValueType.Int, value);
             default: Log.Error($"Expected 'Identifier' but got '{got}'"); break;
         }
 
-        return identifier;
+        return new(ValueType.String, value);
     }
 
     public Token NextToken()
     {
-        var token = PeekToken;
+        Token token = PeekToken;
+        Console.WriteLine("NextToken() = " + token);
         currentTokenIndex++;
         PeekToken = tokens[currentTokenIndex];
         return token;
     }
+
+    private static bool IsArithmetic(TokenType tokenType) =>
+        tokenType == TokenType.Addition ||
+        tokenType == TokenType.Subtraction ||
+        tokenType == TokenType.Multiplication ||
+        tokenType == TokenType.Division ||
+        tokenType == TokenType.Modulo;
+
+    private static bool IsRelational(TokenType tokenType) =>
+        tokenType == TokenType.LessThan ||
+        tokenType == TokenType.GreaterThan ||
+        tokenType == TokenType.LessThanEqual ||
+        tokenType == TokenType.GreaterThanEqual ||
+        tokenType == TokenType.EqualEqual ||
+        tokenType == TokenType.NotEqual;
+
+    private static bool IsLogical(TokenType tokenType) =>
+        tokenType == TokenType.LogicalAnd ||
+        tokenType == TokenType.LogicalOr ||
+        tokenType == TokenType.LogicalNot;
+
+    private static bool IsBinaryToken(TokenType tokenType) => IsArithmetic(tokenType) || IsRelational(tokenType) || IsLogical(tokenType);
+
+    private static bool IsAssignment(TokenType tokenType) =>
+        tokenType == TokenType.Assignment ||
+        tokenType == TokenType.AdditionAssignment ||
+        tokenType == TokenType.SubtractionAssignment ||
+        tokenType == TokenType.MultiplicationAssignment ||
+        tokenType == TokenType.DivisionAssignment ||
+        tokenType == TokenType.ModuloAssignment;
 }

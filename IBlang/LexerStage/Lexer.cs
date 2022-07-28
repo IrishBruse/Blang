@@ -1,18 +1,17 @@
-namespace IBlang.LexerStage;
-
+﻿namespace IBlang.LexerStage;
 public class Lexer
 {
-    private StreamReader file;
-    private int lineNumber = 1;
-    private int columnNumber = 1;
+    private readonly StreamReader file;
 
     private int index = 1;
-    private Context ctx;
+    private int oldIndex = 1;
+    private readonly Context ctx;
+
     private static readonly Dictionary<string, TokenType> Keywords = new() {
-        { "func",   TokenType.Keyword_Func },
-        { "if",     TokenType.Keyword_If },
-        { "else",   TokenType.Keyword_Else },
-        { "return", TokenType.Keyword_Return },
+        { "func",   TokenType.KeywordFunc },
+        { "if",     TokenType.KeywordIf },
+        { "else",   TokenType.KeywordElse },
+        { "return", TokenType.KeywordReturn },
     };
 
     public Lexer(Context ctx)
@@ -42,47 +41,47 @@ public class Lexer
 
             int start = index;
 
-            char c = PeekChar();
+            char c = NextChar();
+
+            if (PeekChar() == '/')
+            {
+                while (PeekChar() != '\n')
+                {
+                    _ = NextChar();
+                }
+                continue;
+            }
 
             Token token = c switch
             {
-                '(' => new Token(TokenType.OpenParenthesis, NextChar().ToString(), new(start, index)),
-                ')' => new Token(TokenType.CloseParenthesis, NextChar().ToString(), new(start, index)),
-                '[' => new Token(TokenType.OpenBracket, NextChar().ToString(), new(start, index)),
-                ']' => new Token(TokenType.CloseBracket, NextChar().ToString(), new(start, index)),
-                '{' => new Token(TokenType.OpenScope, NextChar().ToString(), new(start, index)),
-                '}' => new Token(TokenType.CloseScope, NextChar().ToString(), new(start, index)),
+                '(' => new Token(TokenType.OpenParenthesis, c.ToString(), new(start, index)),
+                ')' => new Token(TokenType.CloseParenthesis, c.ToString(), new(start, index)),
+                '[' => new Token(TokenType.OpenBracket, c.ToString(), new(start, index)),
+                ']' => new Token(TokenType.CloseBracket, c.ToString(), new(start, index)),
+                '{' => new Token(TokenType.OpenScope, c.ToString(), new(start, index)),
+                '}' => new Token(TokenType.CloseScope, c.ToString(), new(start, index)),
 
-                '.' => new Token(TokenType.Dot, NextChar().ToString(), new(start, index)),
-                ',' => new Token(TokenType.Comma, NextChar().ToString(), new(start, index)),
+                '.' => new Token(TokenType.Dot, c.ToString(), new(start, index)),
+                ',' => new Token(TokenType.Comma, c.ToString(), new(start, index)),
 
-                '<' => new Token(TokenType.LessThan, NextChar().ToString(), new(start, index)),
-                '>' => new Token(TokenType.GreaterThan, NextChar().ToString(), new(start, index)),
-                '~' => new Token(TokenType.Tilda, NextChar().ToString(), new(start, index)),
-                ':' => new Token(TokenType.Colon, NextChar().ToString(), new(start, index)),
-                '?' => new Token(TokenType.Question, NextChar().ToString(), new(start, index)),
-
-                '+' => new Token(TokenType.Plus, NextChar().ToString(), new(start, index)),
-                '-' => new Token(TokenType.Minus, NextChar().ToString(), new(start, index)),
-                '*' => new Token(TokenType.Multiply, NextChar().ToString(), new(start, index)),
-                '/' => new Token(TokenType.Divide, NextChar().ToString(), new(start, index)),
-                '^' => new Token(TokenType.Caret, NextChar().ToString(), new(start, index)),
-                '&' => new Token(TokenType.And, NextChar().ToString(), new(start, index)),
-                '|' => new Token(TokenType.Pipe, NextChar().ToString(), new(start, index)),
-                '%' => new Token(TokenType.Module, NextChar().ToString(), new(start, index)),
-                '!' => new Token(TokenType.Exclemation, NextChar().ToString(), new(start, index)),
-                '=' => new Token(TokenType.Equal, NextChar().ToString(), new(start, index)),
-
-                '$' => new Token(TokenType.Dollar, NextChar().ToString(), new(start, index)),
-                ';' => new Token(TokenType.Semicolon, NextChar().ToString(), new(start, index)),
+                '<' => LexBinaryOperator(TokenType.LessThan, start, c),
+                '>' => LexBinaryOperator(TokenType.GreaterThan, start, c),
+                '+' => LexBinaryOperator(TokenType.Addition, start, c),
+                '-' => LexBinaryOperator(TokenType.Subtraction, start, c),
+                '*' => LexBinaryOperator(TokenType.Multiplication, start, c),
+                '/' => LexBinaryOperator(TokenType.Division, start, c),
+                '&' => LexBinaryOperator(TokenType.BitwiseAnd, start, c),
+                '|' => LexBinaryOperator(TokenType.BitwiseOr, start, c),
+                '!' => LexBinaryOperator(TokenType.LogicalNot, start, c),
+                '=' => LexBinaryOperator(TokenType.Assignment, start, c),
 
                 '"' => LexString(),
                 '\'' => LexChar(),
 
-                char digit when char.IsDigit(digit) => LexNumber(),
-                char letter when char.IsLetter(letter) => LexIdentifierOrKeyword(),
+                char digit when char.IsDigit(digit) => LexNumber(c.ToString()),
+                char letter when char.IsLetter(letter) => LexIdentifierOrKeyword(c.ToString()),
 
-                _ => new Token(TokenType.Garbage, NextChar().ToString(), new(start, index)),
+                _ => new Token(TokenType.Garbage, c.ToString(), new(start, index)),
             };
 
             tokens.Add(token);
@@ -93,17 +92,92 @@ public class Lexer
         return tokens.ToArray();
     }
 
-    private Token LexNumber()
+    private Token LexBinaryOperator(TokenType token, int start, char c)
+    {
+        TokenType type = token;
+        char p = PeekChar();
+
+        if (c == '<' && p == '=')
+        {
+            type = TokenType.LessThanEqual;
+            _ = NextChar();
+        }
+        else if (c == '<' && p == '=')
+        {
+            type = TokenType.GreaterThanEqual;
+            _ = NextChar();
+        }
+        else if (c == '=' && p == '=')
+        {
+            type = TokenType.EqualEqual;
+            _ = NextChar();
+        }
+        else if (c == '!' && p == '=')
+        {
+            type = TokenType.NotEqual;
+            _ = NextChar();
+        }
+        else if (c == '&' && p == '&')
+        {
+            type = TokenType.LogicalAnd;
+            _ = NextChar();
+        }
+        else if (c == '|' && p == '|')
+        {
+            type = TokenType.LogicalOr;
+            _ = NextChar();
+        }
+        else if (c == '+' && p == '=')
+        {
+            type = TokenType.AdditionAssignment;
+            _ = NextChar();
+        }
+        else if (c == '-' && p == '=')
+        {
+            type = TokenType.SubtractionAssignment;
+            _ = NextChar();
+        }
+        else if (c == '*' && p == '=')
+        {
+            type = TokenType.MultiplicationAssignment;
+            _ = NextChar();
+        }
+        else if (c == '/' && p == '=')
+        {
+            type = TokenType.DivisionAssignment;
+            _ = NextChar();
+        }
+        else if (c == '%' && p == '=')
+        {
+            type = TokenType.ModuloAssignment;
+            _ = NextChar();
+        }
+        else if (c == '<' && p == '<')
+        {
+            type = TokenType.BitwiseShiftLeft;
+            _ = NextChar();
+        }
+        else if (c == '>' && p == '>')
+        {
+            type = TokenType.BitwiseShiftRight;
+            _ = NextChar();
+        }
+
+        Span span = new(start, index);
+        return new Token(type, $"{c}{p}", span);
+    }
+
+    private Token LexNumber(string c)
     {
         int start = index;
 
-        string numberLiteral = "";
+        string numberLiteral = c;
         while (char.IsDigit(PeekChar()))
         {
             numberLiteral += NextChar();
         }
 
-        return new Token(TokenType.NumberLiteral, numberLiteral, new(start, index));
+        return new Token(TokenType.IntegerLiteral, numberLiteral, new(start, index));
 
     }
 
@@ -111,15 +185,13 @@ public class Lexer
     {
         int start = index;
 
-        Log.Assert('"' == NextChar());// Eat the quote
-
         string stringLiteral = "";
         while (PeekChar() is not '"' and not '\n')
         {
             stringLiteral += NextChar();
         }
 
-        Log.Assert('"' == NextChar());// Eat the quote
+        EatChar('"');// Eat the quote
 
         return new Token(TokenType.StringLiteral, stringLiteral, new(start, index));
     }
@@ -129,10 +201,10 @@ public class Lexer
         int start = index;
 
         char charLiteral;
-        Log.Assert('\'' == NextChar());// Eat the quote
+
         if (PeekChar() == '\\')// Handle Escape
         {
-            Log.Assert('\'' == NextChar());// Eat the \
+            EatChar('\'');
 
             char escapeCode = NextChar();
             switch (escapeCode)
@@ -153,16 +225,18 @@ public class Lexer
         {
             charLiteral = NextChar();
         }
-        Log.Assert('\'' == NextChar());// Eat the quote
+        EatChar('\'');// Eat the quote
 
         return new Token(TokenType.CharLiteral, charLiteral.ToString(), new(start, index));
     }
 
-    private Token LexIdentifierOrKeyword()
+    private void EatChar(char c) => Log.Assert(c == NextChar());// Eat the \
+
+    private Token LexIdentifierOrKeyword(string c)
     {
         int start = index;
 
-        string identifier = "";
+        string identifier = c;
         while (char.IsLetter(PeekChar()))
         {
             identifier += NextChar();
@@ -183,19 +257,12 @@ public class Lexer
         char c = (char)file.Read();
         if (c == '\n')
         {
-            lineNumber++;
-            columnNumber = 1;
-        }
-        else
-        {
-            columnNumber++;
+            ctx.LineSpans.Add(new(oldIndex, index));
+            oldIndex = index;
         }
         index++;
         return c;
     }
 
-    private char PeekChar()
-    {
-        return (char)file.Peek();
-    }
+    private char PeekChar() => (char)file.Peek();
 }

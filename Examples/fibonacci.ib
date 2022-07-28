@@ -1,10 +1,5 @@
-func Main()
-{
-    result = Fibonacci(10)
-    Print(result)
-}
 
-func Fibonacci(n)
+func Fibonacci(int n)
 {
     if n <= 1
     {
@@ -14,4 +9,12 @@ func Fibonacci(n)
     {
         return Fibonacci(n - 1) + Fibonacci(n - 2)
     }
+}
+
+func Main()
+{
+    result = Fibonacci(10)
+    PrintNumber(result)
+
+    return 1
 }

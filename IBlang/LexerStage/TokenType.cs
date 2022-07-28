@@ -1,23 +1,26 @@
-namespace IBlang.LexerStage;
+﻿namespace IBlang.LexerStage;
 
 public enum TokenType
 {
+    // Misc
+    Eol = 254,
+    Eof = 256,
     Garbage = -1,
+
+    // Keywords
+    KeywordFunc,
+    KeywordIf,
+    KeywordElse,
+    KeywordReturn,
 
     Identifier,
 
-    NumberLiteral,
+    IntegerLiteral,
+    FloatLiteral,
     StringLiteral,
     CharLiteral,
 
-    Keyword_Func,
-    Keyword_If,
-    Keyword_Else,
-    Keyword_Return,
-
-    Operator,
-
-    Bracket,
+    // Bracket Pairs
     OpenParenthesis,
     CloseParenthesis,
     OpenBracket,
@@ -25,30 +28,43 @@ public enum TokenType
     OpenScope,
     CloseScope,
 
-    LessThan,
-    GreaterThan,
-    And,
-    Pipe,
-
+    // Punctuation
     Dot,
     Comma,
-    Tilda,
-    Semicolon,
-    Colon,
-    Question,
 
-    Plus,
-    Minus,
-    Multiply,
-    Divide,
-    Module,
+    // Arithmetic
+    Addition,
+    Subtraction,
+    Multiplication,
+    Division,
+    Modulo,
 
-    Caret,
-    Exclemation,
-    Dollar,
+    // Relational
+    LessThan,
+    GreaterThan,
+    LessThanEqual,
+    GreaterThanEqual,
+    EqualEqual,
+    NotEqual,
 
-    Equal,
+    // Logical
+    LogicalAnd,
+    LogicalOr,
+    LogicalNot,
 
-    Eol,
-    Eof,
+    // Assignment
+    Assignment,
+    AdditionAssignment,
+    SubtractionAssignment,
+    MultiplicationAssignment,
+    DivisionAssignment,
+    ModuloAssignment,
+
+    // Bitwise
+    BitwiseComplement,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXOr,
+    BitwiseShiftLeft,
+    BitwiseShiftRight,
 }

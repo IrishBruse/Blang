@@ -1,4 +1,4 @@
-namespace IBlang.ParserStage;
+﻿namespace IBlang.ParserStage;
 
 using System;
 using System.Collections.Generic;
@@ -7,109 +7,170 @@ using IBlang.LexerStage;
 
 public partial class Parser
 {
-    private Context ctx;
+    private readonly Context ctx;
+
+    public TokenType Peek => tokens[currentTokenIndex].Type;
 
     public Parser(Context ctx, Token[] tokens)
     {
         this.ctx = ctx;
         this.tokens = tokens;
-        PeekToken = tokens[0];
         currentTokenIndex = 0;
+        PeekToken = tokens[currentTokenIndex];
     }
 
     public Ast Parse()
     {
         List<FunctionDecleration> functions = new();
-        while (PeekToken.Type != TokenType.Eof)
+        while (true)
         {
-            switch (PeekToken.Type)
+            switch (Peek)
             {
-                case TokenType.Keyword_Func: functions.Add(ParseFuncDecleration()); break;
-
-                default:
-                Log.Error($"{ctx.Files[0]} Unhandled token of type {PeekToken.Type}");
-                NextToken();
-                break;
+                case TokenType.KeywordFunc: functions.Add(ParseFuncDecleration()); break;
+                default: return new Ast(functions.ToArray());
             }
         }
 
-        return new Ast(functions.ToArray());
+        throw new CompilerDebugException("Unreachable");
     }
 
     private FunctionDecleration ParseFuncDecleration()
     {
-        EatToken(TokenType.Keyword_Func);
-        var identifier = EatIdentifier();
+        Log.Trace();
+
+        EatToken(TokenType.KeywordFunc);
+        string identifier = EatIdentifier();
         EatToken(TokenType.OpenParenthesis);
 
-        List<Identifier> parameters = new();
-        while (PeekToken.Type != TokenType.CloseParenthesis)
-        {
-            Token token = NextToken();
-            parameters.Add(new(token.Value));
+        List<ParameterDecleration> parameters = new();
 
-            if (PeekToken.Type == TokenType.Comma)
-            {
-                Log.Error($" TODO: add comma handling");
-            }
+        while (Peek != TokenType.CloseParenthesis)
+        {
+            parameters.Add(new(EatIdentifier(), EatIdentifier()));
         }
 
         EatToken(TokenType.CloseParenthesis);
 
-        EatOptionalToken(TokenType.Eol);
+        BlockStatement body = ParseBlock();
+
+        return new FunctionDecleration(identifier, parameters.ToArray(), body);
+    }
+
+    private BlockStatement ParseBlock()
+    {
+        Log.Trace();
 
         EatToken(TokenType.OpenScope);
 
-        List<Node> exprs = new();
-        while (PeekToken.Type != TokenType.CloseScope)
+        List<Node> statements = new();
+        while (Peek != TokenType.CloseScope)
         {
-            Node expr = ParseExpressions();
-            if (expr is GarbageExpression garbageExpression)
-            {
-                Log.Error($" GarbageExpression Encountered! {garbageExpression.ErrorToken}");
-                return new FunctionDecleration(identifier, parameters.ToArray(), exprs.ToArray());
-            }
-            exprs.Add(expr);
+            statements.Add(ParseStatement());
         }
 
         EatToken(TokenType.CloseScope);
 
-        return new FunctionDecleration(identifier, parameters.ToArray(), exprs.ToArray());
+        return new BlockStatement(statements.ToArray());
     }
 
-    private Node ParseExpressions()
+    private Node ParseStatement()
     {
-        return PeekToken.Type switch
+        Log.Trace();
+
+        return Peek switch
         {
-            TokenType.Identifier => ParseVarOrCall(),
-            TokenType.NumberLiteral => new ValueLiteral(ValueType.Int, NextToken().Value),
-            _ => new GarbageExpression(PeekToken),
+            TokenType.Identifier => ParseIdentifier(EatIdentifier()),
+            TokenType.KeywordIf => ParseIf(),
+            TokenType.KeywordReturn => ParseReturn(),
+            _ => throw new NotImplementedException(Peek.ToString())
         };
     }
 
-    private Node ParseVarOrCall()
+    private Node ParseIdentifier(string identifier)
     {
-        string identifier = EatIdentifier();
+        Log.Trace();
 
-        return PeekToken.Type switch
+        return Peek switch
         {
             TokenType.OpenParenthesis => ParseFuncCall(identifier),
-            TokenType.Equal => ParseVariableDecleration(identifier),
-            _ => new GarbageExpression(PeekToken)
+            TokenType.Assignment => ParseVariableDecleration(identifier),
+            _ => throw new NotImplementedException()
+        };
+    }
+
+    private IfStatement ParseIf()
+    {
+        Log.Trace();
+
+        EatToken(TokenType.KeywordIf);
+
+        Node condition = ParseExpression();
+
+        BlockStatement body = ParseBlock();
+        BlockStatement? elseBody = null;
+
+        if (Peek == TokenType.KeywordElse)
+        {
+            EatToken(TokenType.KeywordElse);
+            elseBody = ParseBlock();
+        }
+
+        return new IfStatement(condition, body, elseBody);
+    }
+
+    /// <summary> RETURN [STATEMENT] </summary>
+    private ReturnStatement ParseReturn()
+    {
+        Log.Trace();
+
+        EatToken(TokenType.KeywordReturn);
+        return new ReturnStatement(ParseExpression());
+    }
+
+    private Node ParseExpression()
+    {
+        Log.Trace();
+
+        Node left = ParseUnaryExpression();
+
+        if (IsBinaryToken(Peek))
+        {
+            Token op = NextToken();
+            return new BinaryExpression(left, op.Value, ParseUnaryExpression());
+        }
+        else
+        {
+            return left;
+        }
+    }
+
+    private Node ParseUnaryExpression()
+    {
+        Token token = NextToken();
+        return token.Type switch
+        {
+            TokenType.Identifier => Peek switch
+            {
+                TokenType.OpenParenthesis => ParseFuncCall(token.Value),
+                _ => new Identifier(token.Value),
+            },
+            TokenType.IntegerLiteral => new ValueLiteral(ValueType.Int, token.Value),
+            TokenType.FloatLiteral => new ValueLiteral(ValueType.Float, token.Value),
+            TokenType.StringLiteral => new ValueLiteral(ValueType.String, token.Value),
+            _ => new GarbageExpression(token),
         };
     }
 
     private Node ParseFuncCall(string identifier)
     {
+        Log.Trace();
+
         EatToken(TokenType.OpenParenthesis);
 
-        List<ValueLiteral> args = new();
-        while (PeekToken.Type != TokenType.CloseParenthesis)
+        List<Node> args = new();
+        while (Peek != TokenType.CloseParenthesis)
         {
-            Token token = EatToken(TokenType.StringLiteral);
-            args.Add(new(ValueType.String, token.Value));
-
-            EatOptionalToken(TokenType.Comma);
+            args.Add(ParseExpression());
         }
 
         EatToken(TokenType.CloseParenthesis);
@@ -118,8 +179,12 @@ public partial class Parser
 
     private Node ParseVariableDecleration(string identifier)
     {
-        EatToken(TokenType.Equal);
+        Log.Trace();
 
-        return new BinaryExpression(new Identifier(identifier), ParseExpressions());
+        EatToken(TokenType.Assignment);
+
+        Node rhs = ParseStatement();
+
+        return new AssignmentExpression(new Identifier(identifier), rhs);
     }
 }

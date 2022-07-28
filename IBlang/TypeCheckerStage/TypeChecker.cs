@@ -1,4 +1,4 @@
-namespace IBlang.TypeCheckerStage;
+﻿namespace IBlang.TypeCheckerStage;
 
 public class TypeChecker
 {

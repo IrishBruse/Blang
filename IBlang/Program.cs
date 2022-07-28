@@ -9,10 +9,31 @@ public class Program
 {
     public static void Main()
     {
-        string currentFile = Path.GetFullPath("../Examples/helloworld.ib");
-        string outputFile = Path.GetFullPath(currentFile.Replace(".ib", ".c"));
+        Console.Clear();
 
-        Context ctx = new(new[] { currentFile });
+        string folder = Path.GetFullPath("../Examples/");
+
+        string[] files = new string[] { "helloworld", "fibonacci" };
+
+        foreach (string item in files)
+        {
+            string file = Path.Join(folder, item);
+            Console.WriteLine("Compiling: " + file);
+            Compile(file);
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+        }
+    }
+
+    private static void Compile(string file)
+    {
+        string inputFile = file + ".ib";
+        string outputFile = file + ".c";
+
+        Context ctx = new(new[] { inputFile }, new());
 
         Token[] tokens = Tokenize(ctx);
         Ast ast = Parse(ctx, tokens);
@@ -41,7 +62,7 @@ public class Program
     {
         File.Delete(path: outputFile);
         StreamWriter writer = new(File.OpenWrite(outputFile));
-        new Visitor(writer).Visit(ast);
+        new Emitter(writer).Visit(ast);
         writer.Close();
         Console.WriteLine();
     }
@@ -61,14 +82,18 @@ public class Program
         {
             while (!tcc.HasExited)
             {
-                string text = tcc.StandardOutput.ReadToEnd();
-                if (text.StartsWith("tcc: error:"))
+                string output = tcc.StandardOutput.ReadToEnd();
+                if (!string.IsNullOrEmpty(output))
                 {
-                    Log.Error(text);
+                    Console.Write(output);
                 }
-                else
+
+                string error = tcc.StandardError.ReadToEnd();
+                if (!string.IsNullOrEmpty(error))
                 {
-                    Console.Write(text);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write(error);
+                    Console.ResetColor();
                 }
             }
         }
@@ -77,13 +102,6 @@ public class Program
     private static Token[] Tokenize(Context ctx)
     {
         Token[] tokens = new Lexer(ctx).Lex();
-
-        foreach (Token token in tokens)
-        {
-            Console.WriteLine(token);
-        }
-
-        Console.WriteLine();
         return tokens;
     }
 
@@ -96,6 +114,7 @@ public class Program
             FileName = exe,
             Arguments = string.Join(' ', args),
             RedirectStandardOutput = true,
+            RedirectStandardError = true,
         });
 
         if (command == null)

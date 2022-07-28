@@ -1,10 +1,9 @@
 #include <stdio.h>
 
-void Print(char* str);
+void PrintString(char *val);
+void PrintNumber(int val);
 
 #ifdef IBLANG_IMPLEMENTATION
-void Print(char* str)
-{
-    printf("%s", str);
-}
+void PrintString(char *val) { printf("%s", val); }
+void PrintNumber(int val) { printf("%d", val); }
 #endif

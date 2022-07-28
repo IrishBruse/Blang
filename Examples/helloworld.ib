@@ -1,5 +1,4 @@
 func Main()
 {
-    Print("Hello, World!\n")
-    test = 123
+    PrintString("Hello, World!\n")
 }
