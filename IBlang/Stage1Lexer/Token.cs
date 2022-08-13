@@ -1,4 +1,4 @@
-﻿namespace IBlang.LexerStage;
+﻿namespace IBlang.Stage1Lexer;
 
 public record Token(TokenType Type, string Value, Span Span)
 {

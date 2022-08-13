@@ -1,7 +1,8 @@
-﻿namespace IBlang.LexerStage;
+﻿namespace IBlang.Stage1Lexer;
+
 public class Lexer
 {
-    private readonly StreamReader file;
+    private StreamReader file;
 
     private int index = 1;
     private int oldIndex = 1;
@@ -12,16 +13,31 @@ public class Lexer
         { "if",     TokenType.KeywordIf },
         { "else",   TokenType.KeywordElse },
         { "return", TokenType.KeywordReturn },
+
+        { "int",    TokenType.TypeInteger },
+        { "float",  TokenType.TypeFloat },
+        { "string", TokenType.TypeString },
+
+        { "i8",  TokenType.TypeSigned8BitInteger },
+        { "i16", TokenType.TypeSigned16BitInteger },
+        { "i32", TokenType.TypeSigned32BitInteger },
+        { "i64", TokenType.TypeSigned64BitInteger },
+
+        { "u8",  TokenType.TypeUnsigned8BitInteger },
+        { "u16", TokenType.TypeUnsigned16BitInteger },
+        { "u32", TokenType.TypeUnsigned32BitInteger },
+        { "u64", TokenType.TypeUnsigned64BitInteger },
     };
 
     public Lexer(Context ctx)
     {
         this.ctx = ctx;
-        file = File.OpenText(ctx.Files[0]);
     }
 
-    public Token[] Lex()
+    public Token[] Lex(string inputFile)
     {
+        file = File.OpenText(inputFile);
+
         List<Token> tokens = new();
 
         while (!file.EndOfStream)
@@ -178,7 +194,6 @@ public class Lexer
         }
 
         return new Token(TokenType.IntegerLiteral, numberLiteral, new(start, index));
-
     }
 
     private Token LexString()
@@ -230,7 +245,10 @@ public class Lexer
         return new Token(TokenType.CharLiteral, charLiteral.ToString(), new(start, index));
     }
 
-    private void EatChar(char c) => Log.Assert(c == NextChar());// Eat the \
+    private void EatChar(char c)
+    {
+        Log.Assert(c == NextChar());
+    }
 
     private Token LexIdentifierOrKeyword(string c)
     {
@@ -264,5 +282,8 @@ public class Lexer
         return c;
     }
 
-    private char PeekChar() => (char)file.Peek();
+    private char PeekChar()
+    {
+        return (char)file.Peek();
+    }
 }

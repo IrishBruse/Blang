@@ -1,9 +1,9 @@
-﻿namespace IBlang.ParserStage;
+﻿namespace IBlang.Stage2Parser;
 
 using System;
 using System.Collections.Generic;
 
-using IBlang.LexerStage;
+using IBlang.Stage1Lexer;
 
 public partial class Parser
 {
@@ -11,16 +11,16 @@ public partial class Parser
 
     public TokenType Peek => tokens[currentTokenIndex].Type;
 
-    public Parser(Context ctx, Token[] tokens)
+    public Parser(Context ctx)
     {
         this.ctx = ctx;
-        this.tokens = tokens;
-        currentTokenIndex = 0;
-        PeekToken = tokens[currentTokenIndex];
     }
 
-    public Ast Parse()
+    public Ast Parse(Token[] tokens)
     {
+        currentTokenIndex = 0;
+        this.tokens = tokens;
+        PeekToken = tokens[currentTokenIndex];
         List<FunctionDecleration> functions = new();
         while (true)
         {
@@ -62,10 +62,10 @@ public partial class Parser
 
         EatToken(TokenType.OpenScope);
 
-        List<Node> statements = new();
+        List<INode> statements = new();
         while (Peek != TokenType.CloseScope)
         {
-            statements.Add(ParseStatement());
+            statements.Add((INode)ParseStatement());
         }
 
         EatToken(TokenType.CloseScope);
@@ -73,7 +73,7 @@ public partial class Parser
         return new BlockStatement(statements.ToArray());
     }
 
-    private Node ParseStatement()
+    private INode ParseStatement()
     {
         Log.Trace();
 
@@ -86,7 +86,7 @@ public partial class Parser
         };
     }
 
-    private Node ParseIdentifier(string identifier)
+    private INode ParseIdentifier(string identifier)
     {
         Log.Trace();
 
@@ -104,7 +104,7 @@ public partial class Parser
 
         EatToken(TokenType.KeywordIf);
 
-        Node condition = ParseExpression();
+        INode condition = ParseExpression();
 
         BlockStatement body = ParseBlock();
         BlockStatement? elseBody = null;
@@ -127,11 +127,11 @@ public partial class Parser
         return new ReturnStatement(ParseExpression());
     }
 
-    private Node ParseExpression()
+    private INode ParseExpression()
     {
         Log.Trace();
 
-        Node left = ParseUnaryExpression();
+        INode left = ParseUnaryExpression();
 
         if (IsBinaryToken(Peek))
         {
@@ -144,7 +144,7 @@ public partial class Parser
         }
     }
 
-    private Node ParseUnaryExpression()
+    private INode ParseUnaryExpression()
     {
         Token token = NextToken();
         return token.Type switch
@@ -161,13 +161,13 @@ public partial class Parser
         };
     }
 
-    private Node ParseFuncCall(string identifier)
+    private INode ParseFuncCall(string identifier)
     {
         Log.Trace();
 
         EatToken(TokenType.OpenParenthesis);
 
-        List<Node> args = new();
+        List<INode> args = new();
         while (Peek != TokenType.CloseParenthesis)
         {
             args.Add(ParseExpression());
@@ -177,13 +177,13 @@ public partial class Parser
         return new FunctionCallExpression(identifier, args.ToArray());
     }
 
-    private Node ParseVariableDecleration(string identifier)
+    private INode ParseVariableDecleration(string identifier)
     {
         Log.Trace();
 
         EatToken(TokenType.Assignment);
 
-        Node rhs = ParseStatement();
+        INode rhs = ParseStatement();
 
         return new AssignmentExpression(new Identifier(identifier), rhs);
     }

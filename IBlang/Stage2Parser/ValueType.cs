@@ -1,4 +1,4 @@
-namespace IBlang.ParserStage;
+namespace IBlang.Stage2Parser;
 
 #pragma warning disable CA1720
 public enum ValueType

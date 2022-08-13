@@ -1,12 +1,12 @@
-﻿namespace IBlang.ParserStage;
+﻿namespace IBlang.Stage2Parser;
 
 using System.Runtime.CompilerServices;
 
-using IBlang.LexerStage;
+using IBlang.Stage1Lexer;
 
 public partial class Parser
 {
-    private readonly Token[] tokens;
+    private Token[] tokens;
     private int currentTokenIndex;
     private Token PeekToken { get; set; }
 
@@ -77,7 +77,10 @@ public partial class Parser
         tokenType == TokenType.LogicalOr ||
         tokenType == TokenType.LogicalNot;
 
-    private static bool IsBinaryToken(TokenType tokenType) => IsArithmetic(tokenType) || IsRelational(tokenType) || IsLogical(tokenType);
+    private static bool IsBinaryToken(TokenType tokenType) =>
+        IsArithmetic(tokenType) ||
+        IsRelational(tokenType) ||
+        IsLogical(tokenType);
 
     private static bool IsAssignment(TokenType tokenType) =>
         tokenType == TokenType.Assignment ||

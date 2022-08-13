@@ -1,15 +1,1 @@
-#define IBLANG_IMPLEMENTATION
-#include "IBlang.h"
-
-int Fibonacci(int n) {
-  if (n <= 1) {
-    return n;
-  } else {
-    return Fibonacci(n - 1) + Fibonacci(n - 2);
-  };
-}
-int main() {
-  int result = Fibonacci(10);
-  PrintNumber(result);
-  return 1;
-}
+﻿<?xml version="1.0" encoding="utf-8"?><Ast xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><FunctionDeclerations /></Ast>

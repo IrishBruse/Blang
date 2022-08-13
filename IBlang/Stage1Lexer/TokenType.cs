@@ -1,4 +1,4 @@
-﻿namespace IBlang.LexerStage;
+﻿namespace IBlang.Stage1Lexer;
 
 public enum TokenType
 {
@@ -67,4 +67,15 @@ public enum TokenType
     BitwiseXOr,
     BitwiseShiftLeft,
     BitwiseShiftRight,
+    TypeInteger,
+    TypeFloat,
+    TypeString,
+    TypeSigned8BitInteger,
+    TypeSigned16BitInteger,
+    TypeSigned32BitInteger,
+    TypeSigned64BitInteger,
+    TypeUnsigned8BitInteger,
+    TypeUnsigned16BitInteger,
+    TypeUnsigned32BitInteger,
+    TypeUnsigned64BitInteger,
 }

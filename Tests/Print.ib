@@ -1,0 +1,4 @@
+func Main()
+{
+    PrintString("Test\n")
+}

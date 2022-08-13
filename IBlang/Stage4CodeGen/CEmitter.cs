@@ -1,31 +1,45 @@
-﻿namespace IBlang.ParserStage;
+﻿namespace IBlang.Stage4CodeGen;
 
-using System.IO;
+using System.Text;
 
-public class Emitter
+using IBlang.Stage2Parser;
+
+public class CEmitter
 {
-    private readonly StreamWriter writer;
-    private int depth = -1;
+    private readonly Context ctx;
+    private int depth;
+    private StringBuilder writer;
 
-    public Emitter(StreamWriter writer)
+    public CEmitter(Context ctx)
     {
-        this.writer = writer;
+        writer = new();
+        depth = -1;
+        this.ctx = ctx;
     }
 
-    public void Visit(Node node)
+    public StringBuilder Emit(INode node)
+    {
+        writer = writer.Clear();
+        Output(node);
+        return writer;
+    }
+
+    public void Output(INode node)
     {
         depth++;
         for (int i = 0; i < depth; i++)
         {
-            Console.Write("  ");
+            Console.Write("    ");
         }
+
         Console.WriteLine(node);
+
         switch (node)
         {
             case Ast expr:
             WriteLine("#define IBLANG_IMPLEMENTATION");
             WriteLine("#include \"IBlang.h\"");
-            WriteLine("");
+            WriteLine();
             Visit(expr.FunctionDeclerations);
             break;
 
@@ -60,21 +74,21 @@ public class Emitter
             break;
 
             case BinaryExpression expr:
-            Visit(expr.Left);
+            Output(expr.Left);
             Write(expr.Operator);
-            Visit(expr.Right);
+            Output(expr.Right);
             break;
 
             case AssignmentExpression expr:
             Write("int ");// TODO replace with typechecker
             Write(expr.Left.Name);
             Write("=");
-            Visit(expr.Right);
+            Output(expr.Right);
             break;
 
             case ReturnStatement expr:
             Write("return ");
-            Visit(expr.Statement);
+            Output(expr.Statement);
             break;
 
             case ValueLiteral expr:
@@ -99,25 +113,25 @@ public class Emitter
             break;
 
             case BlockStatement expr:
-            WriteLine("{");
-            foreach (Node item in expr.Body)
+            WriteLine("{\n");
+            foreach (INode item in expr.Body)
             {
-                Visit(item);
+                Output(item);
                 Write(";");
             }
-            WriteLine("}");
+            WriteLine("\n}");
             break;
 
             case IfStatement expr:
             Write("if");
             Write("(");
-            Visit(expr.Condition);
+            Output(expr.Condition);
             Write(")");
             Visit(expr.Body);
             if (expr.Else != null)
             {
                 Write("else");
-                Visit(expr.Else);
+                Output(expr.Else);
             }
             break;
 
@@ -129,15 +143,17 @@ public class Emitter
         depth--;
     }
 
-    private void Visit(params Node[] nodes)
+    private void Visit<T>(params T[] nodes) where T : INode
     {
-        foreach (Node item in nodes)
+        foreach (T item in nodes)
         {
-            Visit(item);
+            Output(item);
         }
     }
 
-    private void Write(string value) => writer.Write(value);
+    private void Write(string value) => _ = writer.Append(value);
 
-    private void WriteLine(string value) => writer.WriteLine(value);
+    private void WriteLine(string value) => _ = writer.AppendLine(value);
+
+    private void WriteLine() => _ = writer.AppendLine("");
 }
