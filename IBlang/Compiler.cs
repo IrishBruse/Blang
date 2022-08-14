@@ -34,11 +34,19 @@ public class Compiler
             return false;
         }
 
+        _ = command.Start();
+
         StringBuilder builder = new();
 
         while (command.HasExited)
         {
             string output = command.StandardOutput.ReadToEnd();
+            if (!string.IsNullOrEmpty(output))
+            {
+                _ = builder.Append(output);
+            }
+
+            output = command.StandardError.ReadToEnd();
             if (!string.IsNullOrEmpty(output))
             {
                 _ = builder.Append(output);
