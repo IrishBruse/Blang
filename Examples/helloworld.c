@@ -1,4 +1,10 @@
 #define IBLANG_IMPLEMENTATION
-#include "IBlang.h"
+#include <stdio.h>
 
-int main() { PrintString("Hello, World!\n"); }
+void PrintString(char *val) { printf("%s", val); }
+void PrintNumber(int val) { printf("%d", val); }
+
+int main(){
+
+PrintString("Hello, World!\n");
+}

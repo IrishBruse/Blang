@@ -31,7 +31,7 @@ public class Log
 
     public static void Trace([CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string method = "")
     {
-        Console.WriteLine($"{file}:{lineNumber} -> {method}()");
+        File.AppendAllText("Trace.log", $"{file}:{lineNumber} -> {method}()\n");
     }
 
     public static void Assert(bool condition, [CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0, [CallerArgumentExpression("condition")] string expression = "", [CallerMemberName] string method = "")

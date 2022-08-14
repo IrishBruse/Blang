@@ -38,7 +38,10 @@ public class CEmitter
         {
             case Ast expr:
             WriteLine("#define IBLANG_IMPLEMENTATION");
-            WriteLine("#include \"IBlang.h\"");
+            foreach (string item in File.ReadAllLines("./IBlang.c"))
+            {
+                WriteLine(item);
+            }
             WriteLine();
             Visit(expr.FunctionDeclerations);
             break;

@@ -21,7 +21,9 @@ public class Command
             return;
         }
 
-        while (command.HasExited)
+        command.WaitForExit();
+
+        do
         {
             string output = command.StandardOutput.ReadToEnd();
             if (!string.IsNullOrEmpty(output))
@@ -37,6 +39,7 @@ public class Command
                 Console.ResetColor();
             }
         }
+        while (!command.HasExited);
     }
 
     public static Process? Start(string exe, params string[] args)

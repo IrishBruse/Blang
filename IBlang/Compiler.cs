@@ -34,7 +34,7 @@ public class Compiler
             return false;
         }
 
-        _ = command.Start();
+        command.WaitForExit();
 
         StringBuilder builder = new();
 
@@ -67,6 +67,7 @@ public class Compiler
 
     private static void Output(string sourceFile)
     {
+        File.Delete("Trace.log");
         string outputFile = OutFile(sourceFile, ".c");
 
         Context ctx = new(new[] { sourceFile }, new());

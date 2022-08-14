@@ -1,0 +1,6 @@
+A:\IBlang\IBlang\Stage2Parser\Parser.cs:39 -> ParseFuncDecleration()
+A:\IBlang\IBlang\Stage2Parser\Parser.cs:61 -> ParseBlock()
+A:\IBlang\IBlang\Stage2Parser\Parser.cs:78 -> ParseStatement()
+A:\IBlang\IBlang\Stage2Parser\Parser.cs:91 -> ParseIdentifier()
+A:\IBlang\IBlang\Stage2Parser\Parser.cs:166 -> ParseFuncCall()
+A:\IBlang\IBlang\Stage2Parser\Parser.cs:132 -> ParseExpression()
