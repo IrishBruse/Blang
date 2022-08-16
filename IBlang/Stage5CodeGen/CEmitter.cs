@@ -1,4 +1,4 @@
-﻿namespace IBlang.Stage4CodeGen;
+﻿namespace IBlang.Stage5CodeGen;
 
 using System.Text;
 
@@ -6,38 +6,25 @@ using IBlang.Stage2Parser;
 
 public class CEmitter
 {
-    private readonly Context ctx;
-    private int depth;
     private StringBuilder writer;
 
-    public CEmitter(Context ctx)
+    public CEmitter()
     {
         writer = new();
-        depth = -1;
-        this.ctx = ctx;
     }
 
-    public StringBuilder Emit(INode node)
+    public StringBuilder Emit(Ast node)
     {
         writer = writer.Clear();
         Output(node);
         return writer;
     }
 
-    public void Output(INode node)
+    private void Output(INode node)
     {
-        depth++;
-        for (int i = 0; i < depth; i++)
-        {
-            Console.Write("    ");
-        }
-
-        Console.WriteLine(node);
-
         switch (node)
         {
             case Ast expr:
-            WriteLine("#define IBLANG_IMPLEMENTATION");
             foreach (string item in File.ReadAllLines("./IBlang.c"))
             {
                 WriteLine(item);
@@ -47,8 +34,7 @@ public class CEmitter
             break;
 
             case FunctionDecleration expr:
-            // TODO replace with typechecker
-            Write("int ");
+            Write("int "); // TODO replace with typechecker
 
             if (expr.Identifier == "Main")
             {
@@ -77,21 +63,21 @@ public class CEmitter
             break;
 
             case BinaryExpression expr:
-            Output(expr.Left);
+            Visit(expr.Left);
             Write(expr.Operator);
-            Output(expr.Right);
+            Visit(expr.Right);
             break;
 
             case AssignmentExpression expr:
             Write("int ");// TODO replace with typechecker
             Write(expr.Left.Name);
             Write("=");
-            Output(expr.Right);
+            Visit(expr.Right);
             break;
 
             case ReturnStatement expr:
             Write("return ");
-            Output(expr.Statement);
+            Visit(expr.Statement);
             break;
 
             case ValueLiteral expr:
@@ -119,7 +105,7 @@ public class CEmitter
             WriteLine("{\n");
             foreach (INode item in expr.Body)
             {
-                Output(item);
+                Visit(item);
                 Write(";");
             }
             WriteLine("\n}");
@@ -128,13 +114,14 @@ public class CEmitter
             case IfStatement expr:
             Write("if");
             Write("(");
-            Output(expr.Condition);
+            Visit(expr.Condition);
             Write(")");
             Visit(expr.Body);
-            if (expr.Else != null)
+            BlockStatement? elseBlock = expr.Else;
+            if (elseBlock.HasValue)
             {
                 Write("else");
-                Output(expr.Else);
+                Visit(elseBlock.Value);
             }
             break;
 
@@ -142,8 +129,6 @@ public class CEmitter
             Log.Error($"Unhandled node {node}");
             throw new NotImplementedException(node.ToString());
         }
-
-        depth--;
     }
 
     private void Visit<T>(params T[] nodes) where T : INode

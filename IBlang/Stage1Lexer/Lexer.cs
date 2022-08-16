@@ -2,31 +2,18 @@
 
 public class Lexer
 {
-    private StreamReader file;
+    private StreamReader? file;
 
     private int index = 1;
     private int oldIndex = 1;
     private readonly Context ctx;
+    private List<Token> tokens = new();
 
     private static readonly Dictionary<string, TokenType> Keywords = new() {
         { "func",   TokenType.KeywordFunc },
         { "if",     TokenType.KeywordIf },
         { "else",   TokenType.KeywordElse },
         { "return", TokenType.KeywordReturn },
-
-        { "int",    TokenType.TypeInteger },
-        { "float",  TokenType.TypeFloat },
-        { "string", TokenType.TypeString },
-
-        { "i8",  TokenType.TypeSigned8BitInteger },
-        { "i16", TokenType.TypeSigned16BitInteger },
-        { "i32", TokenType.TypeSigned32BitInteger },
-        { "i64", TokenType.TypeSigned64BitInteger },
-
-        { "u8",  TokenType.TypeUnsigned8BitInteger },
-        { "u16", TokenType.TypeUnsigned16BitInteger },
-        { "u32", TokenType.TypeUnsigned32BitInteger },
-        { "u64", TokenType.TypeUnsigned64BitInteger },
     };
 
     public Lexer(Context ctx)
@@ -38,7 +25,6 @@ public class Lexer
     {
         file = File.OpenText(inputFile);
 
-        List<Token> tokens = new();
 
         while (!file.EndOfStream)
         {
@@ -48,7 +34,7 @@ public class Lexer
                 _ = NextChar();
                 if (file.EndOfStream)
                 {
-                    tokens.Add(new Token(TokenType.Eof, "EOF", new(index - 1, index)));
+                    AddToken(new Token(TokenType.Eof, "EOF", new(index - 1, index)));
 
                     file.Close();
                     return tokens.ToArray();
@@ -100,12 +86,18 @@ public class Lexer
                 _ => new Token(TokenType.Garbage, c.ToString(), new(start, index)),
             };
 
-            tokens.Add(token);
+            AddToken(token);
         }
 
         file.Close();
 
         return tokens.ToArray();
+    }
+
+    private void AddToken(Token token)
+    {
+        ctx.LogToken(token.ToString());
+        tokens.Add(token);
     }
 
     private Token LexBinaryOperator(TokenType token, int start, char c)
@@ -272,7 +264,7 @@ public class Lexer
 
     private char NextChar()
     {
-        char c = (char)file.Read();
+        char c = (char)file!.Read();
         if (c == '\n')
         {
             ctx.LineSpans.Add(new(oldIndex, index));
@@ -284,6 +276,6 @@ public class Lexer
 
     private char PeekChar()
     {
-        return (char)file.Peek();
+        return (char)file!.Peek();
     }
 }

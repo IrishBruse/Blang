@@ -41,17 +41,4 @@ public class Command
         }
         while (!command.HasExited);
     }
-
-    public static Process? Start(string exe, params string[] args)
-    {
-        Console.WriteLine($"> {exe} {string.Join(' ', args)}");
-
-        return Process.Start(new ProcessStartInfo
-        {
-            FileName = exe,
-            Arguments = string.Join(' ', args),
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-        });
-    }
 }

@@ -1,10 +1,29 @@
 ﻿using IBlang;
 
-string[] tests = Directory.GetFiles(Path.GetFullPath("../Tests"), "*.ib");
+string[] tests = Directory.GetFiles(Path.GetFullPath("./Tests/"), "*.ib");
 
-foreach (string test in tests)
+int totalPassed = 0;
+
+for (int i = 0; i < tests.Length; i++)
 {
-    bool passed = Compiler.Test(test);
-    string result = passed ? "Passed" : "Failed";
-    Console.WriteLine($"Test \"{test}\" has {result}!");
+    string testFile = tests[i];
+
+    (string output, string expected) = Compiler.Test(testFile);
+
+    if (output == expected)
+    {
+        totalPassed++;
+        Log.WriteLine($"Test \"{Path.GetFileNameWithoutExtension(testFile)}\" has Passed!", ConsoleColor.Green);
+    }
+    else
+    {
+        Log.WriteLine($"Test \"{Path.GetFileNameWithoutExtension(testFile)}\" has Failed!", ConsoleColor.Red);
+        Log.WriteLine($"Expected:", ConsoleColor.Gray);
+        Log.WriteLine($"{expected}", ConsoleColor.Green);
+        Log.WriteLine($"Got:", ConsoleColor.Gray);
+        Log.WriteLine($"{output}", ConsoleColor.Red);
+        Log.WriteLine("");
+    }
 }
+
+Console.WriteLine($"{totalPassed}/{tests.Length} {(tests.Length > 1 ? "Tests" : "Test")} Passed");

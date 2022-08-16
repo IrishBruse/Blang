@@ -2,17 +2,25 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 using IBlang.Stage1Lexer;
 
-public partial class Parser
+#pragma warning disable CS8618
+
+public class Parser
 {
     private readonly Context ctx;
+
+    private Token[] tokens;
+    private int currentTokenIndex;
+    private Token PeekToken { get; set; }
 
     public TokenType Peek => tokens[currentTokenIndex].Type;
 
     public Parser(Context ctx)
     {
+        tokens = Array.Empty<Token>();
         this.ctx = ctx;
     }
 
@@ -36,7 +44,7 @@ public partial class Parser
 
     private FunctionDecleration ParseFuncDecleration()
     {
-        Log.Trace();
+        ctx.TraceParser();
 
         EatToken(TokenType.KeywordFunc);
         string identifier = EatIdentifier();
@@ -56,16 +64,17 @@ public partial class Parser
         return new FunctionDecleration(identifier, parameters.ToArray(), body);
     }
 
+
     private BlockStatement ParseBlock()
     {
-        Log.Trace();
+        ctx.TraceParser();
 
         EatToken(TokenType.OpenScope);
 
         List<INode> statements = new();
         while (Peek != TokenType.CloseScope)
         {
-            statements.Add((INode)ParseStatement());
+            statements.Add(ParseStatement());
         }
 
         EatToken(TokenType.CloseScope);
@@ -75,7 +84,7 @@ public partial class Parser
 
     private INode ParseStatement()
     {
-        Log.Trace();
+        ctx.TraceParser();
 
         return Peek switch
         {
@@ -88,7 +97,7 @@ public partial class Parser
 
     private INode ParseIdentifier(string identifier)
     {
-        Log.Trace();
+        ctx.TraceParser();
 
         return Peek switch
         {
@@ -98,9 +107,13 @@ public partial class Parser
         };
     }
 
+    /// <summary>
+    /// IF [EXPRESSION] BLOCK <br/>
+    /// Optional ELSE BLOCK
+    /// </summary>
     private IfStatement ParseIf()
     {
-        Log.Trace();
+        ctx.TraceParser();
 
         EatToken(TokenType.KeywordIf);
 
@@ -121,7 +134,7 @@ public partial class Parser
     /// <summary> RETURN [STATEMENT] </summary>
     private ReturnStatement ParseReturn()
     {
-        Log.Trace();
+        ctx.TraceParser();
 
         EatToken(TokenType.KeywordReturn);
         return new ReturnStatement(ParseExpression());
@@ -129,11 +142,11 @@ public partial class Parser
 
     private INode ParseExpression()
     {
-        Log.Trace();
+        ctx.TraceParser();
 
         INode left = ParseUnaryExpression();
 
-        if (IsBinaryToken(Peek))
+        if (TokenHelper.IsBinaryToken(Peek))
         {
             Token op = NextToken();
             return new BinaryExpression(left, op.Value, ParseUnaryExpression());
@@ -163,7 +176,7 @@ public partial class Parser
 
     private INode ParseFuncCall(string identifier)
     {
-        Log.Trace();
+        ctx.TraceParser();
 
         EatToken(TokenType.OpenParenthesis);
 
@@ -179,7 +192,7 @@ public partial class Parser
 
     private INode ParseVariableDecleration(string identifier)
     {
-        Log.Trace();
+        ctx.TraceParser();
 
         EatToken(TokenType.Assignment);
 
@@ -187,4 +200,53 @@ public partial class Parser
 
         return new AssignmentExpression(new Identifier(identifier), rhs);
     }
+
+    private void EatToken(TokenType expected, [CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string method = "")
+    {
+        Token got = NextToken();
+
+        if (got.Type != expected)
+        {
+            Log.Error($"Expected '{string.Join(' ', expected)}' but got '{got}'", file, lineNumber, method);
+        }
+    }
+
+    private string EatIdentifier([CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string method = "")
+    {
+        Token got = NextToken();
+        const TokenType expected = TokenType.Identifier;
+        if (got.Type != expected)
+        {
+            Log.Error($"Expected '{expected}' but got '{got}'", file, lineNumber, method);
+        }
+        return got.Value;
+    }
+
+    private ValueLiteral EatConstant()
+    {
+        string value = PeekToken.Value;
+
+        TokenType got = NextToken().Type;
+
+        switch (got)
+        {
+            case TokenType.StringLiteral: return new(ValueType.String, value);
+            case TokenType.CharLiteral: return new(ValueType.Char, value);
+            case TokenType.IntegerLiteral: return new(ValueType.Int, value);
+            default: Log.Error($"Expected 'Identifier' but got '{got}'"); break;
+        }
+
+        return new(ValueType.String, value);
+    }
+
+    public Token NextToken()
+    {
+        Token token = PeekToken;
+        ctx.LogToken("Used -> " + token.ToString());
+        currentTokenIndex++;
+        PeekToken = tokens[currentTokenIndex];
+        return token;
+    }
+
 }
+#pragma warning restore CS8618

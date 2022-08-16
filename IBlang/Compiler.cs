@@ -5,77 +5,66 @@ using System.Text;
 
 using IBlang.Stage1Lexer;
 using IBlang.Stage2Parser;
-using IBlang.Stage4CodeGen;
+using IBlang.Stage3TypeChecker;
+using IBlang.Stage4Lowering;
+using IBlang.Stage5CodeGen;
 
 public class Compiler
 {
-    public static void CompileAndRun(string sourceFile)
+    public static void CompileAndRunFile(string sourceFile)
     {
         string outputFile = OutFile(sourceFile, ".c");
-        Output(sourceFile);
+        Compile(sourceFile);
         Command.Run("tcc", "-run", outputFile);
     }
 
-    public static void Compile(string sourceFile)
+    public static void CompileFile(string sourceFile)
     {
         string outputFile = OutFile(sourceFile, ".c");
-        Output(sourceFile);
+        Compile(sourceFile);
         Command.Run("tcc", outputFile, "-o", OutFile(sourceFile, ".exe"));
     }
 
-    public static bool Test(string sourceFile)
+    public static (string output, string expected) Test(string sourceFile)
     {
         string outputFile = OutFile(sourceFile, ".c");
-        Output(sourceFile);
-        Process? command = Command.Start("tcc", "-run", outputFile);
+        Compile(sourceFile);
 
-        if (command == null)
+        Process command = Process.Start(new ProcessStartInfo
         {
-            return false;
-        }
+            FileName = "tcc",
+            Arguments = string.Join(' ', "-run", outputFile),
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        })!;
 
         command.WaitForExit();
 
-        StringBuilder builder = new();
+        StringBuilder output = new();
 
-        while (command.HasExited)
+        do
         {
-            string output = command.StandardOutput.ReadToEnd();
-            if (!string.IsNullOrEmpty(output))
-            {
-                _ = builder.Append(output);
-            }
-
-            output = command.StandardError.ReadToEnd();
-            if (!string.IsNullOrEmpty(output))
-            {
-                _ = builder.Append(output);
-            }
+            _ = output.Append(command.StandardOutput.ReadToEnd());
+            _ = output.Append(command.StandardError.ReadToEnd());
         }
+        while (!command.HasExited);
 
-        Console.WriteLine(builder);
+        string expected = File.ReadAllText(sourceFile + ".out");
 
-        if (File.ReadAllText(sourceFile + ".out") == builder.ToString())
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return (output.ToString(), expected);
     }
 
-    private static void Output(string sourceFile)
+    private static void Compile(string sourceFile)
     {
-        File.Delete("Trace.log");
         string outputFile = OutFile(sourceFile, ".c");
 
-        Context ctx = new(new[] { sourceFile }, new());
+        Context ctx = new(sourceFile, new());
 
         Token[] tokens = new Lexer(ctx).Lex(sourceFile);
-        Ast node = new Parser(ctx).Parse(tokens);
-
-        StringBuilder cSource = new CEmitter(ctx).Emit(node);
+        Ast ast = new Parser(ctx).Parse(tokens);
+        ast = new TypeChecker(ctx).TypeCheck(ast);
+        ast = new AstLowering(ctx).Lower(ast);
+        StringBuilder cSource = new CEmitter().Emit(ast);
 
         File.WriteAllText(outputFile, cSource.ToString());
     }
@@ -86,5 +75,8 @@ public class Compiler
         Command.Run("clang-format", "-i", outputFile);
     }
 
-    private static string OutFile(string sourceFile, string ext) => sourceFile.Replace(".ib", ext);
+    private static string OutFile(string sourceFile, string ext)
+    {
+        return sourceFile.Replace(".ib", ext);
+    }
 }
