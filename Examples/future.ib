@@ -1,0 +1,17 @@
+namespace Test
+
+import Console
+import "raylib.h" as Raylib
+
+func Main(string[] args)
+{
+    Console.WriteLine("Welcome to the future!")
+
+    Raylib.InitWindow(1280, 720, "raylib [core] example - future")
+
+    // Main game loop
+    while (!Raylib.WindowShouldClose())
+    {
+
+    }
+}

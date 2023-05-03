@@ -1,6 +1,0 @@
-// Output: Hello World\n
-
-func Main()
-{
-    PrintString("Hello World\n")
-}
