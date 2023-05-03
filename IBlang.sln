@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBlang", "IBlang\IBlang.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBlang.Tests", "IBlang.Tests\IBlang.Tests.csproj", "{B1D4914C-F640-41FB-8D74-6357A5A0946A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBlang.Frontend", "IBlang.Frontend\IBlang.Frontend.csproj", "{E100157A-4BF2-4702-AC56-826FBDEC5FA3}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

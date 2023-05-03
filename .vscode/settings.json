@@ -1,7 +1,0 @@
-{
-    "csharp-utilities.taskConfig.problemMatcher": "",
-    "files.exclude": {
-        ".vscode": true
-    },
-    "explorer.excludeGitIgnore": false
-}
