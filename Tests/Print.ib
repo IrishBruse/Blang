@@ -1,4 +1,6 @@
+// Output: Hello World\n
+
 func Main()
 {
-    PrintString("Test\n")
+    PrintString("Hello World\n")
 }

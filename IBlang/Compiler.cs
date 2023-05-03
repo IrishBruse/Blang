@@ -1,90 +1,30 @@
 namespace IBlang;
-
-using System.Diagnostics;
-using System.Text;
-
-using IBlang.Stage1Lexer;
-using IBlang.Stage2Parser;
-using IBlang.Stage4CodeGen;
-
 public class Compiler
 {
-    public static void CompileAndRun(string sourceFile)
+    public static void Run(string source)
     {
-        string outputFile = OutFile(sourceFile, ".c");
-        Output(sourceFile);
-        Command.Run("tcc", "-run", outputFile);
-    }
+        StreamReader sourceFile = File.OpenText(source);
 
-    public static void Compile(string sourceFile)
-    {
-        string outputFile = OutFile(sourceFile, ".c");
-        Output(sourceFile);
-        Command.Run("tcc", outputFile, "-o", OutFile(sourceFile, ".exe"));
-    }
+        Lexer lexer = new(sourceFile);
 
-    public static bool Test(string sourceFile)
-    {
-        string outputFile = OutFile(sourceFile, ".c");
-        Output(sourceFile);
-        Process? command = Command.Start("tcc", "-run", outputFile);
+        Token[] tokens = lexer.Lex();
 
-        if (command == null)
+        foreach (Token token in tokens)
         {
-            return false;
+            // Console.WriteLine(token);
         }
 
-        command.WaitForExit();
+        Parser parser = new(tokens);
 
-        StringBuilder builder = new();
-
-        while (command.HasExited)
+        try
         {
-            string output = command.StandardOutput.ReadToEnd();
-            if (!string.IsNullOrEmpty(output))
-            {
-                _ = builder.Append(output);
-            }
-
-            output = command.StandardError.ReadToEnd();
-            if (!string.IsNullOrEmpty(output))
-            {
-                _ = builder.Append(output);
-            }
+            parser.Parse();
         }
-
-        Console.WriteLine(builder);
-
-        if (File.ReadAllText(sourceFile + ".out") == builder.ToString())
+        catch (Exception e)
         {
-            return true;
-        }
-        else
-        {
-            return false;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Error.WriteLine(e.Message);
+            Console.ResetColor();
         }
     }
-
-    private static void Output(string sourceFile)
-    {
-        File.Delete("Trace.log");
-        string outputFile = OutFile(sourceFile, ".c");
-
-        Context ctx = new(new[] { sourceFile }, new());
-
-        Token[] tokens = new Lexer(ctx).Lex(sourceFile);
-        Ast node = new Parser(ctx).Parse(tokens);
-
-        StringBuilder cSource = new CEmitter(ctx).Emit(node);
-
-        File.WriteAllText(outputFile, cSource.ToString());
-    }
-
-    public static void Format(string sourceFile)
-    {
-        string outputFile = OutFile(sourceFile, ".c");
-        Command.Run("clang-format", "-i", outputFile);
-    }
-
-    private static string OutFile(string sourceFile, string ext) => sourceFile.Replace(".ib", ext);
 }

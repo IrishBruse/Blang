@@ -1,4 +1,4 @@
-﻿namespace IBlang.Stage1Lexer;
+﻿namespace IBlang;
 
 public enum TokenType
 {
@@ -6,12 +6,6 @@ public enum TokenType
     Eol = 254,
     Eof = 256,
     Garbage = -1,
-
-    // Keywords
-    KeywordFunc,
-    KeywordIf,
-    KeywordElse,
-    KeywordReturn,
 
     Identifier,
 
@@ -67,15 +61,4 @@ public enum TokenType
     BitwiseXOr,
     BitwiseShiftLeft,
     BitwiseShiftRight,
-    TypeInteger,
-    TypeFloat,
-    TypeString,
-    TypeSigned8BitInteger,
-    TypeSigned16BitInteger,
-    TypeSigned32BitInteger,
-    TypeSigned64BitInteger,
-    TypeUnsigned8BitInteger,
-    TypeUnsigned16BitInteger,
-    TypeUnsigned32BitInteger,
-    TypeUnsigned64BitInteger,
 }

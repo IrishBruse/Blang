@@ -1,0 +1,22 @@
+// test
+
+func main()
+{
+	if foo() == 4
+	{
+	    return 0
+	}
+	else{
+		test("Hello World \n")
+	}
+}
+
+func foo()
+{
+	return 4
+}
+
+func test()
+{
+
+}

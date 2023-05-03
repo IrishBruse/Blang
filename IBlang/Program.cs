@@ -1,8 +1,6 @@
 ﻿using IBlang;
 
-string[] examples = Directory.GetFiles(Path.GetFullPath("../Examples"), "*.ib");
-
-foreach (string example in examples)
-{
-    Compiler.CompileAndRun(example);
-}
+// Compiler.Run("../Tests/helloworld.ib");
+// Compiler.Run("../Tests/fibonacci.ib");
+Compiler.Run("../Tests/syntax.ib");
+// Compiler.Run("../Tests/empty.ib");
