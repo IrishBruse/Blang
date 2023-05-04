@@ -7,25 +7,20 @@ using System.Text;
 
 public class Lexer
 {
-    private static readonly HashSet<string> Keywords = new()
+    private static readonly Dictionary<string, TokenType> Keywords = new()
     {
-        { "func" },
+        { "func", TokenType.Keyword_Func },
 
-        { "if" },
-        { "else" },
-        { "return" },
-
-        { "true" },
-        { "false" },
+        { "true", TokenType.Keyword_True },
+        { "false", TokenType.Keyword_False },
     };
 
-    private static readonly HashSet<string> ControlflowKeywords = new()
+    private static readonly Dictionary<string, TokenType> ControlflowKeywords = new()
     {
-        { "if" },
-        { "else" },
-        { "return" },
+        { "if", TokenType.Keyword_If },
+        { "else", TokenType.Keyword_Else },
+        { "return", TokenType.Keyword_Return },
     };
-
 
     private const ConsoleColor CommentColor = ConsoleColor.DarkGray;
     private const ConsoleColor WhitespaceColor = ConsoleColor.DarkGray;
@@ -44,7 +39,11 @@ public class Lexer
     public Lexer(StreamReader sourceFile)
     {
         this.sourceFile = sourceFile;
-        // PrintConsoleColors();
+
+        foreach ((string key, TokenType value) in ControlflowKeywords)
+        {
+            Keywords.Add(key, value);
+        }
     }
 
     private static void PrintConsoleColors()
@@ -285,15 +284,19 @@ public class Lexer
 
         string identifier = identifierBuilder.ToString().ToLower(CultureInfo.CurrentCulture);
 
-        if (Keywords.Contains(identifier))
+        if (Keywords.TryGetValue(identifier, out TokenType value))
         {
             // Recolor keywords
             Console.CursorLeft -= identifier.Length;
-            ConsoleColor color = ControlflowKeywords.Contains(identifier) ? ControlflowColor : KeywordColor;
+            ConsoleColor color = ControlflowKeywords.TryGetValue(identifier, out _) ? ControlflowColor : KeywordColor;
             Print(identifier, foreground: color);
-        }
 
-        tokens.Add(new(identifierBuilder.ToString(), TokenType.Identifier, 0, 0));
+            tokens.Add(new(identifierBuilder.ToString(), value, 0, 0));
+        }
+        else
+        {
+            tokens.Add(new(identifierBuilder.ToString(), TokenType.Identifier, 0, 0));
+        }
     }
 
     private char Peek()
@@ -304,6 +307,7 @@ public class Lexer
     private void LexNumber()
     {
         StringBuilder number = new();
+
         char c;
 
         do

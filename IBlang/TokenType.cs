@@ -61,4 +61,14 @@ public enum TokenType
     BitwiseXOr,
     BitwiseShiftLeft,
     BitwiseShiftRight,
+
+#pragma warning disable CA1707
+    Keyword_Func,
+    Keyword_True,
+    Keyword_False,
+    Keyword_If,
+    Keyword_Else,
+    Keyword_Return,
+#pragma warning restore CA1707
+
 }

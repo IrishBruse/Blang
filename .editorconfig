@@ -24,7 +24,7 @@ dotnet_diagnostic.IDE0022.severity = refactoring
 dotnet_diagnostic.IDE0046.severity = warning
 dotnet_diagnostic.IDE0051.severity = none # Remove unused private member
 dotnet_diagnostic.IDE0058.severity = refactoring
-dotnet_diagnostic.IDE0059.severity = warning
+dotnet_diagnostic.IDE0059.severity = suggestion
 dotnet_diagnostic.IDE0078.severity = none
 dotnet_diagnostic.IDE0058.severity = none # Discard variable _ =
 dotnet_diagnostic.IDE0063.severity = warning

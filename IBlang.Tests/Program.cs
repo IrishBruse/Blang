@@ -1,4 +1,7 @@
-﻿using IBlang;
+﻿using System;
+using System.IO;
+
+using IBlang;
 
 string[] tests = Directory.GetFiles(Path.GetFullPath("./Tests/"), "*.ib");
 
@@ -13,17 +16,24 @@ for (int i = 0; i < tests.Length; i++)
     if (output == expected)
     {
         totalPassed++;
-        Log.WriteLine($"Test \"{Path.GetFileNameWithoutExtension(testFile)}\" has Passed!", ConsoleColor.Green);
+        Print($"Test \"{Path.GetFileNameWithoutExtension(testFile)}\" has Passed!", ConsoleColor.Green);
     }
     else
     {
-        Log.WriteLine($"Test \"{Path.GetFileNameWithoutExtension(testFile)}\" has Failed!", ConsoleColor.Red);
-        Log.WriteLine($"Expected:", ConsoleColor.Gray);
-        Log.WriteLine($"{expected}", ConsoleColor.Green);
-        Log.WriteLine($"Got:", ConsoleColor.Gray);
-        Log.WriteLine($"{output}", ConsoleColor.Red);
-        Log.WriteLine("");
+        Print($"Test \"{Path.GetFileNameWithoutExtension(testFile)}\" has Failed!", ConsoleColor.Red);
+        Print($"Expected:", ConsoleColor.Gray);
+        Print($"{expected}", ConsoleColor.Green);
+        Print($"Got:", ConsoleColor.Gray);
+        Print($"{output}", ConsoleColor.Red);
+        Print("");
     }
 }
 
-Console.WriteLine($"{totalPassed}/{tests.Length} {(tests.Length > 1 ? "Tests" : "Test")} Passed");
+Print($"{totalPassed}/{tests.Length} {(tests.Length > 1 ? "Tests" : "Test")} Passed");
+
+static void Print(string text, ConsoleColor color = ConsoleColor.Gray)
+{
+    Console.ForegroundColor = color;
+    Console.WriteLine(text);
+    Console.ResetColor();
+}

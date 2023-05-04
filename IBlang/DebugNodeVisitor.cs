@@ -2,9 +2,9 @@ namespace IBlang;
 
 public class DebugNodeVisitor : INodeVisitor
 {
-    public void Visit(Ast ast)
+    public void Visit(File file)
     {
-        foreach (FunctionDecleration function in ast.Functions)
+        foreach (FunctionDecleration function in file.Functions)
         {
             function.Accept(this);
         }
