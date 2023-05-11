@@ -12,7 +12,7 @@ public class Parser
         this.tokens = tokens;
     }
 
-    public File Parse()
+    public FileAst Parse()
     {
         List<FunctionDecleration> functions = new();
         while (true)
@@ -20,7 +20,7 @@ public class Parser
             switch (PeekType)
             {
                 case TokenType.Keyword_Func: functions.Add(ParseFunctionDecleration()); break;
-                case TokenType.Eof: return new File(functions.ToArray());
+                case TokenType.Eof: return new FileAst(functions.ToArray());
 
                 default: throw new ParseException($"Unexpected token {Peek}");
             }
@@ -78,10 +78,9 @@ public class Parser
 
     private void ParseStatements()
     {
-        TokenType peekType = PeekType;
-        while (peekType != TokenType.CloseScope)
+        while (PeekType != TokenType.CloseScope)
         {
-            if (peekType == TokenType.Identifier)
+            if (PeekType == TokenType.Identifier)
             {
                 switch (Peek.Value)
                 {
@@ -110,6 +109,7 @@ public class Parser
 
             if (TryEatToken(TokenType.OpenParenthesis))
             {
+                ParseUnaryExpression();
                 EatToken(TokenType.CloseParenthesis);
             }
             else if (TryEatToken(TokenType.Assignment))
@@ -128,7 +128,7 @@ public class Parser
 
     private void ParseIfStatement()
     {
-        EatKeyword("if");
+        EatToken(TokenType.Keyword_If);
         EatToken(TokenType.OpenScope);
         ParseStatements();
         EatToken(TokenType.CloseScope);
@@ -153,35 +153,6 @@ public class Parser
         Token p = Peek;
 
         if (p.Type != type)
-        {
-            return false;
-        }
-        else
-        {
-            currentTokenIndex++;
-            return true;
-        }
-    }
-
-    private void EatKeyword(string keyword)
-    {
-        Token p = Peek;
-
-        if (p.Type != TokenType.Identifier || p.Value != keyword)
-        {
-            throw new ParseException($"Expected keyword '{keyword}' but got {Peek.Type} with value '{Peek.Value}'");
-        }
-        else
-        {
-            currentTokenIndex++;
-        }
-    }
-
-    private bool TryEatKeyword(string keyword)
-    {
-        Token p = Peek;
-
-        if (p.Type != TokenType.Identifier || p.Value != keyword)
         {
             return false;
         }

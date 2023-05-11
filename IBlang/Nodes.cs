@@ -1,12 +1,13 @@
 namespace IBlang;
 
-public record File(FunctionDecleration[] Functions) : INode
+public record FileAst(FunctionDecleration[] Functions) : INode
 {
     public void Accept(INodeVisitor visitor)
     {
         visitor.Visit(this);
     }
 }
+
 public record FunctionDecleration(Parameter[] Parameters, Statement[] Statements) : INode
 {
     public void Accept(INodeVisitor visitor)

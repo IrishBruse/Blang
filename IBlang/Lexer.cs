@@ -5,9 +5,9 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-public class Lexer
+public class Lexer : IDisposable
 {
-    private static readonly Dictionary<string, TokenType> Keywords = new()
+    public static readonly Dictionary<string, TokenType> Keywords = new()
     {
         { "func", TokenType.Keyword_Func },
 
@@ -21,7 +21,6 @@ public class Lexer
         { "else", TokenType.Keyword_Else },
         { "return", TokenType.Keyword_Return },
     };
-
     private const ConsoleColor CommentColor = ConsoleColor.DarkGray;
     private const ConsoleColor WhitespaceColor = ConsoleColor.DarkGray;
     private const ConsoleColor KeywordColor = ConsoleColor.Blue;
@@ -35,58 +34,40 @@ public class Lexer
 
     private StreamReader sourceFile;
     private List<Token> tokens = new();
+    private readonly bool debug;
 
-    public Lexer(StreamReader sourceFile)
+    public Lexer(StreamReader sourceFile, bool debug = false)
     {
         this.sourceFile = sourceFile;
+        this.debug = debug;
+    }
 
+    public Lexer(string sourceText, bool debug = false)
+    {
+        MemoryStream stream = new();
+        StreamWriter writer = new(stream);
+        writer.Write(sourceText);
+        writer.Flush();
+        stream.Position = 0;
+
+        sourceFile = new StreamReader(stream);
+        this.debug = debug;
+    }
+
+    static Lexer()
+    {
         foreach ((string key, TokenType value) in ControlflowKeywords)
         {
             Keywords.Add(key, value);
         }
     }
 
-    private static void PrintConsoleColors()
-    {
-        Console.WriteLine();
-        Print("Black\n", foreground: ConsoleColor.Black);
-        Print("DarkBlue\n", foreground: ConsoleColor.DarkBlue);
-        Print("DarkGreen\n", foreground: ConsoleColor.DarkGreen);
-        Print("DarkCyan\n", foreground: ConsoleColor.DarkCyan);
-        Print("DarkRed\n", foreground: ConsoleColor.DarkRed);
-        Print("DarkMagenta\n", foreground: ConsoleColor.DarkMagenta);
-        Print("DarkYellow\n", foreground: ConsoleColor.DarkYellow);
-        Print("Gray\n", foreground: ConsoleColor.Gray);
-        Print("DarkGray\n", foreground: ConsoleColor.DarkGray);
-        Print("Blue\n", foreground: ConsoleColor.Blue);
-        Print("Green\n", foreground: ConsoleColor.Green);
-        Print("Cyan\n", foreground: ConsoleColor.Cyan);
-        Print("Red\n", foreground: ConsoleColor.Red);
-        Print("Magenta\n", foreground: ConsoleColor.Magenta);
-        Print("Yellow\n", foreground: ConsoleColor.Yellow);
-        Print("White\n", foreground: ConsoleColor.White);
-        Print("     \n", ConsoleColor.Black);
-        Print("     \n", ConsoleColor.DarkBlue);
-        Print("     \n", ConsoleColor.DarkGreen);
-        Print("     \n", ConsoleColor.DarkCyan);
-        Print("     \n", ConsoleColor.DarkRed);
-        Print("     \n", ConsoleColor.DarkMagenta);
-        Print("     \n", ConsoleColor.DarkYellow);
-        Print("     \n", ConsoleColor.Gray);
-        Print("     \n", ConsoleColor.DarkGray);
-        Print("     \n", ConsoleColor.Blue);
-        Print("     \n", ConsoleColor.Green);
-        Print("     \n", ConsoleColor.Cyan);
-        Print("     \n", ConsoleColor.Red);
-        Print("     \n", ConsoleColor.Magenta);
-        Print("     \n", ConsoleColor.Yellow);
-        Print("     \n", ConsoleColor.White);
-        Console.WriteLine();
-    }
-
     public Token[] Lex()
     {
-        Console.WriteLine("-------- Lexed code --------");
+        if (debug)
+        {
+            Console.WriteLine("-------- Lexed code --------");
+        }
 
         while (!sourceFile.EndOfStream)
         {
@@ -143,97 +124,107 @@ public class Lexer
                     case '/': LexOperator(TokenType.Division); break;// Also comments
                     case '&': LexOperator(TokenType.BitwiseAnd); break;
                     case '|': LexOperator(TokenType.BitwiseOr); break;
+                    case '%': LexOperator(TokenType.Modulo); break;
                     case '!': LexOperator(TokenType.LogicalNot); break;
                     case '=': LexOperator(TokenType.Assignment); break;
 
-                    default: Next(background: ErrorColor); break;
+                    default:
+                    tokens.Add(new(c.ToString(), TokenType.Garbage, 0, 0));
+                    Next(background: ErrorColor);
+                    break;
                 }
             }
         }
 
-        Console.WriteLine("-------- End Lexed code --------");
+        if (debug)
+        {
+            Console.WriteLine("-------- End Lexed code --------");
+        }
 
         tokens.Add(new(string.Empty, TokenType.Eof, 0, 0));
 
         return tokens.ToArray();
     }
 
-    private void LexOperator(TokenType singleType)
+    private void LexOperator(TokenType type)
     {
         char c = Next(OperatorColor);
         char p = Peek();
 
         if (c == '<' && p == '=')
         {
-            singleType = TokenType.LessThanEqual;
+            type = TokenType.LessThanEqual;
             Next(OperatorColor);
         }
         else if (c == '>' && p == '=')
         {
-            singleType = TokenType.GreaterThanEqual;
+            type = TokenType.GreaterThanEqual;
             Next(OperatorColor);
         }
         else if (c == '=' && p == '=')
         {
-            singleType = TokenType.EqualEqual;
+            type = TokenType.EqualEqual;
             Next(OperatorColor);
         }
         else if (c == '!' && p == '=')
         {
-            singleType = TokenType.NotEqual;
+            type = TokenType.NotEqual;
             Next(OperatorColor);
         }
         else if (c == '&' && p == '&')
         {
-            singleType = TokenType.LogicalAnd;
+            type = TokenType.LogicalAnd;
             Next(OperatorColor);
         }
         else if (c == '|' && p == '|')
         {
-            singleType = TokenType.LogicalOr;
+            type = TokenType.LogicalOr;
             Next(OperatorColor);
         }
         else if (c == '+' && p == '=')
         {
-            singleType = TokenType.AdditionAssignment;
+            type = TokenType.AdditionAssignment;
             Next(OperatorColor);
         }
         else if (c == '-' && p == '=')
         {
-            singleType = TokenType.SubtractionAssignment;
+            type = TokenType.SubtractionAssignment;
             Next(OperatorColor);
         }
         else if (c == '*' && p == '=')
         {
-            singleType = TokenType.MultiplicationAssignment;
+            type = TokenType.MultiplicationAssignment;
             Next(OperatorColor);
         }
         else if (c == '/' && p == '=')
         {
-            singleType = TokenType.DivisionAssignment;
+            type = TokenType.DivisionAssignment;
             Next(OperatorColor);
         }
         else if (c == '%' && p == '=')
         {
-            singleType = TokenType.ModuloAssignment;
+            type = TokenType.ModuloAssignment;
             Next(OperatorColor);
         }
         else if (c == '<' && p == '<')
         {
-            singleType = TokenType.BitwiseShiftLeft;
+            type = TokenType.BitwiseShiftLeft;
             Next(OperatorColor);
         }
         else if (c == '>' && p == '>')
         {
-            singleType = TokenType.BitwiseShiftRight;
+            type = TokenType.BitwiseShiftRight;
             Next(OperatorColor);
         }
         else if (c == '/' && p == '/') // Single line comment
         {
-            Console.CursorLeft--;
-            Print('/', foreground: CommentColor);
+            if (debug)
+            {
+                Console.CursorLeft--;
+                Print('/', foreground: CommentColor);
+            }
 
-            while (c != '\n')
+            while (c != '\n' && !sourceFile.EndOfStream)
             {
                 c = Next(CommentColor);
             }
@@ -242,9 +233,8 @@ public class Lexer
             return;
         }
 
-        tokens.Add(new(c.ToString(), singleType, 0, 0));
+        tokens.Add(new(c.ToString(), type, 0, 0));
     }
-
     private void LexBracket(TokenType type)
     {
         char c = Next(BracketsColor);
@@ -286,10 +276,14 @@ public class Lexer
 
         if (Keywords.TryGetValue(identifier, out TokenType value))
         {
-            // Recolor keywords
-            Console.CursorLeft -= identifier.Length;
-            ConsoleColor color = ControlflowKeywords.TryGetValue(identifier, out _) ? ControlflowColor : KeywordColor;
-            Print(identifier, foreground: color);
+            if (debug)
+            {
+                // Recolor keywords
+                // Console.CursorLeft -= identifier.Length;
+
+                ConsoleColor color = ControlflowKeywords.TryGetValue(identifier, out _) ? ControlflowColor : KeywordColor;
+                Print(identifier, foreground: color);
+            }
 
             tokens.Add(new(identifierBuilder.ToString(), value, 0, 0));
         }
@@ -324,13 +318,16 @@ public class Lexer
     {
         char c = (char)sourceFile.Read();
 
-        if (display != null)
+        if (debug)
         {
-            Print(display, background, foreground);
-        }
-        else
-        {
-            Print(c, background, foreground);
+            if (display != null)
+            {
+                Print(display, background, foreground);
+            }
+            else
+            {
+                Print(c, background, foreground);
+            }
         }
 
         return c;
@@ -350,5 +347,12 @@ public class Lexer
         Console.ForegroundColor = foreground;
         Console.Write(str);
         Console.ResetColor();
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+
+        sourceFile.Dispose();
     }
 }

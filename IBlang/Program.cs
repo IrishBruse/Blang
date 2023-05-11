@@ -1,4 +1,10 @@
-using IBlang;
+namespace IBlang;
 
-// Compiler.Run("../Tests/syntax.ib");
-Compiler.Run("../Tests/helloworld.ib");
+public class Program
+{
+    public static void Main()
+    {
+        // Compiler.Run("../Tests/syntax.ib");
+        Compiler.Run("../Tests/helloworld.ib");
+    }
+}

@@ -3,17 +3,10 @@ public class Compiler
 {
     public static void Run(string source)
     {
-        StreamReader sourceFile = System.IO.File.OpenText(source);
+        StreamReader sourceFile = File.OpenText(source);
 
-        Lexer lexer = new(sourceFile);
-
+        Lexer lexer = new(sourceFile, true);
         Token[] tokens = lexer.Lex();
-
-        // foreach (Token token in tokens)
-        // {
-        //     Console.WriteLine(token);
-        // }
-
         Parser parser = new(tokens);
 
         try
@@ -29,9 +22,9 @@ public class Compiler
         }
     }
 
-    public static (string output, string expected) Test(string testFile)
+    public static (string expected, string output) Test(string testFile)
     {
-        string source = System.IO.File.ReadAllText(testFile);
+        string source = File.ReadAllText(testFile);
 
         string[] lines = source.Split("\n");
 

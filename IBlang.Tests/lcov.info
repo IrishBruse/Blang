@@ -1,0 +1,782 @@
+SF:a:\IBlang\IBlang\Compiler.cs
+FN:4,System.Void IBlang.Compiler::Run(System.String)
+FNDA:0,System.Void IBlang.Compiler::Run(System.String)
+DA:5,0
+DA:6,0
+DA:8,0
+DA:9,0
+DA:10,0
+DA:13,0
+DA:14,0
+DA:15,0
+DA:16,0
+DA:17,0
+DA:18,0
+DA:19,0
+DA:20,0
+DA:21,0
+DA:22,0
+DA:23,0
+FN:25,System.ValueTuple`2<System.String,System.String> IBlang.Compiler::Test(System.String)
+FNDA:0,System.ValueTuple`2<System.String,System.String> IBlang.Compiler::Test(System.String)
+DA:26,0
+DA:27,0
+DA:29,0
+DA:31,0
+DA:33,0
+DA:34,0
+DA:35,0
+DA:37,0
+DA:38,0
+DA:39,0
+DA:40,0
+DA:41,0
+DA:43,0
+DA:45,0
+DA:46,0
+BRDA:33,105,1,0
+BRDA:37,53,0,0
+BRDA:37,53,1,0
+BRDA:33,105,0,0
+LF:31
+LH:0
+BRF:4
+BRH:0
+FNF:2
+FNH:0
+end_of_record
+SF:a:\IBlang\IBlang\CompilerException.cs
+FN:8,System.Void IBlang.ParseException::.ctor()
+FNDA:0,System.Void IBlang.ParseException::.ctor()
+DA:9,0
+DA:10,0
+DA:11,0
+FN:12,System.Void IBlang.ParseException::.ctor(System.String)
+FNDA:0,System.Void IBlang.ParseException::.ctor(System.String)
+DA:13,0
+DA:14,0
+DA:15,0
+FN:16,System.Void IBlang.ParseException::.ctor(System.String,System.Exception)
+FNDA:0,System.Void IBlang.ParseException::.ctor(System.String,System.Exception)
+DA:17,0
+DA:18,0
+DA:19,0
+FN:20,System.Void IBlang.ParseException::.ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)
+FNDA:0,System.Void IBlang.ParseException::.ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)
+DA:21,0
+DA:22,0
+DA:23,0
+LF:12
+LH:0
+BRF:0
+BRH:0
+FNF:4
+FNH:0
+end_of_record
+SF:a:\IBlang\IBlang\DebugNodeVisitor.cs
+FN:5,System.Void IBlang.DebugNodeVisitor::Visit(IBlang.FileAst)
+FNDA:0,System.Void IBlang.DebugNodeVisitor::Visit(IBlang.FileAst)
+DA:6,0
+DA:7,0
+DA:8,0
+DA:9,0
+DA:10,0
+DA:11,0
+BRDA:7,35,1,0
+BRDA:7,35,0,0
+FN:13,System.Void IBlang.DebugNodeVisitor::Visit(IBlang.FunctionDecleration)
+FNDA:0,System.Void IBlang.DebugNodeVisitor::Visit(IBlang.FunctionDecleration)
+DA:14,0
+DA:15,0
+DA:16,0
+DA:17,0
+DA:18,0
+DA:20,0
+DA:21,0
+DA:22,0
+DA:23,0
+DA:24,0
+BRDA:15,35,1,0
+BRDA:15,35,0,0
+BRDA:20,78,1,0
+BRDA:20,78,0,0
+FN:26,System.Void IBlang.DebugNodeVisitor::Visit(IBlang.Parameter)
+FNDA:0,System.Void IBlang.DebugNodeVisitor::Visit(IBlang.Parameter)
+DA:27,0
+DA:29,0
+FN:31,System.Void IBlang.DebugNodeVisitor::Visit(IBlang.Statement)
+FNDA:0,System.Void IBlang.DebugNodeVisitor::Visit(IBlang.Statement)
+DA:32,0
+DA:34,0
+LF:20
+LH:0
+BRF:6
+BRH:0
+FNF:4
+FNH:0
+end_of_record
+SF:a:\IBlang\IBlang\Lexer.cs
+FN:65,IBlang.Token[] IBlang.Lexer::Lex()
+FNDA:0,IBlang.Token[] IBlang.Lexer::Lex()
+DA:66,0
+DA:67,0
+DA:68,0
+DA:69,0
+DA:70,0
+DA:72,0
+DA:73,0
+DA:74,0
+DA:76,0
+DA:77,0
+DA:78,0
+DA:79,0
+DA:80,0
+DA:81,0
+DA:82,0
+DA:83,0
+DA:84,0
+DA:85,0
+DA:86,0
+DA:87,0
+DA:88,0
+DA:89,0
+DA:91,0
+DA:93,0
+DA:94,0
+DA:95,0
+DA:96,0
+DA:97,0
+DA:98,0
+DA:99,0
+DA:100,0
+DA:101,0
+DA:102,0
+DA:103,0
+DA:105,0
+DA:106,0
+DA:108,0
+DA:110,0
+DA:111,0
+DA:113,0
+DA:114,0
+DA:116,0
+DA:117,0
+DA:119,0
+DA:120,0
+DA:121,0
+DA:122,0
+DA:123,0
+DA:124,0
+DA:125,0
+DA:126,0
+DA:127,0
+DA:128,0
+DA:129,0
+DA:132,0
+DA:133,0
+DA:134,0
+DA:136,0
+DA:137,0
+DA:139,0
+DA:140,0
+DA:141,0
+DA:142,0
+DA:144,0
+DA:146,0
+DA:147,0
+BRDA:67,9,0,0
+BRDA:72,646,1,0
+BRDA:76,45,0,0
+BRDA:78,55,0,0
+BRDA:78,55,1,0
+BRDA:82,85,0,0
+BRDA:82,85,1,0
+BRDA:86,114,0,0
+BRDA:86,114,1,0
+BRDA:76,45,1,0
+BRDA:96,166,0,0
+BRDA:96,166,1,0
+BRDA:100,192,0,0
+BRDA:100,192,1,0
+BRDA:106,220,0,0
+BRDA:106,227,0,0
+BRDA:106,220,1,0
+BRDA:106,325,0,0
+BRDA:106,333,0,0
+BRDA:106,227,2,0
+BRDA:106,325,1,0
+BRDA:106,333,1,0
+BRDA:106,227,8,0
+BRDA:106,227,9,0
+BRDA:106,342,1,0
+BRDA:106,342,3,0
+BRDA:106,299,1,0
+BRDA:106,299,3,0
+BRDA:106,227,11,0
+BRDA:106,227,13,0
+BRDA:106,227,10,0
+BRDA:106,227,15,0
+BRDA:106,227,6,0
+BRDA:106,342,2,0
+BRDA:106,227,5,0
+BRDA:106,227,1,0
+BRDA:106,299,2,0
+BRDA:106,227,3,0
+BRDA:106,227,4,0
+BRDA:106,227,7,0
+BRDA:106,227,12,0
+BRDA:106,227,14,0
+BRDA:106,299,0,0
+BRDA:106,342,0,0
+BRDA:67,9,1,0
+BRDA:72,646,0,0
+BRDA:139,661,0,0
+BRDA:139,661,1,0
+FN:149,System.Void IBlang.Lexer::LexOperator(IBlang.TokenType)
+FNDA:0,System.Void IBlang.Lexer::LexOperator(IBlang.TokenType)
+DA:150,0
+DA:151,0
+DA:152,0
+DA:154,0
+DA:155,0
+DA:156,0
+DA:157,0
+DA:158,0
+DA:159,0
+DA:160,0
+DA:161,0
+DA:162,0
+DA:163,0
+DA:164,0
+DA:165,0
+DA:166,0
+DA:167,0
+DA:168,0
+DA:169,0
+DA:170,0
+DA:171,0
+DA:172,0
+DA:173,0
+DA:174,0
+DA:175,0
+DA:176,0
+DA:177,0
+DA:178,0
+DA:179,0
+DA:180,0
+DA:181,0
+DA:182,0
+DA:183,0
+DA:184,0
+DA:185,0
+DA:186,0
+DA:187,0
+DA:188,0
+DA:189,0
+DA:190,0
+DA:191,0
+DA:192,0
+DA:193,0
+DA:194,0
+DA:195,0
+DA:196,0
+DA:197,0
+DA:198,0
+DA:199,0
+DA:200,0
+DA:201,0
+DA:202,0
+DA:203,0
+DA:204,0
+DA:205,0
+DA:206,0
+DA:207,0
+DA:208,0
+DA:209,0
+DA:210,0
+DA:211,0
+DA:212,0
+DA:213,0
+DA:214,0
+DA:215,0
+DA:216,0
+DA:217,0
+DA:218,0
+DA:219,0
+DA:220,0
+DA:221,0
+DA:222,0
+DA:223,0
+DA:224,0
+DA:225,0
+DA:227,0
+DA:228,0
+DA:229,0
+DA:230,0
+DA:233,0
+DA:236,0
+DA:237,0
+BRDA:154,22,0,0
+BRDA:154,22,1,0
+BRDA:154,34,0,0
+BRDA:154,34,1,0
+BRDA:159,61,0,0
+BRDA:159,61,1,0
+BRDA:159,73,0,0
+BRDA:159,73,1,0
+BRDA:164,100,0,0
+BRDA:164,100,1,0
+BRDA:164,114,0,0
+BRDA:164,114,1,0
+BRDA:169,141,0,0
+BRDA:169,141,1,0
+BRDA:169,155,0,0
+BRDA:169,155,1,0
+BRDA:174,182,0,0
+BRDA:174,182,1,0
+BRDA:174,196,0,0
+BRDA:174,196,1,0
+BRDA:179,223,0,0
+BRDA:179,223,1,0
+BRDA:179,237,0,0
+BRDA:179,237,1,0
+BRDA:184,264,0,0
+BRDA:184,264,1,0
+BRDA:184,278,0,0
+BRDA:184,278,1,0
+BRDA:189,305,0,0
+BRDA:189,305,1,0
+BRDA:189,319,0,0
+BRDA:189,319,1,0
+BRDA:194,346,0,0
+BRDA:194,346,1,0
+BRDA:194,360,0,0
+BRDA:194,360,1,0
+BRDA:199,387,0,0
+BRDA:199,387,1,0
+BRDA:199,401,0,0
+BRDA:199,401,1,0
+BRDA:204,428,0,0
+BRDA:204,428,1,0
+BRDA:204,442,0,0
+BRDA:204,442,1,0
+BRDA:209,469,0,0
+BRDA:209,469,1,0
+BRDA:209,483,0,0
+BRDA:209,483,1,0
+BRDA:214,510,0,0
+BRDA:214,510,1,0
+BRDA:214,524,0,0
+BRDA:214,524,1,0
+BRDA:219,548,0,0
+BRDA:219,548,1,0
+BRDA:219,562,0,0
+BRDA:221,575,0,0
+BRDA:227,642,1,0
+BRDA:221,575,1,0
+BRDA:227,619,0,0
+BRDA:227,619,1,0
+BRDA:219,562,1,0
+BRDA:227,642,0,0
+FN:238,System.Void IBlang.Lexer::LexBracket(IBlang.TokenType)
+FNDA:0,System.Void IBlang.Lexer::LexBracket(IBlang.TokenType)
+DA:239,0
+DA:240,0
+DA:242,0
+DA:243,0
+FN:245,System.Void IBlang.Lexer::LexString()
+FNDA:0,System.Void IBlang.Lexer::LexString()
+DA:246,0
+DA:247,0
+DA:250,0
+DA:251,0
+DA:254,0
+DA:255,0
+DA:256,0
+DA:257,0
+DA:258,0
+DA:260,0
+DA:261,0
+BRDA:258,65,1,0
+BRDA:258,50,0,0
+BRDA:258,50,1,0
+BRDA:258,65,0,0
+FN:263,System.Void IBlang.Lexer::LexIdentifier()
+FNDA:0,System.Void IBlang.Lexer::LexIdentifier()
+DA:264,0
+DA:265,0
+DA:269,0
+DA:270,0
+DA:271,0
+DA:272,0
+DA:273,0
+DA:275,0
+DA:277,0
+DA:278,0
+DA:279,0
+DA:280,0
+DA:284,0
+DA:285,0
+DA:286,0
+DA:288,0
+DA:289,0
+DA:291,0
+DA:292,0
+DA:293,0
+DA:294,0
+BRDA:273,55,1,0
+BRDA:273,38,0,0
+BRDA:273,38,1,0
+BRDA:273,55,0,0
+BRDA:277,91,0,0
+BRDA:279,104,0,0
+BRDA:284,120,0,0
+BRDA:284,120,1,0
+BRDA:279,104,1,0
+BRDA:277,91,1,0
+FN:296,System.Char IBlang.Lexer::Peek()
+FNDA:0,System.Char IBlang.Lexer::Peek()
+DA:297,0
+DA:298,0
+DA:299,0
+FN:301,System.Void IBlang.Lexer::LexNumber()
+FNDA:0,System.Void IBlang.Lexer::LexNumber()
+DA:302,0
+DA:303,0
+DA:308,0
+DA:309,0
+DA:310,0
+DA:311,0
+DA:312,0
+DA:314,0
+DA:315,0
+BRDA:312,41,1,0
+BRDA:312,41,0,0
+FN:317,System.Char IBlang.Lexer::Next(System.ConsoleColor,System.ConsoleColor,System.String)
+FNDA:0,System.Char IBlang.Lexer::Next(System.ConsoleColor,System.ConsoleColor,System.String)
+DA:318,0
+DA:319,0
+DA:321,0
+DA:322,0
+DA:323,0
+DA:324,0
+DA:325,0
+DA:326,0
+DA:328,0
+DA:329,0
+DA:330,0
+DA:331,0
+DA:333,0
+DA:334,0
+BRDA:321,22,0,0
+BRDA:323,31,0,0
+BRDA:323,31,1,0
+BRDA:321,22,1,0
+FN:336,System.Void IBlang.Lexer::Print(System.Char,System.ConsoleColor,System.ConsoleColor)
+FNDA:0,System.Void IBlang.Lexer::Print(System.Char,System.ConsoleColor,System.ConsoleColor)
+DA:337,0
+DA:338,0
+DA:339,0
+DA:340,0
+DA:341,0
+DA:342,0
+FN:344,System.Void IBlang.Lexer::Print(System.String,System.ConsoleColor,System.ConsoleColor)
+FNDA:0,System.Void IBlang.Lexer::Print(System.String,System.ConsoleColor,System.ConsoleColor)
+DA:345,0
+DA:346,0
+DA:347,0
+DA:348,0
+DA:349,0
+DA:350,0
+FN:352,System.Void IBlang.Lexer::Dispose()
+FNDA:0,System.Void IBlang.Lexer::Dispose()
+DA:353,0
+DA:354,0
+DA:356,0
+DA:357,0
+FN:35,System.Void IBlang.Lexer::.ctor(System.IO.StreamReader,System.Boolean)
+FNDA:0,System.Void IBlang.Lexer::.ctor(System.IO.StreamReader,System.Boolean)
+DA:36,0
+DA:39,0
+DA:40,0
+DA:41,0
+DA:42,0
+DA:43,0
+FN:44,System.Void IBlang.Lexer::.ctor(System.String,System.Boolean)
+FNDA:0,System.Void IBlang.Lexer::.ctor(System.String,System.Boolean)
+DA:45,0
+DA:46,0
+DA:47,0
+DA:48,0
+DA:49,0
+DA:50,0
+DA:51,0
+DA:53,0
+DA:54,0
+DA:55,0
+FN:9,System.Void IBlang.Lexer::.cctor()
+FNDA:0,System.Void IBlang.Lexer::.cctor()
+DA:10,0
+DA:11,0
+DA:12,0
+DA:13,0
+DA:14,0
+DA:15,0
+DA:16,0
+DA:18,0
+DA:19,0
+DA:20,0
+DA:21,0
+DA:22,0
+DA:23,0
+DA:58,0
+DA:59,0
+DA:60,0
+DA:61,0
+DA:62,0
+DA:63,0
+BRDA:59,167,1,0
+BRDA:59,167,0,0
+LF:261
+LH:0
+BRF:132
+BRH:0
+FNF:14
+FNH:0
+end_of_record
+SF:a:\IBlang\IBlang\Nodes.cs
+FN:2,IBlang.FunctionDecleration[] IBlang.FileAst::get_Functions()
+FNDA:0,IBlang.FunctionDecleration[] IBlang.FileAst::get_Functions()
+DA:3,0
+FN:5,System.Void IBlang.FileAst::Accept(IBlang.INodeVisitor)
+FNDA:0,System.Void IBlang.FileAst::Accept(IBlang.INodeVisitor)
+DA:6,0
+DA:7,0
+DA:8,0
+FN:3,System.Void IBlang.FileAst::.ctor(IBlang.FunctionDecleration[])
+FNDA:0,System.Void IBlang.FileAst::.ctor(IBlang.FunctionDecleration[])
+DA:4,0
+DA:5,0
+DA:9,0
+FN:10,IBlang.Parameter[] IBlang.FunctionDecleration::get_Parameters()
+FNDA:0,IBlang.Parameter[] IBlang.FunctionDecleration::get_Parameters()
+DA:11,0
+FN:13,System.Void IBlang.FunctionDecleration::Accept(IBlang.INodeVisitor)
+FNDA:0,System.Void IBlang.FunctionDecleration::Accept(IBlang.INodeVisitor)
+DA:14,0
+DA:15,0
+DA:16,0
+FN:11,System.Void IBlang.FunctionDecleration::.ctor(IBlang.Parameter[],IBlang.Statement[])
+FNDA:0,System.Void IBlang.FunctionDecleration::.ctor(IBlang.Parameter[],IBlang.Statement[])
+DA:12,0
+DA:13,0
+DA:17,0
+FN:21,System.Void IBlang.Parameter::Accept(IBlang.INodeVisitor)
+FNDA:0,System.Void IBlang.Parameter::Accept(IBlang.INodeVisitor)
+DA:22,0
+DA:23,0
+DA:24,0
+FN:18,System.Void IBlang.Parameter::.ctor()
+FNDA:0,System.Void IBlang.Parameter::.ctor()
+DA:19,0
+DA:20,0
+DA:21,0
+DA:25,0
+FN:29,System.Void IBlang.Statement::Accept(IBlang.INodeVisitor)
+FNDA:0,System.Void IBlang.Statement::Accept(IBlang.INodeVisitor)
+DA:30,0
+DA:31,0
+DA:32,0
+FN:26,System.Void IBlang.Statement::.ctor()
+FNDA:0,System.Void IBlang.Statement::.ctor()
+DA:27,0
+DA:28,0
+DA:29,0
+DA:33,0
+LF:28
+LH:0
+BRF:0
+BRH:0
+FNF:10
+FNH:0
+end_of_record
+SF:a:\IBlang\IBlang\Parser.cs
+FN:6,IBlang.Token IBlang.Parser::get_Peek()
+FNDA:0,IBlang.Token IBlang.Parser::get_Peek()
+DA:7,0
+FN:7,IBlang.TokenType IBlang.Parser::get_PeekType()
+FNDA:0,IBlang.TokenType IBlang.Parser::get_PeekType()
+DA:8,0
+FN:15,IBlang.FileAst IBlang.Parser::Parse()
+FNDA:0,IBlang.FileAst IBlang.Parser::Parse()
+DA:16,0
+DA:17,0
+DA:18,0
+DA:19,0
+DA:20,0
+DA:22,0
+DA:23,0
+DA:25,0
+DA:27,0
+DA:28,0
+BRDA:20,22,0,0
+BRDA:20,22,1,0
+BRDA:20,32,1,0
+BRDA:20,32,0,0
+FN:30,IBlang.FunctionDecleration IBlang.Parser::ParseFunctionDecleration()
+FNDA:0,IBlang.FunctionDecleration IBlang.Parser::ParseFunctionDecleration()
+DA:31,0
+DA:32,0
+DA:34,0
+DA:35,0
+DA:36,0
+DA:38,0
+DA:39,0
+DA:40,0
+DA:42,0
+DA:43,0
+FN:45,IBlang.Parameter[] IBlang.Parser::ParseParameterDefinitions()
+FNDA:0,IBlang.Parameter[] IBlang.Parser::ParseParameterDefinitions()
+DA:46,0
+DA:47,0
+DA:49,0
+DA:51,0
+DA:52,0
+DA:53,0
+DA:55,0
+DA:57,0
+DA:60,0
+DA:62,0
+DA:64,0
+DA:65,0
+DA:66,0
+DA:69,0
+DA:70,0
+DA:74,0
+DA:76,0
+DA:77,0
+BRDA:51,91,1,0
+BRDA:53,29,0,0
+BRDA:53,29,1,0
+BRDA:64,67,0,0
+BRDA:64,67,1,0
+BRDA:51,91,0,0
+FN:79,System.Void IBlang.Parser::ParseStatements()
+FNDA:0,System.Void IBlang.Parser::ParseStatements()
+DA:80,0
+DA:81,0
+DA:82,0
+DA:83,0
+DA:84,0
+DA:85,0
+DA:88,0
+DA:89,0
+DA:92,0
+DA:93,0
+DA:95,0
+DA:97,0
+DA:98,0
+DA:100,0
+DA:101,0
+BRDA:81,137,1,0
+BRDA:83,15,0,0
+BRDA:85,43,1,0
+BRDA:85,43,0,0
+BRDA:83,15,1,0
+BRDA:81,137,0,0
+FN:103,System.Void IBlang.Parser::ParseUnaryExpression()
+FNDA:0,System.Void IBlang.Parser::ParseUnaryExpression()
+DA:104,0
+DA:105,0
+DA:108,0
+DA:110,0
+DA:111,0
+DA:112,0
+DA:113,0
+DA:114,0
+DA:115,0
+DA:116,0
+DA:117,0
+DA:119,0
+DA:122,0
+DA:123,0
+DA:125,0
+DA:127,0
+BRDA:105,11,0,0
+BRDA:105,11,1,0
+BRDA:110,38,0,0
+BRDA:110,38,1,0
+BRDA:115,69,0,0
+BRDA:105,17,1,0
+BRDA:105,17,0,0
+BRDA:115,69,1,0
+FN:129,System.Void IBlang.Parser::ParseIfStatement()
+FNDA:0,System.Void IBlang.Parser::ParseIfStatement()
+DA:130,0
+DA:131,0
+DA:132,0
+DA:133,0
+DA:134,0
+DA:135,0
+FN:137,System.String IBlang.Parser::EatToken(IBlang.TokenType)
+FNDA:0,System.String IBlang.Parser::EatToken(IBlang.TokenType)
+DA:138,0
+DA:139,0
+DA:141,0
+DA:142,0
+DA:143,0
+DA:146,0
+DA:148,0
+DA:149,0
+BRDA:141,22,0,0
+BRDA:141,22,1,0
+FN:151,System.Boolean IBlang.Parser::TryEatToken(IBlang.TokenType)
+FNDA:0,System.Boolean IBlang.Parser::TryEatToken(IBlang.TokenType)
+DA:152,0
+DA:153,0
+DA:155,0
+DA:156,0
+DA:157,0
+DA:160,0
+DA:161,0
+DA:162,0
+DA:164,0
+BRDA:155,22,0,0
+BRDA:155,22,1,0
+FN:9,System.Void IBlang.Parser::.ctor(IBlang.Token[])
+FNDA:0,System.Void IBlang.Parser::.ctor(IBlang.Token[])
+DA:10,0
+DA:11,0
+DA:12,0
+DA:13,0
+LF:98
+LH:0
+BRF:28
+BRH:0
+FNF:11
+FNH:0
+end_of_record
+SF:a:\IBlang\IBlang\Program.cs
+FN:5,System.Void IBlang.Program::Main()
+FNDA:0,System.Void IBlang.Program::Main()
+DA:6,0
+DA:8,0
+DA:9,0
+LF:3
+LH:0
+BRF:0
+BRH:0
+FNF:1
+FNH:0
+end_of_record
+SF:a:\IBlang\IBlang\Token.cs
+FN:2,System.String IBlang.Token::get_Value()
+FNDA:0,System.String IBlang.Token::get_Value()
+DA:3,0
+LF:1
+LH:0
+BRF:0
+BRH:0
+FNF:1
+FNH:0
+end_of_record
