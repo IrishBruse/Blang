@@ -279,7 +279,10 @@ public class Lexer : IDisposable
             if (debug)
             {
                 // Recolor keywords
-                // Console.CursorLeft -= identifier.Length;
+                if (!Console.IsOutputRedirected)
+                {
+                    Console.CursorLeft -= identifier.Length;
+                }
 
                 ConsoleColor color = ControlflowKeywords.TryGetValue(identifier, out _) ? ControlflowColor : KeywordColor;
                 Print(identifier, foreground: color);

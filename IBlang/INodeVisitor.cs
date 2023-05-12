@@ -2,8 +2,12 @@ namespace IBlang;
 
 public interface INodeVisitor
 {
-    public void Visit(FileAst file);
-    public void Visit(FunctionDecleration functionDecleration);
-    public void Visit(Parameter parameter);
-    public void Visit(Statement statement);
+    void Visit(FileAst file);
+    void Visit(FunctionDecleration functionDecleration);
+    void Visit(Parameter parameter);
+    void Visit(Statement statement);
+    void Visit(IfStatement ifStatement);
+    void Visit(BinaryExpression binaryExpression);
+    void Visit(StringLiteral stringLiteral);
+    void Visit(FunctionCall functionCall);
 }

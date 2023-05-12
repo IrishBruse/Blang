@@ -8,10 +8,13 @@ public class Compiler
         Lexer lexer = new(sourceFile, true);
         Token[] tokens = lexer.Lex();
         Parser parser = new(tokens);
+        DebugNodeVisitor debugVisitor = new();
+
+        FileAst ast = null;
 
         try
         {
-            parser.Parse();
+            ast = parser.Parse();
         }
         catch (ParseException e)
         {
@@ -20,6 +23,8 @@ public class Compiler
             Console.Error.WriteLine(e.StackTrace);
             Console.ResetColor();
         }
+
+        debugVisitor.Visit(ast);
     }
 
     public static (string expected, string output) Test(string testFile)

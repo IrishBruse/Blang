@@ -29,17 +29,15 @@ public class Parser
 
     private FunctionDecleration ParseFunctionDecleration()
     {
-        List<Statement> statements = new();
-
         EatToken(TokenType.Keyword_Func);
-        EatToken(TokenType.Identifier);
+        string name = EatToken(TokenType.Identifier);
         Parameter[] parameters = ParseParameterDefinitions();
 
         EatToken(TokenType.OpenScope);
-        ParseStatements();
+        Statement[] statements = ParseStatements();
         EatToken(TokenType.CloseScope);
 
-        return new FunctionDecleration(parameters, statements.ToArray());
+        return new FunctionDecleration(name, parameters, statements);
     }
 
     private Parameter[] ParseParameterDefinitions()
@@ -50,14 +48,7 @@ public class Parser
 
         while (PeekType != TokenType.CloseParenthesis)
         {
-            switch (PeekType)
-            {
-                case TokenType.StringLiteral: break;
-
-                default: break;
-            }
-
-            parameters.Add(new Parameter());
+            parameters.Add(new Parameter(EatIdentifier(), EatIdentifier()));
 
             EatToken(TokenType.Identifier); // Name
 
@@ -76,8 +67,10 @@ public class Parser
         return parameters.ToArray();
     }
 
-    private void ParseStatements()
+    private Statement[] ParseStatements()
     {
+        List<Statement> statements = new();
+
         while (PeekType != TokenType.CloseScope)
         {
             if (PeekType == TokenType.Identifier)
@@ -85,11 +78,11 @@ public class Parser
                 switch (Peek.Value)
                 {
                     case "if":
-                    ParseIfStatement();
+                    statements.Add(ParseIfStatement());
                     break;
 
                     default:
-                    ParseUnaryExpression();
+                    statements.Add(ParseUnaryExpression());
                     break;
                 }
             }
@@ -98,40 +91,77 @@ public class Parser
                 throw new ParseException($"Unexpected token {Peek}");
             }
         }
+
+        return statements.ToArray();
     }
 
-    private void ParseUnaryExpression()
+    private Statement ParseUnaryExpression()
     {
         switch (PeekType)
         {
             case TokenType.Identifier:
-            EatToken(TokenType.Identifier);
+            string name = EatToken(TokenType.Identifier);
+
+            List<INode> args = new();
 
             if (TryEatToken(TokenType.OpenParenthesis))
             {
-                ParseUnaryExpression();
+                args.Add(ParseUnaryExpression());
                 EatToken(TokenType.CloseParenthesis);
             }
             else if (TryEatToken(TokenType.Assignment))
             {
                 throw new NotImplementedException();
             }
-            break;
+            return new FunctionCall(name, args.ToArray());
 
             case TokenType.StringLiteral:
-            EatToken(TokenType.StringLiteral);
-            break;
+            string value = EatToken(TokenType.StringLiteral);
+            return new StringLiteral(value);
 
             default: throw new ParseException($"Unexpected token {Peek}");
         }
     }
 
-    private void ParseIfStatement()
+    private IfStatement ParseIfStatement()
     {
         EatToken(TokenType.Keyword_If);
+        ParseBinaryExpression();
         EatToken(TokenType.OpenScope);
-        ParseStatements();
+        Statement[] statements = ParseStatements();
         EatToken(TokenType.CloseScope);
+
+        return new IfStatement(Array.Empty<Parameter>(), statements);
+    }
+
+    private BinaryExpression ParseBinaryExpression()
+    {
+        INode left = ParseUnaryExpression();
+
+        switch (PeekType)
+        {
+            case TokenType.Addition:
+            EatToken(TokenType.Addition);
+            break;
+
+            case TokenType.Subtraction:
+            EatToken(TokenType.Subtraction);
+            break;
+
+            case TokenType.Multiplication:
+            EatToken(TokenType.Multiplication);
+            break;
+
+            case TokenType.Division:
+            EatToken(TokenType.Division);
+            break;
+
+            default: throw new ParseException($"Unexpected token {Peek}");
+        }
+
+        INode right = ParseUnaryExpression();
+
+        return new BinaryExpression(left, right);
     }
 
     private string EatToken(TokenType type)
@@ -161,5 +191,19 @@ public class Parser
             currentTokenIndex++;
             return true;
         }
+    }
+
+    private string EatIdentifier()
+    {
+        Token p = Peek;
+
+        if (p.Type != TokenType.Identifier)
+        {
+            throw new ParseException($"Expected identifier but got {Peek.Type} with value '{Peek.Value}'");
+        }
+
+        currentTokenIndex++;
+
+        return p.Value;
     }
 }
