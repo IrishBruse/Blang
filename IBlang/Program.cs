@@ -4,7 +4,7 @@ public class Program
 {
     public static void Main()
     {
-        // Compiler.Run("../Tests/syntax.ib");
-        Compiler.Run("../Tests/helloworld.ib");
+        Compiler.Run("../Tests/Syntax.ib");
+        // Compiler.Run("../Tests/HelloWorld.ib");
     }
 }

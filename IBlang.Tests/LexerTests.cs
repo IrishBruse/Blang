@@ -8,9 +8,7 @@ public class LexerTests
     [Test]
     public void LexEmpty()
     {
-        using Lexer lexer = new(string.Empty);
-
-        Token[] tokens = lexer.Lex();
+        Token[] tokens = Lex(string.Empty);
 
         Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Eof));
     }
@@ -18,7 +16,7 @@ public class LexerTests
     [Test]
     public void LexDebug()
     {
-        using Lexer lexer = new("func", true);
+        Lexer lexer = new("func", true);
 
         Token[] tokens = lexer.Lex();
 
@@ -28,9 +26,7 @@ public class LexerTests
     [Test]
     public void LexComment()
     {
-        using Lexer lexer = new("// Comment");
-
-        Token[] tokens = lexer.Lex();
+        Token[] tokens = Lex("// Comment");
 
         Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Eof));
     }
@@ -38,9 +34,7 @@ public class LexerTests
     [Test]
     public void LexIdentifier()
     {
-        using Lexer lexer = new("word");
-
-        Token[] tokens = lexer.Lex();
+        Token[] tokens = Lex("word");
 
         Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Identifier));
     }
@@ -48,9 +42,7 @@ public class LexerTests
     [Test]
     public void LexNumber()
     {
-        using Lexer lexer = new("420");
-
-        Token[] tokens = lexer.Lex();
+        Token[] tokens = Lex("420");
 
         Assert.That(tokens[0].Type, Is.EqualTo(TokenType.IntegerLiteral));
     }
@@ -58,9 +50,7 @@ public class LexerTests
     [Test]
     public void LexString()
     {
-        using Lexer lexer = new("\"Hello World\"");
-
-        Token[] tokens = lexer.Lex();
+        Token[] tokens = Lex("\"Hello World\"");
 
         Assert.That(tokens[0].Type, Is.EqualTo(TokenType.StringLiteral));
     }
@@ -68,9 +58,7 @@ public class LexerTests
     [Test]
     public void LexWhitespace()
     {
-        using Lexer lexer = new(" \t\r\n");
-
-        Token[] tokens = lexer.Lex();
+        Token[] tokens = Lex(" \t\r\n");
 
         Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Eof));
     }
@@ -78,9 +66,7 @@ public class LexerTests
     [Test]
     public void LexGarbage()
     {
-        using Lexer lexer = new("😫");
-
-        Token[] tokens = lexer.Lex();
+        Token[] tokens = Lex("😫");
 
         Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Garbage));
     }
@@ -88,9 +74,7 @@ public class LexerTests
     [Test]
     public void LexBrackets()
     {
-        using Lexer lexer = new("[] {} ()");
-
-        Token[] tokens = lexer.Lex();
+        Token[] tokens = Lex("[] {} ()");
 
         TokenType[] expected = new TokenType[] {
             TokenType.OpenBracket, TokenType.CloseBracket,
@@ -117,12 +101,15 @@ public class LexerTests
     [TestCase(">>", TokenType.BitwiseShiftRight)]
     public void LexBinaryOperators(string op, TokenType tokenType)
     {
-        using Lexer lexer = new(op);
-
-        Token[] tokens = lexer.Lex();
+        Token[] tokens = Lex(op);
 
         CollectionAssert.AreEqual(new TokenType[] { tokenType, TokenType.Eof }, TestUtility.GetTokenTypes(tokens));
     }
 
+    private static Token[] Lex(string source)
+    {
+        using Lexer lexer = new(source);
 
+        return lexer.Lex();
+    }
 }

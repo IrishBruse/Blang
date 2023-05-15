@@ -21,6 +21,8 @@ public class Lexer : IDisposable
         { "else", TokenType.Keyword_Else },
         { "return", TokenType.Keyword_Return },
     };
+
+
     private const ConsoleColor CommentColor = ConsoleColor.DarkGray;
     private const ConsoleColor WhitespaceColor = ConsoleColor.DarkGray;
     private const ConsoleColor KeywordColor = ConsoleColor.Blue;
@@ -35,6 +37,8 @@ public class Lexer : IDisposable
     private StreamReader sourceFile;
     private List<Token> tokens = new();
     private readonly bool debug;
+    private List<int> lineEndings = new() { 0 };
+    private int index;
 
     public Lexer(StreamReader sourceFile, bool debug = false)
     {
@@ -66,7 +70,7 @@ public class Lexer : IDisposable
     {
         if (debug)
         {
-            Console.WriteLine("-------- Lexed code --------");
+            Console.WriteLine("-------- Lexer --------");
         }
 
         while (!sourceFile.EndOfStream)
@@ -81,6 +85,8 @@ public class Lexer : IDisposable
                 }
                 else if (c == '\n')
                 {
+                    Print("|" + index + "|");
+                    lineEndings.Add(index);
                     Next(display: "\\n\n", foreground: WhitespaceColor);
                 }
                 else if (c == '\t')
@@ -129,7 +135,7 @@ public class Lexer : IDisposable
                     case '=': LexOperator(TokenType.Assignment); break;
 
                     default:
-                    tokens.Add(new(c.ToString(), TokenType.Garbage, 0, 0));
+                    AddToken(new(c.ToString(), TokenType.Garbage, 0, 0));
                     Next(background: ErrorColor);
                     break;
                 }
@@ -138,10 +144,10 @@ public class Lexer : IDisposable
 
         if (debug)
         {
-            Console.WriteLine("-------- End Lexed code --------");
+            Console.WriteLine("-------- Lexer --------");
         }
 
-        tokens.Add(new(string.Empty, TokenType.Eof, 0, 0));
+        AddToken(new(string.Empty, TokenType.Eof, 0, 0));
 
         return tokens.ToArray();
     }
@@ -224,22 +230,22 @@ public class Lexer : IDisposable
                 Print('/', foreground: CommentColor);
             }
 
-            while (c != '\n' && !sourceFile.EndOfStream)
+            while (Peek() != '\n' && !sourceFile.EndOfStream)
             {
-                c = Next(CommentColor);
+                Next(CommentColor);
             }
 
             // We didnt actually process any opertor just comments
             return;
         }
 
-        tokens.Add(new(c.ToString(), type, 0, 0));
+        AddToken(new(c.ToString(), type, 0, 0));
     }
     private void LexBracket(TokenType type)
     {
         char c = Next(BracketsColor);
 
-        tokens.Add(new(c.ToString(), type, 0, 0));
+        AddToken(new(c.ToString(), type, 0, 0));
     }
 
     private void LexString()
@@ -257,7 +263,7 @@ public class Lexer : IDisposable
         }
         while (c != '"' && c != '\n');
 
-        tokens.Add(new(literal.ToString(), TokenType.StringLiteral, 0, 0));
+        AddToken(new(literal.ToString(), TokenType.StringLiteral, 0, 0));
     }
 
     private void LexIdentifier()
@@ -288,11 +294,11 @@ public class Lexer : IDisposable
                 Print(identifier, foreground: color);
             }
 
-            tokens.Add(new(identifierBuilder.ToString(), value, 0, 0));
+            AddToken(new(identifierBuilder.ToString(), value, 0, 0));
         }
         else
         {
-            tokens.Add(new(identifierBuilder.ToString(), TokenType.Identifier, 0, 0));
+            AddToken(new(identifierBuilder.ToString(), TokenType.Identifier, 0, 0));
         }
     }
 
@@ -314,12 +320,20 @@ public class Lexer : IDisposable
         }
         while (char.IsDigit(Peek()));
 
-        tokens.Add(new(number.ToString(), TokenType.IntegerLiteral, 0, 0));
+        AddToken(new(number.ToString(), TokenType.IntegerLiteral, 0, index));
+    }
+
+
+    private void AddToken(Token token)
+    {
+        tokens.Add(token);
     }
 
     private char Next(ConsoleColor foreground = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black, string display = null)
     {
         char c = (char)sourceFile.Read();
+
+        index++;
 
         if (debug)
         {

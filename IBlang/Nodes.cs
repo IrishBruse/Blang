@@ -8,7 +8,7 @@ public record FileAst(FunctionDecleration[] Functions) : INode
     }
 }
 
-public record FunctionDecleration(string Name, Parameter[] Parameters, Statement[] Statements) : INode
+public record FunctionDecleration(string Name, ParameterDefinition[] Parameters, INode[] Statements) : INode
 {
     public void Accept(INodeVisitor visitor)
     {
@@ -24,15 +24,7 @@ public record BinaryExpression(INode Left, INode Right) : INode
     }
 }
 
-public record IfStatement(Parameter[] Parameters, Statement[] Statements) : Statement
-{
-    public new void Accept(INodeVisitor visitor)
-    {
-        visitor.Visit(this);
-    }
-}
-
-public record Parameter(string Type, string Identifier) : INode
+public record IfStatement(INode[] Parameters, INode[] Statements) : INode
 {
     public void Accept(INodeVisitor visitor)
     {
@@ -40,7 +32,7 @@ public record Parameter(string Type, string Identifier) : INode
     }
 }
 
-public record Statement() : INode
+public record ParameterDefinition(string Type, string Identifier) : INode
 {
     public void Accept(INodeVisitor visitor)
     {
@@ -56,9 +48,17 @@ public record StringLiteral(string Value) : INode
     }
 }
 
-public record FunctionCall(string Name, INode[] Args) : Statement
+public record IntegerLiteral(string Value) : INode
 {
-    public new void Accept(INodeVisitor visitor)
+    public void Accept(INodeVisitor visitor)
+    {
+        visitor.Visit(this);
+    }
+}
+
+public record FunctionCall(string Name, INode[] Args) : INode
+{
+    public void Accept(INodeVisitor visitor)
     {
         visitor.Visit(this);
     }

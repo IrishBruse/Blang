@@ -1,4 +1,5 @@
 namespace IBlang;
+
 public class Parser
 {
     private readonly Token[] tokens;
@@ -14,41 +15,54 @@ public class Parser
 
     public FileAst Parse()
     {
-        List<FunctionDecleration> functions = new();
-        while (true)
+        try
         {
-            switch (PeekType)
+            List<FunctionDecleration> functions = new();
+            while (true)
             {
-                case TokenType.Keyword_Func: functions.Add(ParseFunctionDecleration()); break;
-                case TokenType.Eof: return new FileAst(functions.ToArray());
+                switch (PeekType)
+                {
+                    case TokenType.Keyword_Func:
+                    functions.Add(ParseFunctionDecleration());
+                    break;
 
-                default: throw new ParseException($"Unexpected token {Peek}");
+                    case TokenType.Eof:
+                    return new FileAst(functions.ToArray());
+
+                    default: throw new ParseException($"Unexpected token {Peek}");
+                }
             }
         }
+        catch (ParseException e)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Error.WriteLine(e.Message);
+            Console.Error.WriteLine(e.StackTrace);
+            Console.ResetColor();
+        }
+        return new FileAst(Array.Empty<FunctionDecleration>());
     }
 
     private FunctionDecleration ParseFunctionDecleration()
     {
         EatToken(TokenType.Keyword_Func);
-        string name = EatToken(TokenType.Identifier);
-        Parameter[] parameters = ParseParameterDefinitions();
 
-        EatToken(TokenType.OpenScope);
-        Statement[] statements = ParseStatements();
-        EatToken(TokenType.CloseScope);
+        string name = EatToken(TokenType.Identifier);
+        ParameterDefinition[] parameters = ParseParameterDefinitions();
+        INode[] statements = ParseBlock();
 
         return new FunctionDecleration(name, parameters, statements);
     }
 
-    private Parameter[] ParseParameterDefinitions()
+    private ParameterDefinition[] ParseParameterDefinitions()
     {
         EatToken(TokenType.OpenParenthesis);
 
-        List<Parameter> parameters = new();
+        List<ParameterDefinition> parameters = new();
 
         while (PeekType != TokenType.CloseParenthesis)
         {
-            parameters.Add(new Parameter(EatIdentifier(), EatIdentifier()));
+            parameters.Add(new ParameterDefinition(EatIdentifier(), EatIdentifier()));
 
             EatToken(TokenType.Identifier); // Name
 
@@ -67,60 +81,59 @@ public class Parser
         return parameters.ToArray();
     }
 
-    private Statement[] ParseStatements()
+    private INode[] ParseBlock()
     {
-        List<Statement> statements = new();
+        EatToken(TokenType.OpenScope);
+
+        List<INode> statements = new();
 
         while (PeekType != TokenType.CloseScope)
         {
-            if (PeekType == TokenType.Identifier)
-            {
-                switch (Peek.Value)
-                {
-                    case "if":
-                    statements.Add(ParseIfStatement());
-                    break;
-
-                    default:
-                    statements.Add(ParseUnaryExpression());
-                    break;
-                }
-            }
-            else
-            {
-                throw new ParseException($"Unexpected token {Peek}");
-            }
+            statements.Add(ParseStatement());
         }
+
+        EatToken(TokenType.CloseScope);
 
         return statements.ToArray();
     }
 
-    private Statement ParseUnaryExpression()
+    private INode ParseStatement()
     {
-        switch (PeekType)
+        return PeekType switch
         {
-            case TokenType.Identifier:
-            string name = EatToken(TokenType.Identifier);
+            TokenType.Identifier => ParseFunctionCall(),
+            TokenType.Keyword_If => ParseIfStatement(),
+            _ => throw new ParseException($"Unexpected token {Peek}"),
+        };
+    }
 
-            List<INode> args = new();
+    private INode ParseFunctionCall()
+    {
+        string identifier = EatToken(TokenType.Identifier);
 
-            if (TryEatToken(TokenType.OpenParenthesis))
-            {
-                args.Add(ParseUnaryExpression());
-                EatToken(TokenType.CloseParenthesis);
-            }
-            else if (TryEatToken(TokenType.Assignment))
-            {
-                throw new NotImplementedException();
-            }
-            return new FunctionCall(name, args.ToArray());
+        List<INode> args = new();
 
-            case TokenType.StringLiteral:
-            string value = EatToken(TokenType.StringLiteral);
-            return new StringLiteral(value);
-
-            default: throw new ParseException($"Unexpected token {Peek}");
+        if (TryEatToken(TokenType.OpenParenthesis))
+        {
+            args.Add(ParseParameter());
+            EatToken(TokenType.CloseParenthesis);
         }
+        else if (TryEatToken(TokenType.Assignment))
+        {
+            throw new NotImplementedException();
+        }
+        return new FunctionCall(identifier, args.ToArray());
+    }
+
+    private INode ParseParameter()
+    {
+        return PeekType switch
+        {
+            TokenType.Identifier => ParseFunctionCall(),
+            TokenType.StringLiteral => new StringLiteral(EatToken(TokenType.StringLiteral)),
+            TokenType.IntegerLiteral => new IntegerLiteral(EatToken(TokenType.IntegerLiteral)),
+            _ => throw new ParseException($"Unexpected token {Peek}"),
+        };
     }
 
     private IfStatement ParseIfStatement()
@@ -128,15 +141,15 @@ public class Parser
         EatToken(TokenType.Keyword_If);
         ParseBinaryExpression();
         EatToken(TokenType.OpenScope);
-        Statement[] statements = ParseStatements();
+        INode[] statements = ParseBlock();
         EatToken(TokenType.CloseScope);
 
-        return new IfStatement(Array.Empty<Parameter>(), statements);
+        return new IfStatement(Array.Empty<ParameterDefinition>(), statements);
     }
 
     private BinaryExpression ParseBinaryExpression()
     {
-        INode left = ParseUnaryExpression();
+        INode left = ParseStatement();
 
         switch (PeekType)
         {
@@ -159,7 +172,7 @@ public class Parser
             default: throw new ParseException($"Unexpected token {Peek}");
         }
 
-        INode right = ParseUnaryExpression();
+        INode right = ParseStatement();
 
         return new BinaryExpression(left, right);
     }
@@ -199,7 +212,7 @@ public class Parser
 
         if (p.Type != TokenType.Identifier)
         {
-            throw new ParseException($"Expected identifier but got {Peek.Type} with value '{Peek.Value}'");
+            throw new ParseException($"Expected identifier but got {p.Type} with value '{p.Value}'");
         }
 
         currentTokenIndex++;

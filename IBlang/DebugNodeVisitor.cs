@@ -6,17 +6,19 @@ public class DebugNodeVisitor : INodeVisitor
 
     public void Visit(FileAst file)
     {
+        Console.WriteLine("-------- Debug Ast --------");
         foreach (FunctionDecleration function in file.Functions)
         {
             function.Accept(this);
         }
+        Console.WriteLine("-------- Debug Ast --------");
     }
 
     public void Visit(FunctionDecleration functionDecleration)
     {
-        Console.Write($"{functionDecleration.Name}(");
+        Console.Write($"func {functionDecleration.Name}(");
 
-        foreach (Parameter parameter in functionDecleration.Parameters)
+        foreach (ParameterDefinition parameter in functionDecleration.Parameters)
         {
             parameter.Accept(this);
         }
@@ -25,42 +27,49 @@ public class DebugNodeVisitor : INodeVisitor
 
         Console.WriteLine("{");
 
-        foreach (Statement statement in functionDecleration.Statements)
+        foreach (INode statement in functionDecleration.Statements)
         {
-            Console.WriteLine("    ");
+            Console.Write("    ");
             statement.Accept(this);
         }
 
         Console.WriteLine("}");
     }
 
-    public void Visit(Parameter parameter)
+    public void Visit(ParameterDefinition parameter)
     {
+        Console.WriteLine("Parameter");
         Console.Write($"{parameter.Type} {parameter.Identifier}");
-    }
-
-    public void Visit(Statement statement)
-    {
-        Console.WriteLine("Statement");
     }
 
     public void Visit(IfStatement ifStatement)
     {
-
+        Console.Write("IfStatement");
     }
 
     public void Visit(BinaryExpression binaryExpression)
     {
-
+        throw new NotImplementedException();
     }
 
     public void Visit(StringLiteral stringLiteral)
     {
+        Console.Write(stringLiteral.Value);
+    }
 
+    public void Visit(IntegerLiteral integerLiteral)
+    {
+        throw new NotImplementedException();
     }
 
     public void Visit(FunctionCall functionCall)
     {
-        Console.WriteLine($"{functionCall.Name}({string.Join(", ", functionCall.Args.Select(x => x.ToString()))})");
+        Console.Write($"{functionCall.Name}(");
+        foreach (INode item in functionCall.Args)
+        {
+            item.Accept(this);
+        }
+        Console.WriteLine(")");
     }
+
 }

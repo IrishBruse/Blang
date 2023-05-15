@@ -7,23 +7,14 @@ public class Compiler
 
         Lexer lexer = new(sourceFile, true);
         Token[] tokens = lexer.Lex();
+
+        Console.WriteLine();
+
         Parser parser = new(tokens);
+
+        FileAst ast = parser.Parse();
+
         DebugNodeVisitor debugVisitor = new();
-
-        FileAst ast = null;
-
-        try
-        {
-            ast = parser.Parse();
-        }
-        catch (ParseException e)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Error.WriteLine(e.Message);
-            Console.Error.WriteLine(e.StackTrace);
-            Console.ResetColor();
-        }
-
         debugVisitor.Visit(ast);
     }
 
