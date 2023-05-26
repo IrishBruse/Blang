@@ -9,6 +9,8 @@ public enum TokenType
 
     Identifier,
 
+    Comment,
+
     IntegerLiteral,
     FloatLiteral,
     StringLiteral,

@@ -10,4 +10,5 @@ public interface INodeVisitor
     void Visit(StringLiteral stringLiteral);
     void Visit(FunctionCall functionCall);
     void Visit(IntegerLiteral integerLiteral);
+    void Visit(Garbage garbage);
 }

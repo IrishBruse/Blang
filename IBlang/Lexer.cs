@@ -7,6 +7,8 @@ using System.Text;
 
 public class Lexer : IDisposable
 {
+    public SortedList<int, int> LineEndings { get; private set; } = new();
+
     public static readonly Dictionary<string, TokenType> Keywords = new()
     {
         { "func", TokenType.Keyword_Func },
@@ -22,7 +24,6 @@ public class Lexer : IDisposable
         { "return", TokenType.Keyword_Return },
     };
 
-
     private const ConsoleColor CommentColor = ConsoleColor.DarkGray;
     private const ConsoleColor WhitespaceColor = ConsoleColor.DarkGray;
     private const ConsoleColor KeywordColor = ConsoleColor.Blue;
@@ -35,18 +36,23 @@ public class Lexer : IDisposable
     private const ConsoleColor ControlflowColor = ConsoleColor.Magenta;
 
     private StreamReader sourceFile;
+    private readonly string file;
     private List<Token> tokens = new();
     private readonly bool debug;
-    private List<int> lineEndings = new() { 0 };
-    private int index;
+    private readonly bool whitespace;
+    private int endIndex;
+    private int startIndex;
+    private int line;
 
-    public Lexer(StreamReader sourceFile, bool debug = false)
+    public Lexer(StreamReader sourceFile, string file, bool debug = false, bool whitespace = false)
     {
         this.sourceFile = sourceFile;
+        this.file = file;
         this.debug = debug;
+        this.whitespace = whitespace;
     }
 
-    public Lexer(string sourceText, bool debug = false)
+    public Lexer(string sourceText, bool debug = false, bool whitespace = false)
     {
         MemoryStream stream = new();
         StreamWriter writer = new(stream);
@@ -55,7 +61,9 @@ public class Lexer : IDisposable
         stream.Position = 0;
 
         sourceFile = new StreamReader(stream);
+
         this.debug = debug;
+        this.whitespace = whitespace;
     }
 
     static Lexer()
@@ -77,27 +85,11 @@ public class Lexer : IDisposable
         {
             char c = Peek();
 
+            startIndex = endIndex;
+
             if (char.IsWhiteSpace(c))
             {
-                if (c == '\r')
-                {
-                    Next(display: string.Empty);
-                }
-                else if (c == '\n')
-                {
-                    Print("|" + index + "|");
-                    lineEndings.Add(index);
-                    Next(display: "\\n\n", foreground: WhitespaceColor);
-                }
-                else if (c == '\t')
-                {
-                    Next(display: "»   ", foreground: WhitespaceColor);
-                }
-                else
-                {
-                    // Eat all other whitespace
-                    Next(display: "·", foreground: WhitespaceColor);
-                }
+                LexWhitespace(c);
             }
             else if (char.IsLetter(c))
             {
@@ -135,7 +127,7 @@ public class Lexer : IDisposable
                     case '=': LexOperator(TokenType.Assignment); break;
 
                     default:
-                    AddToken(new(c.ToString(), TokenType.Garbage, 0, 0));
+                    AddToken(c.ToString(), TokenType.Garbage);
                     Next(background: ErrorColor);
                     break;
                 }
@@ -147,9 +139,32 @@ public class Lexer : IDisposable
             Console.WriteLine("-------- Lexer --------");
         }
 
-        AddToken(new(string.Empty, TokenType.Eof, 0, 0));
+        AddToken(string.Empty, TokenType.Eof);
 
         return tokens.ToArray();
+    }
+
+    private void LexWhitespace(char c)
+    {
+        if (c == '\r')
+        {
+            Next(display: whitespace ? "\\r" : "", foreground: WhitespaceColor);
+        }
+        else if (c == '\n')
+        {
+            line++;
+            LineEndings.Add(endIndex, line);
+            Next(display: whitespace ? "\\n\n" : "\n", foreground: WhitespaceColor);
+        }
+        else if (c == '\t')
+        {
+            Next(display: whitespace ? "»   " : "    ", foreground: WhitespaceColor);
+        }
+        else
+        {
+            // Eat all other whitespace
+            Next(display: whitespace ? "·" : " ", foreground: WhitespaceColor);
+        }
     }
 
     private void LexOperator(TokenType type)
@@ -157,95 +172,105 @@ public class Lexer : IDisposable
         char c = Next(OperatorColor);
         char p = Peek();
 
+        string op = c.ToString();
+
         if (c == '<' && p == '=')
         {
             type = TokenType.LessThanEqual;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '>' && p == '=')
         {
             type = TokenType.GreaterThanEqual;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '=' && p == '=')
         {
             type = TokenType.EqualEqual;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '!' && p == '=')
         {
             type = TokenType.NotEqual;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '&' && p == '&')
         {
             type = TokenType.LogicalAnd;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '|' && p == '|')
         {
             type = TokenType.LogicalOr;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '+' && p == '=')
         {
             type = TokenType.AdditionAssignment;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '-' && p == '=')
         {
             type = TokenType.SubtractionAssignment;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '*' && p == '=')
         {
             type = TokenType.MultiplicationAssignment;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '/' && p == '=')
         {
             type = TokenType.DivisionAssignment;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '%' && p == '=')
         {
             type = TokenType.ModuloAssignment;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '<' && p == '<')
         {
             type = TokenType.BitwiseShiftLeft;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '>' && p == '>')
         {
             type = TokenType.BitwiseShiftRight;
-            Next(OperatorColor);
+            op += Next(OperatorColor);
         }
         else if (c == '/' && p == '/') // Single line comment
         {
-            if (debug)
-            {
-                Console.CursorLeft--;
-                Print('/', foreground: CommentColor);
-            }
-
-            while (Peek() != '\n' && !sourceFile.EndOfStream)
-            {
-                Next(CommentColor);
-            }
-
-            // We didnt actually process any opertor just comments
+            LexSingleLineComment();
             return;
         }
 
-        AddToken(new(c.ToString(), type, 0, 0));
+        AddToken(op, type);
     }
+
+    private void LexSingleLineComment()
+    {
+        if (debug)
+        {
+            Console.CursorLeft--;
+            Print('/', foreground: CommentColor);
+        }
+
+        StringBuilder comment = new("/");
+
+        while (!IsLineBreak(Peek()) && !sourceFile.EndOfStream)
+        {
+            comment.Append(Next(CommentColor));
+        }
+
+        AddToken(comment.ToString(), TokenType.Comment);
+    }
+
     private void LexBracket(TokenType type)
     {
         char c = Next(BracketsColor);
 
-        AddToken(new(c.ToString(), type, 0, 0));
+        AddToken(c.ToString(), type);
     }
 
     private void LexString()
@@ -261,9 +286,9 @@ public class Lexer : IDisposable
             c = Next(StringColor);
             literal.Append(c);
         }
-        while (c != '"' && c != '\n');
+        while (c != '"' && !IsLineBreak(c));
 
-        AddToken(new(literal.ToString(), TokenType.StringLiteral, 0, 0));
+        AddToken(literal.ToString(), TokenType.StringLiteral);
     }
 
     private void LexIdentifier()
@@ -276,7 +301,7 @@ public class Lexer : IDisposable
             c = Next(IdentifierColor);
             identifierBuilder.Append(c);
         }
-        while (char.IsLetterOrDigit(Peek()) && c != '\n');
+        while (char.IsLetterOrDigit(Peek()) && !IsLineBreak(c));
 
         string identifier = identifierBuilder.ToString().ToLower(CultureInfo.CurrentCulture);
 
@@ -294,11 +319,11 @@ public class Lexer : IDisposable
                 Print(identifier, foreground: color);
             }
 
-            AddToken(new(identifierBuilder.ToString(), value, 0, 0));
+            AddToken(identifierBuilder.ToString(), value);
         }
         else
         {
-            AddToken(new(identifierBuilder.ToString(), TokenType.Identifier, 0, 0));
+            AddToken(identifierBuilder.ToString(), TokenType.Identifier);
         }
     }
 
@@ -320,20 +345,24 @@ public class Lexer : IDisposable
         }
         while (char.IsDigit(Peek()));
 
-        AddToken(new(number.ToString(), TokenType.IntegerLiteral, 0, index));
+        AddToken(number.ToString(), TokenType.IntegerLiteral);
     }
 
-
-    private void AddToken(Token token)
+    private bool IsLineBreak(char c)
     {
-        tokens.Add(token);
+        return c == '\n' || c == '\r';
+    }
+
+    private void AddToken(string value, TokenType type)
+    {
+        tokens.Add(new(value, type, new(file, startIndex, endIndex)));
     }
 
     private char Next(ConsoleColor foreground = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black, string display = null)
     {
         char c = (char)sourceFile.Read();
 
-        index++;
+        endIndex++;
 
         if (debug)
         {

@@ -2,8 +2,6 @@ namespace IBlang;
 
 public class DebugNodeVisitor : INodeVisitor
 {
-    private int indentation;
-
     public void Visit(FileAst file)
     {
         Console.WriteLine("-------- Debug Ast --------");
@@ -72,4 +70,8 @@ public class DebugNodeVisitor : INodeVisitor
         Console.WriteLine(")");
     }
 
+    public void Visit(Garbage garbage)
+    {
+        Console.Write($"<Garbage>");
+    }
 }

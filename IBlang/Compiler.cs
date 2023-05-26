@@ -1,26 +1,29 @@
 namespace IBlang;
 public class Compiler
 {
-    public static void Run(string source)
+    public static void Run(string file)
     {
-        StreamReader sourceFile = File.OpenText(source);
+        file = Path.GetFullPath(file);
+        StreamReader sourceFile = File.OpenText(file);
 
-        Lexer lexer = new(sourceFile, true);
+        Lexer lexer = new(sourceFile, file, true, true);
         Token[] tokens = lexer.Lex();
 
-        Console.WriteLine();
-
-        Parser parser = new(tokens);
-
+        Parser parser = new(tokens, lexer.LineEndings);
         FileAst ast = parser.Parse();
 
-        DebugNodeVisitor debugVisitor = new();
-        debugVisitor.Visit(ast);
+        parser.ListErrors();
+
+        if (!parser.HasErrors)
+        {
+            DebugNodeVisitor debugVisitor = new();
+            debugVisitor.Visit(ast);
+        }
     }
 
-    public static (string expected, string output) Test(string testFile)
+    public static (string expected, string output) Test(string file)
     {
-        string source = File.ReadAllText(testFile);
+        string source = File.ReadAllText(file);
 
         string[] lines = source.Split("\n");
 
@@ -36,7 +39,7 @@ public class Compiler
             }
         }
 
-        Run(testFile);
+        Run(file);
 
         return (expected, expected);
     }

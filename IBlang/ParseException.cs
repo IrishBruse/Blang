@@ -4,7 +4,7 @@ using System;
 using System.Runtime.Serialization;
 
 [Serializable]
-internal class ParseException : Exception
+public sealed class ParseException : Exception
 {
     public ParseException()
     {
@@ -18,7 +18,7 @@ internal class ParseException : Exception
     {
     }
 
-    protected ParseException(SerializationInfo info, StreamingContext context) : base(info, context)
+    private ParseException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

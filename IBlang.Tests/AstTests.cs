@@ -16,7 +16,7 @@ public class AstTests
     {
         Lexer lexer = new(file);
         Token[] tokens = lexer.Lex();
-        Parser parser = new(tokens);
+        Parser parser = new(tokens, lexer.LineEndings);
 
         return parser.Parse();
     }

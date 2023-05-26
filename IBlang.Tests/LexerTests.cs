@@ -28,7 +28,7 @@ public class LexerTests
     {
         Token[] tokens = Lex("// Comment");
 
-        Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Eof));
+        Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Comment));
     }
 
     [Test]

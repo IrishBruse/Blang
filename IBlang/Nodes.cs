@@ -48,7 +48,7 @@ public record StringLiteral(string Value) : INode
     }
 }
 
-public record IntegerLiteral(string Value) : INode
+public record IntegerLiteral(int Value) : INode
 {
     public void Accept(INodeVisitor visitor)
     {
@@ -57,6 +57,14 @@ public record IntegerLiteral(string Value) : INode
 }
 
 public record FunctionCall(string Name, INode[] Args) : INode
+{
+    public void Accept(INodeVisitor visitor)
+    {
+        visitor.Visit(this);
+    }
+}
+
+public record Garbage(string Error) : INode
 {
     public void Accept(INodeVisitor visitor)
     {
