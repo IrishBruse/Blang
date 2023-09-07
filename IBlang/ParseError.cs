@@ -1,5 +1,7 @@
 namespace IBlang;
 
-public record ParseError(string Message, Span Span)
+using System.Diagnostics;
+
+public record ParseError(string Message, Span Span, StackTrace StackTrace)
 {
 }

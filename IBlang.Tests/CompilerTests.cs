@@ -1,17 +1,17 @@
 namespace IBlang.Tests;
 
+using Xunit;
+
 public class CompilerTests
 {
-    [SetUp]
-    public void Setup() { }
-
-    [TestCase("Empty")]
+    [Theory]
+    [InlineData("Empty")]
     public void Test1(string file)
     {
         file = $"Tests/{file}.ib";
 
         (string output, string expected) = Compiler.Test(file);
 
-        Assert.That(output, Is.EqualTo(expected));
+        Assert.Equal(output, expected);
     }
 }

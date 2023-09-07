@@ -1,6 +1,6 @@
 // test
 
-func main()
+func Main()
 {
 	if foo() == 4
 	{

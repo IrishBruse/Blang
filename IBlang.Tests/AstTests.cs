@@ -1,21 +1,20 @@
 namespace IBlang.Tests;
 
+using Xunit;
+
 public class AstTests
 {
-    [SetUp]
-    public void Setup() { }
-
-    [Test]
+    [Fact]
     public void ParseEmpty()
     {
         FileAst ast = Parse(string.Empty);
-        Assert.That(ast.Functions, Is.Empty);
+        Assert.Empty(ast.Functions);
     }
 
     private FileAst Parse(string file)
     {
         Lexer lexer = new(file);
-        Token[] tokens = lexer.Lex();
+        Tokens tokens = new(lexer.Lex());
         Parser parser = new(tokens, lexer.LineEndings);
 
         return parser.Parse();

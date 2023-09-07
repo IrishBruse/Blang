@@ -1,41 +1,41 @@
 namespace IBlang;
 
+using System.Diagnostics;
+
 public class Parser
 {
-    public bool HasErrors => errors.Count > 0;
+    public bool HasErrors => tokens.Errors.Count > 0;
 
-    private readonly Token[] tokens;
+    private readonly Tokens tokens;
     private readonly SortedList<int, int> lineEndings;
-    private int currentTokenIndex;
-    private List<ParseError> errors = new();
 
-    private Token Peek => tokens[currentTokenIndex];
-    private TokenType PeekType => Peek.Type;
+    private readonly bool debug;
 
-    public Parser(Token[] tokens, SortedList<int, int> lineEndings)
+    public Parser(Tokens tokens, SortedList<int, int> lineEndings, bool debug = false)
     {
+        this.debug = debug;
         this.tokens = tokens;
         this.lineEndings = lineEndings;
     }
 
     public FileAst Parse()
     {
-        Console.WriteLine();
+        List<FunctionDecleration> functions = new();
 
         try
         {
-            List<FunctionDecleration> functions = new();
             while (true)
             {
-                switch (PeekType)
+                switch (tokens.Peek.Type)
                 {
-                    case TokenType.Keyword_Func:
-                    functions.Add(ParseFunctionDecleration());
-                    break;
-
-                    case TokenType.Comment: EatToken(TokenType.Comment); break;
+                    case TokenType.Keyword_Func: functions.Add(ParseFunctionDecleration()); break;
+                    case TokenType.Comment: tokens.EatToken(TokenType.Comment); break;
                     case TokenType.Eof: return new FileAst(functions.ToArray());
-                    default: Error(Peek); break;
+
+                    default:
+                    tokens.Errors.Add(new($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value}", tokens.Peek.Span, new StackTrace(true)));
+                    tokens.Eat();
+                    break;
                 }
             }
         }
@@ -46,36 +46,36 @@ public class Parser
             Console.Error.WriteLine(e.StackTrace);
             Console.ResetColor();
         }
-        return new FileAst(Array.Empty<FunctionDecleration>());
+        return new FileAst(functions.ToArray());
     }
 
     private FunctionDecleration ParseFunctionDecleration()
     {
-        EatToken(TokenType.Keyword_Func);
+        tokens.EatToken(TokenType.Keyword_Func);
 
-        string name = EatToken(TokenType.Identifier);
+        string name = tokens.EatToken(TokenType.Identifier);
 
         ParameterDefinition[] parameters = ParseParameterDefinitions();
-        INode[] statements = ParseBlock();
+        BlockBody statements = ParseBlock();
 
         return new FunctionDecleration(name, parameters, statements);
     }
 
     private ParameterDefinition[] ParseParameterDefinitions()
     {
-        EatToken(TokenType.OpenParenthesis);
+        tokens.EatToken(TokenType.OpenParenthesis);
 
         List<ParameterDefinition> parameters = new();
 
-        while (PeekType != TokenType.CloseParenthesis)
+        while (tokens.Peek.Type != TokenType.CloseParenthesis)
         {
-            string type = EatIdentifier();
-            string identifier = EatIdentifier();
+            string type = tokens.EatIdentifier();
+            string identifier = tokens.EatIdentifier();
             parameters.Add(new ParameterDefinition(type, identifier));
 
-            EatToken(TokenType.Identifier); // Name
+            tokens.EatToken(TokenType.Identifier); // Name
 
-            if (TryEatToken(TokenType.Comma))
+            if (tokens.TryEatToken(TokenType.Comma))
             {
                 continue;
             }
@@ -85,237 +85,169 @@ public class Parser
             }
         }
 
-        EatToken(TokenType.CloseParenthesis);
+        tokens.EatToken(TokenType.CloseParenthesis);
 
         return parameters.ToArray();
     }
 
-    private INode[] ParseBlock()
+    private BlockBody ParseBlock()
     {
-        EatToken(TokenType.OpenScope);
+        tokens.EatToken(TokenType.OpenScope);
 
-        List<INode> statements = new();
+        List<Statement> statements = new();
 
-        while (PeekType != TokenType.CloseScope)
+        while (tokens.Peek.Type != TokenType.CloseScope)
         {
             statements.Add(ParseStatement());
         }
 
-        EatToken(TokenType.CloseScope);
+        tokens.EatToken(TokenType.CloseScope);
 
-        return statements.ToArray();
+        return new(statements);
     }
 
-    private INode ParseStatement()
+    private Statement ParseStatement()
     {
-        return PeekType switch
+        return tokens.Peek.Type switch
         {
-            TokenType.Identifier => ParseFunctionCall(),
+            TokenType.Identifier => ParseIdentifierStatement(),
             TokenType.Keyword_If => ParseIfStatement(),
-            _ => Error(Peek),
+            TokenType.Keyword_Return => ParseReturn(),
+            _ => tokens.Error($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in ParseStatement"),
         };
     }
 
-    private INode ParseFunctionCall()
+    private Statement ParseIdentifierStatement()
     {
-        string identifier = EatToken(TokenType.Identifier);
+        string identifier = tokens.EatToken(TokenType.Identifier);
 
-        List<INode> args = new();
-
-        if (TryEatToken(TokenType.OpenParenthesis))
+        return tokens.Peek.Type switch
         {
-            while (!TryEatToken(TokenType.CloseParenthesis))
-            {
-                args.Add(ParseParameter());
-
-                if (TryEatToken(TokenType.Comma))
-                {
-                    continue;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-        else if (TryEatToken(TokenType.Assignment))
-        {
-            throw new NotImplementedException();
-        }
-        return new FunctionCall(identifier, args.ToArray());
+            TokenType.OpenParenthesis => ParseFunctionCall(identifier),
+            // TokenType.Assignment => throw new NotImplementedException("Implement assignment"),
+            _ => tokens.Error($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseIdentifierStatement)),
+        };
     }
 
-    private INode ParseParameter()
+    private ReturnStatement ParseReturn()
     {
-        return PeekType switch
+        tokens.EatKeyword(TokenType.Keyword_Return);
+
+        Expression expression = ParseExpression();
+        return new ReturnStatement(expression);
+    }
+
+    private FunctionCallExpression ParseFunctionCall(string identifier)
+    {
+        List<Expression> args = new();
+
+        tokens.EatToken(TokenType.OpenParenthesis);
+        while (!tokens.TryEatToken(TokenType.CloseParenthesis))
         {
-            TokenType.Identifier => ParseFunctionCall(),
+            args.Add(ParseExpression());
+            tokens.TryEatToken(TokenType.Comma);
+        }
+
+        return new FunctionCallExpression(identifier, args.ToArray());
+    }
+
+    private Expression ParseExpression()
+    {
+        return tokens.Peek.Type switch
+        {
+            TokenType.Identifier => ParseFunctionCall(tokens.EatToken(TokenType.Identifier)),
             TokenType.StringLiteral => ParseStringLiteral(),
             TokenType.IntegerLiteral => ParseIntegerLiteral(),
-            _ => Error($"{PeekType} is not a valid parameter type"),
+            _ => tokens.Error($"{tokens.Peek.Type} is not a valid parameter type in " + nameof(ParseExpression)),
         };
-    }
-
-    private INode ParseStringLiteral()
-    {
-        string token = EatToken(TokenType.StringLiteral);
-        return new StringLiteral(token);
-    }
-
-    private INode ParseIntegerLiteral()
-    {
-        int token = EatNumber(TokenType.IntegerLiteral);
-        return new IntegerLiteral(token);
     }
 
     /// <summary> if <BinaryExpression> { } </summary>
     private IfStatement ParseIfStatement()
     {
-        EatToken(TokenType.Keyword_If);
-        ParseBinaryExpression();
-        EatToken(TokenType.OpenScope);
-        INode[] statements = ParseBlock();
-        EatToken(TokenType.CloseScope);
+        tokens.EatToken(TokenType.Keyword_If);
+        BooleanExpression condition = ParseBooleanExpression();
+        BlockBody body = ParseBlock();
+        BlockBody? elseBody = null;
 
-        return new IfStatement(Array.Empty<ParameterDefinition>(), statements);
+        if (tokens.TryEatToken(TokenType.Keyword_Else))
+        {
+            elseBody = ParseBlock();
+        }
+
+        return new IfStatement(condition, body, elseBody);
     }
 
-    /// <summary> <Statement> (=,-,*,/) <Statement> </summary>
     private BinaryExpression ParseBinaryExpression()
     {
-        INode left = ParseStatement();
+        Expression left = ParseExpression();
 
-        switch (PeekType)
+        switch (tokens.Peek.Type)
         {
             case TokenType.Addition:
-            EatToken(TokenType.Addition);
+            tokens.EatToken(TokenType.Addition);
             break;
 
             case TokenType.Subtraction:
-            EatToken(TokenType.Subtraction);
+            tokens.EatToken(TokenType.Subtraction);
             break;
 
             case TokenType.Multiplication:
-            EatToken(TokenType.Multiplication);
+            tokens.EatToken(TokenType.Multiplication);
             break;
 
             case TokenType.Division:
-            EatToken(TokenType.Division);
+            tokens.EatToken(TokenType.Division);
+            break;
+
+            case TokenType.EqualEqual:
+            tokens.EatToken(TokenType.EqualEqual);
             break;
 
             default:
-            Error(Peek);
+            tokens.Errors.Add(new($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBinaryExpression), tokens.Peek.Span, new StackTrace(true)));
             break;
         }
 
-        INode right = ParseStatement();
+        Expression right = ParseExpression();
 
         return new BinaryExpression(left, right);
     }
 
-    private string EatToken(TokenType type)
+    private BooleanExpression ParseBooleanExpression()
     {
-        Token p = Peek;
+        Expression left = ParseExpression();
 
-        if (PeekType != type)
+        switch (tokens.Peek.Type)
         {
-            errors.Add(new($"Expected token of type {type} but got {Peek.Type} with value '{Peek.Value}'", Peek.Span));
-            return string.Empty;
+            case TokenType.EqualEqual:
+            tokens.EatToken(TokenType.EqualEqual);
+            break;
+
+            default:
+            tokens.Errors.Add(new($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBooleanExpression), tokens.Peek.Span, new StackTrace(true)));
+            break;
         }
 
-        currentTokenIndex++;
+        Expression right = ParseExpression();
 
-        return p.Value;
+        return new BooleanExpression(left, right);
     }
 
-    private int EatNumber(TokenType type)
+    private StringLiteral ParseStringLiteral()
     {
-        Token p = Peek;
-
-        if (PeekType != type)
-        {
-            errors.Add(new($"Expected {TokenType.IntegerLiteral} but got {Peek.Type} with value '{Peek.Value}'", Peek.Span));
-            return 0;
-        }
-
-        currentTokenIndex++;
-
-        if (int.TryParse(p.Value, out int result))
-        {
-            return result;
-        }
-
-        throw new ParseException($"Could not parse {p.Value} as an integer");
+        string token = tokens.EatToken(TokenType.StringLiteral);
+        return new StringLiteral(token);
     }
 
-    private bool TryEatToken(TokenType type)
+    private IntegerLiteral ParseIntegerLiteral()
     {
-        Token p = Peek;
-
-        if (p.Type != type)
-        {
-            return false;
-        }
-        else
-        {
-            currentTokenIndex++;
-            return true;
-        }
+        int token = tokens.EatNumber(TokenType.IntegerLiteral);
+        return new IntegerLiteral(token);
     }
 
-    private string EatIdentifier()
+    public void PrintErrors()
     {
-        Token p = Peek;
-
-        if (p.Type != TokenType.Identifier)
-        {
-            errors.Add(new($"Expected identifier but got {p.Type} with value '{p.Value}'", p.Span));
-            return string.Empty;
-        }
-
-        currentTokenIndex++;
-
-        return p.Value;
-    }
-
-    private INode Error(string error)
-    {
-        // TODO move onto next line of tokens
-
-        errors.Add(new(error, Peek.Span));
-        currentTokenIndex++;
-        return new Garbage(error);
-    }
-
-    private INode Error(Token peek)
-    {
-        string error = $"Unexpected token {peek.Type}: {peek.Value}";
-        return Error(error);
-    }
-
-    public void ListErrors()
-    {
-        foreach (ParseError error in errors)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-
-            int line = 0;
-            int column = 0;
-            int lastIndex = 0;
-            foreach ((int index, int newLine) in lineEndings)
-            {
-                if (error.Span.Start >= lastIndex && error.Span.Start <= index)
-                {
-                    line = newLine;
-                    column = error.Span.Start - lastIndex;
-                    break;
-                }
-
-                lastIndex = index;
-            }
-
-            Console.Error.WriteLine($"{error.Span.File}:{line}:{column} {error.Message}");
-            Console.ResetColor();
-        }
+        tokens.ListErrors();
     }
 }

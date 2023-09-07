@@ -1,77 +1,78 @@
 namespace IBlang.Tests;
 
+using Xunit;
+
 public class LexerTests
 {
-    [SetUp]
-    public void Setup() { }
-
-    [Test]
+    [Fact]
     public void LexEmpty()
     {
         Token[] tokens = Lex(string.Empty);
 
-        Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Eof));
+        Assert.Equal(TokenType.Eof, tokens[0].Type);
     }
 
-    [Test]
+    [Fact]
     public void LexDebug()
     {
         Lexer lexer = new("func", true);
 
-        Token[] tokens = lexer.Lex();
+        IEnumerator<Token> tokens = lexer.Lex();
 
-        Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Keyword_Func));
+        tokens.MoveNext();
+
+        Assert.Equal(TokenType.Keyword_Func, tokens.Current.Type);
     }
 
-    [Test]
+    [Fact]
     public void LexComment()
     {
         Token[] tokens = Lex("// Comment");
 
-        Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Comment));
+        Assert.Equal(TokenType.Comment, tokens[0].Type);
     }
 
-    [Test]
+    [Fact]
     public void LexIdentifier()
     {
         Token[] tokens = Lex("word");
 
-        Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Identifier));
+        Assert.Equal(TokenType.Identifier, tokens[0].Type);
     }
 
-    [Test]
+    [Fact]
     public void LexNumber()
     {
         Token[] tokens = Lex("420");
 
-        Assert.That(tokens[0].Type, Is.EqualTo(TokenType.IntegerLiteral));
+        Assert.Equal(TokenType.IntegerLiteral, tokens[0].Type);
     }
 
-    [Test]
+    [Fact]
     public void LexString()
     {
         Token[] tokens = Lex("\"Hello World\"");
 
-        Assert.That(tokens[0].Type, Is.EqualTo(TokenType.StringLiteral));
+        Assert.Equal(TokenType.StringLiteral, tokens[0].Type);
     }
 
-    [Test]
+    [Fact]
     public void LexWhitespace()
     {
         Token[] tokens = Lex(" \t\r\n");
 
-        Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Eof));
+        Assert.Equal(TokenType.Eof, tokens[0].Type);
     }
 
-    [Test]
+    [Fact]
     public void LexGarbage()
     {
         Token[] tokens = Lex("😫");
 
-        Assert.That(tokens[0].Type, Is.EqualTo(TokenType.Garbage));
+        Assert.Equal(TokenType.Garbage, tokens[0].Type);
     }
 
-    [Test]
+    [Fact]
     public void LexBrackets()
     {
         Token[] tokens = Lex("[] {} ()");
@@ -83,33 +84,34 @@ public class LexerTests
             TokenType.Eof
         };
 
-        CollectionAssert.AreEqual(expected, TestUtility.GetTokenTypes(tokens));
+        Assert.Equal(expected, TestUtility.GetTokenTypes(tokens));
     }
 
-    [TestCase("<=", TokenType.LessThanEqual)]
-    [TestCase(">=", TokenType.GreaterThanEqual)]
-    [TestCase("==", TokenType.EqualEqual)]
-    [TestCase("!=", TokenType.NotEqual)]
-    [TestCase("&&", TokenType.LogicalAnd)]
-    [TestCase("||", TokenType.LogicalOr)]
-    [TestCase("+=", TokenType.AdditionAssignment)]
-    [TestCase("-=", TokenType.SubtractionAssignment)]
-    [TestCase("*=", TokenType.MultiplicationAssignment)]
-    [TestCase("/=", TokenType.DivisionAssignment)]
-    [TestCase("%=", TokenType.ModuloAssignment)]
-    [TestCase("<<", TokenType.BitwiseShiftLeft)]
-    [TestCase(">>", TokenType.BitwiseShiftRight)]
+    [InlineData("<=", TokenType.LessThanEqual)]
+    [InlineData(">=", TokenType.GreaterThanEqual)]
+    [InlineData("==", TokenType.EqualEqual)]
+    [InlineData("!=", TokenType.NotEqual)]
+    [InlineData("&&", TokenType.LogicalAnd)]
+    [InlineData("||", TokenType.LogicalOr)]
+    [InlineData("+=", TokenType.AdditionAssignment)]
+    [InlineData("-=", TokenType.SubtractionAssignment)]
+    [InlineData("*=", TokenType.MultiplicationAssignment)]
+    [InlineData("/=", TokenType.DivisionAssignment)]
+    [InlineData("%=", TokenType.ModuloAssignment)]
+    [InlineData("<<", TokenType.BitwiseShiftLeft)]
+    [InlineData(">>", TokenType.BitwiseShiftRight)]
+    [Theory]
     public void LexBinaryOperators(string op, TokenType tokenType)
     {
         Token[] tokens = Lex(op);
 
-        CollectionAssert.AreEqual(new TokenType[] { tokenType, TokenType.Eof }, TestUtility.GetTokenTypes(tokens));
+        Assert.Equal(new TokenType[] { tokenType, TokenType.Eof }, TestUtility.GetTokenTypes(tokens));
     }
 
     private static Token[] Lex(string source)
     {
         using Lexer lexer = new(source);
-
-        return lexer.Lex();
+        IEnumerable<Token> tokens = (IEnumerable<Token>)lexer.Lex();
+        return tokens.ToArray();
     }
 }
