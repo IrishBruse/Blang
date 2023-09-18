@@ -5,6 +5,8 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
+using IBlang.Data;
+
 public class Lexer : IDisposable
 {
     public SortedList<int, int> LineEndings { get; private set; } = new();

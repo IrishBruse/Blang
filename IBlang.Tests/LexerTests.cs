@@ -1,5 +1,7 @@
 namespace IBlang.Tests;
 
+using IBlang.Data;
+
 using Xunit;
 
 public class LexerTests
@@ -15,11 +17,11 @@ public class LexerTests
     [Fact]
     public void LexDebug()
     {
-        Lexer lexer = new("func", true);
+        Lexer lexer = new("func");
 
         IEnumerator<Token> tokens = lexer.Lex();
 
-        tokens.MoveNext();
+        _ = tokens.MoveNext();
 
         Assert.Equal(TokenType.Keyword_Func, tokens.Current.Type);
     }
@@ -108,7 +110,7 @@ public class LexerTests
         Assert.Equal(new TokenType[] { tokenType, TokenType.Eof }, TestUtility.GetTokenTypes(tokens));
     }
 
-    private static Token[] Lex(string source)
+    static Token[] Lex(string source)
     {
         using Lexer lexer = new(source);
         IEnumerable<Token> tokens = (IEnumerable<Token>)lexer.Lex();

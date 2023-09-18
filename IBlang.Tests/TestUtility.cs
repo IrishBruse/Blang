@@ -1,5 +1,7 @@
 namespace IBlang.Tests;
 
+using IBlang.Data;
+
 public static class TestUtility
 {
     public static TokenType[] GetTokenTypes(Token[] tokens)

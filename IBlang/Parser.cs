@@ -2,50 +2,39 @@ namespace IBlang;
 
 using System.Diagnostics;
 
+using IBlang.Data;
+
 public class Parser
 {
-    public bool HasErrors => tokens.Errors.Count > 0;
-
     private readonly Tokens tokens;
-    private readonly SortedList<int, int> lineEndings;
 
     private readonly bool debug;
 
-    public Parser(Tokens tokens, SortedList<int, int> lineEndings, bool debug = false)
+    public Parser(Tokens tokens, bool debug = false)
     {
         this.debug = debug;
         this.tokens = tokens;
-        this.lineEndings = lineEndings;
     }
 
     public FileAst Parse()
     {
         List<FunctionDecleration> functions = new();
 
-        try
+        while (tokens.Peek.Type != TokenType.Eof)
         {
-            while (true)
+            switch (tokens.Peek.Type)
             {
-                switch (tokens.Peek.Type)
-                {
-                    case TokenType.Keyword_Func: functions.Add(ParseFunctionDecleration()); break;
-                    case TokenType.Comment: tokens.EatToken(TokenType.Comment); break;
-                    case TokenType.Eof: return new FileAst(functions.ToArray());
+                case TokenType.Keyword_Func: functions.Add(ParseFunctionDecleration()); break;
+                case TokenType.Comment: tokens.EatToken(TokenType.Comment); break;
+                case TokenType.Eof: return new FileAst(functions.ToArray());
 
-                    default:
-                    tokens.Errors.Add(new($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value}", tokens.Peek.Span, new StackTrace(true)));
-                    tokens.Eat();
-                    break;
-                }
+                default:
+                tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value}", tokens.Peek.Span, new StackTrace(true)));
+                tokens.Skip();
+                break;
             }
         }
-        catch (ParseException e)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Error.WriteLine(e.Message);
-            Console.Error.WriteLine(e.StackTrace);
-            Console.ResetColor();
-        }
+
         return new FileAst(functions.ToArray());
     }
 
@@ -124,9 +113,16 @@ public class Parser
         return tokens.Peek.Type switch
         {
             TokenType.OpenParenthesis => ParseFunctionCall(identifier),
-            // TokenType.Assignment => throw new NotImplementedException("Implement assignment"),
+            TokenType.Assignment => ParseAssignmentStatement(identifier),
             _ => tokens.Error($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseIdentifierStatement)),
         };
+    }
+
+    private AssignmentStatement ParseAssignmentStatement(string identifier)
+    {
+        tokens.EatKeyword(TokenType.Assignment);
+
+        return new(identifier, ParseExpression());
     }
 
     private ReturnStatement ParseReturn()
@@ -142,11 +138,13 @@ public class Parser
         List<Expression> args = new();
 
         tokens.EatToken(TokenType.OpenParenthesis);
-        while (!tokens.TryEatToken(TokenType.CloseParenthesis))
+        while (tokens.Peek.Type != TokenType.CloseParenthesis)
         {
             args.Add(ParseExpression());
             tokens.TryEatToken(TokenType.Comma);
         }
+
+        tokens.EatToken(TokenType.CloseParenthesis);
 
         return new FunctionCallExpression(identifier, args.ToArray());
     }
@@ -155,9 +153,21 @@ public class Parser
     {
         return tokens.Peek.Type switch
         {
-            TokenType.Identifier => ParseFunctionCall(tokens.EatToken(TokenType.Identifier)),
+            TokenType.Identifier => ParseIdentifierExpression(),
             TokenType.StringLiteral => ParseStringLiteral(),
             TokenType.IntegerLiteral => ParseIntegerLiteral(),
+            _ => tokens.Error($"{tokens.Peek.Type} is not a valid parameter type in " + nameof(ParseExpression)),
+        };
+    }
+
+    private Expression ParseIdentifierExpression()
+    {
+        string identifier = tokens.EatToken(TokenType.Identifier);
+
+        return tokens.Peek.Type switch
+        {
+            TokenType.OpenParenthesis => ParseFunctionCall(identifier),
+            TokenType.CloseParenthesis => new Identifier(identifier), // variable identifier
             _ => tokens.Error($"{tokens.Peek.Type} is not a valid parameter type in " + nameof(ParseExpression)),
         };
     }
@@ -205,7 +215,7 @@ public class Parser
             break;
 
             default:
-            tokens.Errors.Add(new($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBinaryExpression), tokens.Peek.Span, new StackTrace(true)));
+            tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBinaryExpression), tokens.Peek.Span, new StackTrace(true)));
             break;
         }
 
@@ -225,7 +235,7 @@ public class Parser
             break;
 
             default:
-            tokens.Errors.Add(new($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBooleanExpression), tokens.Peek.Span, new StackTrace(true)));
+            tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBooleanExpression), tokens.Peek.Span, new StackTrace(true)));
             break;
         }
 

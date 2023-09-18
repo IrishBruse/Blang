@@ -1,4 +1,4 @@
-﻿namespace IBlang;
+﻿namespace IBlang.Data;
 
 public enum TokenType
 {

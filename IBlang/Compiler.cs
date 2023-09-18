@@ -1,9 +1,13 @@
 namespace IBlang;
 
+using IBlang.Data;
+
 public class Compiler
 {
     public static void Run(string file)
     {
+        Console.WriteLine($"Compiling {Path.GetFullPath(file)}");
+
         file = Path.GetFullPath(file);
 
         StreamReader sourceFile = File.OpenText(file);
@@ -11,8 +15,8 @@ public class Compiler
         Console.WriteLine("-------- Lexer  --------");
 
         Lexer lexer = new(sourceFile, file, LexerDebug.Print);
-        Tokens tokens = new(lexer.Lex());
-        Parser parser = new(tokens, lexer.LineEndings, true);
+        Tokens tokens = new(lexer.Lex(), lexer.LineEndings, false);
+        Parser parser = new(tokens, true);
         FileAst ast = parser.Parse();
 
         Console.WriteLine("\n-------- Parser --------");

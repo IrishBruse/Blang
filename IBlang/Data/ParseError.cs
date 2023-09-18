@@ -1,4 +1,4 @@
-namespace IBlang;
+namespace IBlang.Data;
 
 using System.Diagnostics;
 

@@ -6,6 +6,14 @@ public class PrintAstDebugger : IVisitor
 {
     public int Indent { get; set; }
 
+    private void PrintIndent()
+    {
+        for (int i = 0; i < Indent; i++)
+        {
+            Console.Write("  ");
+        }
+    }
+
     public void Visit(FileAst node)
     {
         PrintIndent();
@@ -107,7 +115,7 @@ public class PrintAstDebugger : IVisitor
 
     private void Visit(Statement statement)
     {
-        statement.Switch(Visit, Visit, Visit, Visit);
+        statement.Switch(Visit, Visit, Visit, Visit, Visit);
     }
 
     public void Visit(Error<string> node)
@@ -118,11 +126,9 @@ public class PrintAstDebugger : IVisitor
         Console.ResetColor();
     }
 
-    private void PrintIndent()
+    public void Visit(AssignmentStatement node)
     {
-        for (int i = 0; i < Indent; i++)
-        {
-            Console.Write("  ");
-        }
+        PrintIndent();
+        Console.WriteLine($"AssignmentStatement: {node.Name} =");
     }
 }

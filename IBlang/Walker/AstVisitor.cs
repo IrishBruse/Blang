@@ -54,6 +54,24 @@ public class AstVisitor
         Indent--;
     }
 
+    public void Visit(ReturnStatement statement)
+    {
+        Indent++;
+        Visitor.Visit(statement);
+        Indent--;
+    }
+
+    public void Visit(AssignmentStatement statement)
+    {
+        Indent++;
+        Visitor.Visit(statement);
+        Indent--;
+
+        Indent++;
+        Visit(statement.Value);
+        Indent--;
+    }
+
     public void Visit(StringLiteral stringLiteral)
     {
         Visitor.Visit(stringLiteral);
@@ -77,6 +95,7 @@ public class AstVisitor
             ifStatement => Visit(ifStatement),
             functionCall => Visit(functionCall),
             returnStatement => Visit(returnStatement),
+            assignmentStatement => Visit(assignmentStatement),
             error => Visitor.Visit(error)
         );
     }

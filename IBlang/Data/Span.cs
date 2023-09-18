@@ -1,4 +1,4 @@
-namespace IBlang;
+namespace IBlang.Data;
 
 public record Span(string File, int Start, int End)
 {

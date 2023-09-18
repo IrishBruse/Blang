@@ -11,11 +11,11 @@ public class AstTests
         Assert.Empty(ast.Functions);
     }
 
-    private FileAst Parse(string file)
+    static FileAst Parse(string file)
     {
         Lexer lexer = new(file);
-        Tokens tokens = new(lexer.Lex());
-        Parser parser = new(tokens, lexer.LineEndings);
+        Tokens tokens = new(lexer.Lex(), lexer.LineEndings);
+        Parser parser = new(tokens);
 
         return parser.Parse();
     }

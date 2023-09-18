@@ -17,6 +17,7 @@ public record ParameterDefinition(string Type, string Identifier) : INode { }
 public record FunctionCallExpression(string Name, Expression[] Args) : INode { }
 public record BinaryExpression(Expression Left, Expression Right) : INode { }
 public record BooleanExpression(Expression Left, Expression Right) : INode { }
+public record AssignmentStatement(string Name, Expression Value) : INode { }
 
 public record BooleanLiteral(bool Value) : INode { }
 public record StringLiteral(string Value) : INode { }
@@ -66,7 +67,7 @@ public record BlockBody(Statement[] Statements) : INode, IEnumerator<Statement>,
 }
 
 [GenerateOneOf]
-public partial class Statement : OneOfBase<IfStatement, FunctionCallExpression, ReturnStatement, Error<string>>, INode { }
+public partial class Statement : OneOfBase<IfStatement, FunctionCallExpression, ReturnStatement, AssignmentStatement, Error<string>>, INode { }
 
 [GenerateOneOf]
 public partial class Expression : OneOfBase<StringLiteral, FloatLiteral, IntegerLiteral, Identifier, FunctionCallExpression, Error<string>>, INode { }
@@ -79,9 +80,12 @@ public interface IVisitor
     public void Visit(FunctionDecleration node);
     public void Visit(BinaryExpression node);
     public void Visit(BooleanExpression node);
-    public void Visit(IfStatement node);
     public void Visit(ParameterDefinition node);
     public void Visit(FunctionCallExpression node);
+
+    public void Visit(IfStatement node);
+    public void Visit(ReturnStatement node);
+    public void Visit(AssignmentStatement node);
 
     public void Visit(BooleanLiteral node);
     public void Visit(StringLiteral node);
