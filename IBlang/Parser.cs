@@ -6,9 +6,9 @@ using IBlang.Data;
 
 public class Parser
 {
-    private readonly Tokens tokens;
+    readonly Tokens tokens;
 
-    private readonly bool debug;
+    readonly bool debug;
 
     public Parser(Tokens tokens, bool debug = false)
     {
@@ -22,23 +22,28 @@ public class Parser
 
         while (tokens.Peek.Type != TokenType.Eof)
         {
-            switch (tokens.Peek.Type)
+            if (tokens.Peek.Type == TokenType.Keyword_Func)
             {
-                case TokenType.Keyword_Func: functions.Add(ParseFunctionDecleration()); break;
-                case TokenType.Comment: tokens.EatToken(TokenType.Comment); break;
-                case TokenType.Eof: return new FileAst(functions.ToArray());
-
-                default:
+                functions.Add(ParseFunctionDecleration());
+            }
+            else if (tokens.Peek.Type == TokenType.Comment)
+            {
+                tokens.EatToken(TokenType.Comment);
+            }
+            else if (tokens.Peek.Type == TokenType.Eof)
+            {
+                return new FileAst(functions.ToArray());
+            }
+            else
+            {
                 tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value}", tokens.Peek.Span, new StackTrace(true)));
                 tokens.Skip();
-                break;
             }
         }
-
         return new FileAst(functions.ToArray());
     }
 
-    private FunctionDecleration ParseFunctionDecleration()
+    FunctionDecleration ParseFunctionDecleration()
     {
         tokens.EatToken(TokenType.Keyword_Func);
 
@@ -50,7 +55,7 @@ public class Parser
         return new FunctionDecleration(name, parameters, statements);
     }
 
-    private ParameterDefinition[] ParseParameterDefinitions()
+    ParameterDefinition[] ParseParameterDefinitions()
     {
         tokens.EatToken(TokenType.OpenParenthesis);
 
@@ -79,7 +84,7 @@ public class Parser
         return parameters.ToArray();
     }
 
-    private BlockBody ParseBlock()
+    BlockBody ParseBlock()
     {
         tokens.EatToken(TokenType.OpenScope);
 
@@ -95,7 +100,7 @@ public class Parser
         return new(statements);
     }
 
-    private Statement ParseStatement()
+    Statement ParseStatement()
     {
         return tokens.Peek.Type switch
         {
@@ -106,7 +111,7 @@ public class Parser
         };
     }
 
-    private Statement ParseIdentifierStatement()
+    Statement ParseIdentifierStatement()
     {
         string identifier = tokens.EatToken(TokenType.Identifier);
 
@@ -118,14 +123,14 @@ public class Parser
         };
     }
 
-    private AssignmentStatement ParseAssignmentStatement(string identifier)
+    AssignmentStatement ParseAssignmentStatement(string identifier)
     {
         tokens.EatKeyword(TokenType.Assignment);
 
         return new(identifier, ParseExpression());
     }
 
-    private ReturnStatement ParseReturn()
+    ReturnStatement ParseReturn()
     {
         tokens.EatKeyword(TokenType.Keyword_Return);
 
@@ -133,7 +138,7 @@ public class Parser
         return new ReturnStatement(expression);
     }
 
-    private FunctionCallExpression ParseFunctionCall(string identifier)
+    FunctionCallExpression ParseFunctionCall(string identifier)
     {
         List<Expression> args = new();
 
@@ -149,7 +154,7 @@ public class Parser
         return new FunctionCallExpression(identifier, args.ToArray());
     }
 
-    private Expression ParseExpression()
+    Expression ParseExpression()
     {
         return tokens.Peek.Type switch
         {
@@ -160,7 +165,7 @@ public class Parser
         };
     }
 
-    private Expression ParseIdentifierExpression()
+    Expression ParseIdentifierExpression()
     {
         string identifier = tokens.EatToken(TokenType.Identifier);
 
@@ -173,7 +178,7 @@ public class Parser
     }
 
     /// <summary> if <BinaryExpression> { } </summary>
-    private IfStatement ParseIfStatement()
+    IfStatement ParseIfStatement()
     {
         tokens.EatToken(TokenType.Keyword_If);
         BooleanExpression condition = ParseBooleanExpression();
@@ -188,7 +193,7 @@ public class Parser
         return new IfStatement(condition, body, elseBody);
     }
 
-    private BinaryExpression ParseBinaryExpression()
+    BinaryExpression ParseBinaryExpression()
     {
         Expression left = ParseExpression();
 
@@ -213,7 +218,94 @@ public class Parser
             case TokenType.EqualEqual:
             tokens.EatToken(TokenType.EqualEqual);
             break;
-
+            case TokenType.Eol:
+            break;
+            case TokenType.Eof:
+            break;
+            case TokenType.Garbage:
+            break;
+            case TokenType.Identifier:
+            break;
+            case TokenType.Comment:
+            break;
+            case TokenType.IntegerLiteral:
+            break;
+            case TokenType.FloatLiteral:
+            break;
+            case TokenType.StringLiteral:
+            break;
+            case TokenType.CharLiteral:
+            break;
+            case TokenType.OpenParenthesis:
+            break;
+            case TokenType.CloseParenthesis:
+            break;
+            case TokenType.OpenBracket:
+            break;
+            case TokenType.CloseBracket:
+            break;
+            case TokenType.OpenScope:
+            break;
+            case TokenType.CloseScope:
+            break;
+            case TokenType.Dot:
+            break;
+            case TokenType.Comma:
+            break;
+            case TokenType.Modulo:
+            break;
+            case TokenType.LessThan:
+            break;
+            case TokenType.GreaterThan:
+            break;
+            case TokenType.LessThanEqual:
+            break;
+            case TokenType.GreaterThanEqual:
+            break;
+            case TokenType.NotEqual:
+            break;
+            case TokenType.LogicalAnd:
+            break;
+            case TokenType.LogicalOr:
+            break;
+            case TokenType.LogicalNot:
+            break;
+            case TokenType.Assignment:
+            break;
+            case TokenType.AdditionAssignment:
+            break;
+            case TokenType.SubtractionAssignment:
+            break;
+            case TokenType.MultiplicationAssignment:
+            break;
+            case TokenType.DivisionAssignment:
+            break;
+            case TokenType.ModuloAssignment:
+            break;
+            case TokenType.BitwiseComplement:
+            break;
+            case TokenType.BitwiseAnd:
+            break;
+            case TokenType.BitwiseOr:
+            break;
+            case TokenType.BitwiseXOr:
+            break;
+            case TokenType.BitwiseShiftLeft:
+            break;
+            case TokenType.BitwiseShiftRight:
+            break;
+            case TokenType.Keyword_Func:
+            break;
+            case TokenType.Keyword_True:
+            break;
+            case TokenType.Keyword_False:
+            break;
+            case TokenType.Keyword_If:
+            break;
+            case TokenType.Keyword_Else:
+            break;
+            case TokenType.Keyword_Return:
+            break;
             default:
             tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBinaryExpression), tokens.Peek.Span, new StackTrace(true)));
             break;
@@ -224,7 +316,7 @@ public class Parser
         return new BinaryExpression(left, right);
     }
 
-    private BooleanExpression ParseBooleanExpression()
+    BooleanExpression ParseBooleanExpression()
     {
         Expression left = ParseExpression();
 
@@ -233,7 +325,102 @@ public class Parser
             case TokenType.EqualEqual:
             tokens.EatToken(TokenType.EqualEqual);
             break;
-
+            case TokenType.Eol:
+            break;
+            case TokenType.Eof:
+            break;
+            case TokenType.Garbage:
+            break;
+            case TokenType.Identifier:
+            break;
+            case TokenType.Comment:
+            break;
+            case TokenType.IntegerLiteral:
+            break;
+            case TokenType.FloatLiteral:
+            break;
+            case TokenType.StringLiteral:
+            break;
+            case TokenType.CharLiteral:
+            break;
+            case TokenType.OpenParenthesis:
+            break;
+            case TokenType.CloseParenthesis:
+            break;
+            case TokenType.OpenBracket:
+            break;
+            case TokenType.CloseBracket:
+            break;
+            case TokenType.OpenScope:
+            break;
+            case TokenType.CloseScope:
+            break;
+            case TokenType.Dot:
+            break;
+            case TokenType.Comma:
+            break;
+            case TokenType.Addition:
+            break;
+            case TokenType.Subtraction:
+            break;
+            case TokenType.Multiplication:
+            break;
+            case TokenType.Division:
+            break;
+            case TokenType.Modulo:
+            break;
+            case TokenType.LessThan:
+            break;
+            case TokenType.GreaterThan:
+            break;
+            case TokenType.LessThanEqual:
+            break;
+            case TokenType.GreaterThanEqual:
+            break;
+            case TokenType.NotEqual:
+            break;
+            case TokenType.LogicalAnd:
+            break;
+            case TokenType.LogicalOr:
+            break;
+            case TokenType.LogicalNot:
+            break;
+            case TokenType.Assignment:
+            break;
+            case TokenType.AdditionAssignment:
+            break;
+            case TokenType.SubtractionAssignment:
+            break;
+            case TokenType.MultiplicationAssignment:
+            break;
+            case TokenType.DivisionAssignment:
+            break;
+            case TokenType.ModuloAssignment:
+            break;
+            case TokenType.BitwiseComplement:
+            break;
+            case TokenType.BitwiseAnd:
+            break;
+            case TokenType.BitwiseOr:
+            break;
+            case TokenType.BitwiseXOr:
+            break;
+            case TokenType.BitwiseShiftLeft:
+            break;
+            case TokenType.BitwiseShiftRight:
+            break;
+            case TokenType.Keyword_Func:
+            break;
+            case TokenType.Keyword_True:
+            break;
+            case TokenType.Keyword_False:
+            break;
+            case TokenType.Keyword_If:
+            break;
+            case TokenType.Keyword_Else:
+            break;
+            case TokenType.Keyword_Return:
+            break;
             default:
             tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBooleanExpression), tokens.Peek.Span, new StackTrace(true)));
             break;
@@ -244,13 +431,13 @@ public class Parser
         return new BooleanExpression(left, right);
     }
 
-    private StringLiteral ParseStringLiteral()
+    StringLiteral ParseStringLiteral()
     {
         string token = tokens.EatToken(TokenType.StringLiteral);
         return new StringLiteral(token);
     }
 
-    private IntegerLiteral ParseIntegerLiteral()
+    IntegerLiteral ParseIntegerLiteral()
     {
         int token = tokens.EatNumber(TokenType.IntegerLiteral);
         return new IntegerLiteral(token);

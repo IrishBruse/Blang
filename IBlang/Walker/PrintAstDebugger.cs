@@ -6,7 +6,7 @@ public class PrintAstDebugger : IVisitor
 {
     public int Indent { get; set; }
 
-    private void PrintIndent()
+    void PrintIndent()
     {
         for (int i = 0; i < Indent; i++)
         {
@@ -108,12 +108,12 @@ public class PrintAstDebugger : IVisitor
         Visit(node.Result);
     }
 
-    private void Visit(Expression expression)
+    void Visit(Expression expression)
     {
         expression.Switch(Visit, Visit, Visit, Visit, Visit, Visit);
     }
 
-    private void Visit(Statement statement)
+    void Visit(Statement statement)
     {
         statement.Switch(Visit, Visit, Visit, Visit, Visit);
     }

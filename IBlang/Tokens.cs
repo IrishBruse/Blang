@@ -10,13 +10,13 @@ using OneOf.Types;
 [DebuggerStepThrough, DebuggerDisplay("{Peek}")]
 public class Tokens
 {
-    private readonly IEnumerator<Token> tokens;
-    private readonly SortedList<int, int> lineEndings;
-    private readonly bool throwOnErrors;
+    readonly IEnumerator<Token> tokens;
+    readonly SortedList<int, int> lineEndings;
+    readonly bool throwOnErrors;
 
     public Token Peek => tokens.Current;
 
-    private List<ParseError> Errors { get; } = new();
+    List<ParseError> Errors { get; } = new();
 
     public Tokens(IEnumerator<Token> tokens, SortedList<int, int> lineEndings, bool throwOnErrors = false)
     {

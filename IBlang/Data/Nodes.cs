@@ -34,7 +34,7 @@ public record BlockBody(Statement[] Statements) : INode, IEnumerator<Statement>,
         set => Statements[key] = value;
     }
 
-    private int position = -1;
+    int position = -1;
 
     object IEnumerator.Current => Current;
     public Statement Current => Statements[position];

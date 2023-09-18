@@ -4,11 +4,11 @@ namespace IBlang;
 
 public class AstVisitor
 {
-    private IVisitor Visitor { get; set; }
+    IVisitor Visitor { get; set; }
 
-    private int indentation;
+    int indentation;
 
-    private int Indent
+    int Indent
     {
         get => indentation;
         set => indentation = Visitor.Indent = value;

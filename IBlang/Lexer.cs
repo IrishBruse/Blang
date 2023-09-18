@@ -18,32 +18,31 @@ public class Lexer : IDisposable
         { "false", TokenType.Keyword_False },
     };
 
-    private static readonly Dictionary<string, TokenType> ControlflowKeywords = new()
+    static readonly Dictionary<string, TokenType> ControlflowKeywords = new()
     {
         { "if", TokenType.Keyword_If },
         { "else", TokenType.Keyword_Else },
         { "return", TokenType.Keyword_Return },
     };
 
-    private const ConsoleColor CommentColor = ConsoleColor.DarkGray;
-    private const ConsoleColor WhitespaceColor = ConsoleColor.DarkGray;
-    private const ConsoleColor KeywordColor = ConsoleColor.Blue;
-    private const ConsoleColor BracketsColor = ConsoleColor.DarkGreen;
-    private const ConsoleColor ErrorColor = ConsoleColor.DarkRed;
-    private const ConsoleColor OperatorColor = ConsoleColor.Red;
-    private const ConsoleColor NumberColor = ConsoleColor.Cyan;
-    private const ConsoleColor StringColor = ConsoleColor.Yellow;
-    private const ConsoleColor IdentifierColor = ConsoleColor.Gray;
-    private const ConsoleColor ControlflowColor = ConsoleColor.Magenta;
+    const ConsoleColor CommentColor = ConsoleColor.DarkGray;
+    const ConsoleColor WhitespaceColor = ConsoleColor.DarkGray;
+    const ConsoleColor KeywordColor = ConsoleColor.Blue;
+    const ConsoleColor BracketsColor = ConsoleColor.DarkGreen;
+    const ConsoleColor OperatorColor = ConsoleColor.Red;
+    const ConsoleColor NumberColor = ConsoleColor.Cyan;
+    const ConsoleColor StringColor = ConsoleColor.Yellow;
+    const ConsoleColor IdentifierColor = ConsoleColor.Gray;
+    const ConsoleColor ControlflowColor = ConsoleColor.Magenta;
 
-    private StreamReader sourceFile;
-    private readonly string file;
+    StreamReader sourceFile;
+    readonly string file;
 
-    private readonly LexerDebug flags;
+    readonly LexerDebug flags;
 
-    private int endIndex;
-    private int startIndex;
-    private int line;
+    int endIndex;
+    int startIndex;
+    int line;
 
     public Lexer(StreamReader sourceFile, string file, LexerDebug flags = LexerDebug.None)
     {
@@ -130,7 +129,7 @@ public class Lexer : IDisposable
         yield return new Token(string.Empty, TokenType.Eof, new(file, startIndex, endIndex));
     }
 
-    private void EatWhitespace(char c)
+    void EatWhitespace(char c)
     {
         if (c == '\r')
         {
@@ -153,7 +152,7 @@ public class Lexer : IDisposable
         }
     }
 
-    private Token LexOperator(TokenType type)
+    Token LexOperator(TokenType type)
     {
         char c = Next(OperatorColor);
         char p = Peek();
@@ -233,7 +232,7 @@ public class Lexer : IDisposable
         return new Token(op, type, new(file, startIndex, endIndex));
     }
 
-    private Token LexSingleLineComment()
+    Token LexSingleLineComment()
     {
         if (flags.HasFlag(LexerDebug.Print))
         {
@@ -251,14 +250,14 @@ public class Lexer : IDisposable
         return new Token(comment.ToString(), TokenType.Comment, new(file, startIndex, endIndex));
     }
 
-    private Token LexBracket(TokenType type)
+    Token LexBracket(TokenType type)
     {
         char c = Next(BracketsColor);
 
         return new Token(c.ToString(), type, new(file, startIndex, endIndex));
     }
 
-    private Token LexString()
+    Token LexString()
     {
         StringBuilder literal = new();
 
@@ -276,7 +275,7 @@ public class Lexer : IDisposable
         return new Token(literal.ToString(), TokenType.StringLiteral, new(file, startIndex, endIndex));
     }
 
-    private Token LexIdentifier()
+    Token LexIdentifier()
     {
         StringBuilder identifierBuilder = new();
         char c;
@@ -312,12 +311,12 @@ public class Lexer : IDisposable
         }
     }
 
-    private char Peek()
+    char Peek()
     {
         return (char)sourceFile.Peek();
     }
 
-    private Token LexNumber()
+    Token LexNumber()
     {
         StringBuilder number = new();
 
@@ -333,12 +332,12 @@ public class Lexer : IDisposable
         return new Token(number.ToString(), TokenType.IntegerLiteral, new(file, startIndex, endIndex));
     }
 
-    private bool IsLineBreak(char c)
+    static bool IsLineBreak(char c)
     {
-        return c == '\n' || c == '\r';
+        return c is '\n' or '\r';
     }
 
-    private char Next(ConsoleColor foreground = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black, string? display = null)
+    char Next(ConsoleColor foreground = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black, string? display = null)
     {
         char c = (char)sourceFile.Read();
 
@@ -359,7 +358,7 @@ public class Lexer : IDisposable
         return c;
     }
 
-    private static void Print(char c, ConsoleColor background = ConsoleColor.Black, ConsoleColor foreground = ConsoleColor.White)
+    static void Print(char c, ConsoleColor background = ConsoleColor.Black, ConsoleColor foreground = ConsoleColor.White)
     {
         Console.BackgroundColor = background;
         Console.ForegroundColor = foreground;
@@ -367,7 +366,7 @@ public class Lexer : IDisposable
         Console.ResetColor();
     }
 
-    private static void Print(string str, ConsoleColor background = ConsoleColor.Black, ConsoleColor foreground = ConsoleColor.White)
+    static void Print(string str, ConsoleColor background = ConsoleColor.Black, ConsoleColor foreground = ConsoleColor.White)
     {
         Console.BackgroundColor = background;
         Console.ForegroundColor = foreground;
