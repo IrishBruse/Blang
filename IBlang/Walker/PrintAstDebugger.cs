@@ -34,6 +34,7 @@ public class PrintAstDebugger : IVisitor
 
     public void Visit(BooleanExpression node)
     {
+        PrintIndent();
         Visit(node.Left);
         Visit(node.Right);
     }

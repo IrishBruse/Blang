@@ -6,13 +6,13 @@ public class Compiler
 {
     public static void Run(string file)
     {
-        Console.WriteLine($"Compiling {Path.GetFullPath(file)}");
+        Console.WriteLine($"\nCompiling {Path.GetFullPath(file)}");
 
         file = Path.GetFullPath(file);
 
         StreamReader sourceFile = File.OpenText(file);
 
-        Console.WriteLine("-------- Lexer  --------");
+        Console.WriteLine("\n-------- Lexer  --------");
 
         Lexer lexer = new(sourceFile, file, LexerDebug.Print);
         Tokens tokens = new(lexer.Lex(), lexer.LineEndings, false);
@@ -24,12 +24,10 @@ public class Compiler
         AstVisitor debugVisitor = new(new PrintAstDebugger());
         debugVisitor.Visit(ast);
 
-        Console.WriteLine("\n-------- Errors --------");
-
         tokens.ListErrors();
     }
 
-    public static (string expected, string output) Test(string file)
+    public static bool Test(string file)
     {
         string source = File.ReadAllText(file);
 
@@ -49,6 +47,6 @@ public class Compiler
 
         Run(file);
 
-        return (expected, expected);
+        return expected.Equals(source);
     }
 }

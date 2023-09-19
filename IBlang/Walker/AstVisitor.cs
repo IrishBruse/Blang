@@ -6,12 +6,14 @@ public class AstVisitor
 {
     IVisitor Visitor { get; set; }
 
-    int indentation;
-
-    int Indent
+    void Indent()
     {
-        get => indentation;
-        set => indentation = Visitor.Indent = value;
+        Visitor.Indent++;
+    }
+
+    void Dedent()
+    {
+        Visitor.Indent--;
     }
 
     public AstVisitor(IVisitor visitor)
@@ -21,72 +23,95 @@ public class AstVisitor
 
     public void Visit(FileAst file)
     {
+        Indent();
         Visitor.Visit(file);
+
         foreach (FunctionDecleration function in file.Functions)
         {
             Visit(function);
         }
+        Dedent();
     }
 
     public void Visit(FunctionDecleration functionDecleration)
     {
+        Indent();
         Visitor.Visit(functionDecleration);
+        Dedent();
 
         foreach (ParameterDefinition parameter in functionDecleration.Parameters)
         {
-            Indent++;
+            Indent();
             Visit(parameter);
-            Indent--;
+            Dedent();
         }
 
+        Indent();
         Visit(functionDecleration.Body);
+        Dedent();
     }
 
     public void Visit(ParameterDefinition parameter)
     {
-        Visitor.Visit(parameter);
+        Indent();
+        {
+            Visitor.Visit(parameter);
+        }
+        Dedent();
     }
 
     public void Visit(IfStatement ifStatement)
     {
-        Indent++;
-        Visitor.Visit(ifStatement);
-        Indent--;
+        Indent();
+        {
+            Visitor.Visit(ifStatement);
+        }
+        Dedent();
     }
 
     public void Visit(ReturnStatement statement)
     {
-        Indent++;
-        Visitor.Visit(statement);
-        Indent--;
+        Indent();
+        {
+            Visitor.Visit(statement);
+        }
+        Dedent();
     }
 
     public void Visit(AssignmentStatement statement)
     {
-        Indent++;
-        Visitor.Visit(statement);
-        Indent--;
+        Indent();
+        {
+            Visitor.Visit(statement);
 
-        Indent++;
-        Visit(statement.Value);
-        Indent--;
+            Indent();
+            {
+                Visit(statement.Value);
+            }
+            Dedent();
+        }
+        Dedent();
     }
 
     public void Visit(StringLiteral stringLiteral)
     {
+        Indent();
         Visitor.Visit(stringLiteral);
+        Dedent();
     }
 
     public void Visit(IntegerLiteral integerLiteral)
     {
+        Indent();
         Visitor.Visit(integerLiteral);
+        Dedent();
     }
 
     public void Visit(BlockBody blockBody)
     {
-        Indent++;
+        Indent();
         Visitor.Visit(blockBody);
-        Indent--;
+        Dedent();
     }
 
     public void Visit(Statement statement)
@@ -96,7 +121,7 @@ public class AstVisitor
             functionCall => Visit(functionCall),
             returnStatement => Visit(returnStatement),
             assignmentStatement => Visit(assignmentStatement),
-            error => Visitor.Visit(error)
+            error => Visit(error)
         );
     }
 
@@ -108,27 +133,42 @@ public class AstVisitor
             integerLiteral => Visit(integerLiteral),
             identifier => Visit(identifier),
             functionCall => Visit(functionCall),
-            error => Visitor.Visit(error)
+            error => Visit(error)
         );
     }
 
     public void Visit(Identifier identifier)
     {
+        Indent();
         Visitor.Visit(identifier);
+        Dedent();
     }
 
     public void Visit(FloatLiteral value)
     {
+        Indent();
         Visitor.Visit(value);
+        Dedent();
     }
 
     public void Visit(FunctionCallExpression functionCall)
     {
+        Indent();
         Visitor.Visit(functionCall);
         foreach (Expression arg in functionCall.Args)
         {
+            Indent();
             Visit(arg);
+            Dedent();
         }
+        Dedent();
+    }
+
+    public void Visit(OneOf.Types.Error<string> error)
+    {
+        Indent();
+        Visitor.Visit(error);
+        Dedent();
     }
 }
 

@@ -10,8 +10,6 @@ public class CompilerTests
     {
         file = $"Tests/{file}.ib";
 
-        (string output, string expected) = Compiler.Test(file);
-
-        Assert.Equal(output, expected);
+        Compiler.Test(file);
     }
 }

@@ -136,6 +136,9 @@ public class Tokens
         {
             Errors.Add(error);
         }
+
+        tokens.MoveNext();
+
         return new Error<string>(message);
     }
 
@@ -153,6 +156,11 @@ public class Tokens
 
     public void ListErrors(bool showStackTrace = false)
     {
+        if (Errors.Count > 0)
+        {
+            Console.WriteLine("\n\n-------- Errors --------");
+        }
+
         foreach (ParseError error in Errors)
         {
             Console.ForegroundColor = ConsoleColor.Red;
