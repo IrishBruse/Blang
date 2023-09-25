@@ -218,94 +218,7 @@ public class Parser
             case TokenType.EqualEqual:
             tokens.EatToken(TokenType.EqualEqual);
             break;
-            case TokenType.Eol:
-            break;
-            case TokenType.Eof:
-            break;
-            case TokenType.Garbage:
-            break;
-            case TokenType.Identifier:
-            break;
-            case TokenType.Comment:
-            break;
-            case TokenType.IntegerLiteral:
-            break;
-            case TokenType.FloatLiteral:
-            break;
-            case TokenType.StringLiteral:
-            break;
-            case TokenType.CharLiteral:
-            break;
-            case TokenType.OpenParenthesis:
-            break;
-            case TokenType.CloseParenthesis:
-            break;
-            case TokenType.OpenBracket:
-            break;
-            case TokenType.CloseBracket:
-            break;
-            case TokenType.OpenScope:
-            break;
-            case TokenType.CloseScope:
-            break;
-            case TokenType.Dot:
-            break;
-            case TokenType.Comma:
-            break;
-            case TokenType.Modulo:
-            break;
-            case TokenType.LessThan:
-            break;
-            case TokenType.GreaterThan:
-            break;
-            case TokenType.LessThanEqual:
-            break;
-            case TokenType.GreaterThanEqual:
-            break;
-            case TokenType.NotEqual:
-            break;
-            case TokenType.LogicalAnd:
-            break;
-            case TokenType.LogicalOr:
-            break;
-            case TokenType.LogicalNot:
-            break;
-            case TokenType.Assignment:
-            break;
-            case TokenType.AdditionAssignment:
-            break;
-            case TokenType.SubtractionAssignment:
-            break;
-            case TokenType.MultiplicationAssignment:
-            break;
-            case TokenType.DivisionAssignment:
-            break;
-            case TokenType.ModuloAssignment:
-            break;
-            case TokenType.BitwiseComplement:
-            break;
-            case TokenType.BitwiseAnd:
-            break;
-            case TokenType.BitwiseOr:
-            break;
-            case TokenType.BitwiseXOr:
-            break;
-            case TokenType.BitwiseShiftLeft:
-            break;
-            case TokenType.BitwiseShiftRight:
-            break;
-            case TokenType.Keyword_Func:
-            break;
-            case TokenType.Keyword_True:
-            break;
-            case TokenType.Keyword_False:
-            break;
-            case TokenType.Keyword_If:
-            break;
-            case TokenType.Keyword_Else:
-            break;
-            case TokenType.Keyword_Return:
-            break;
+
             default:
             tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBinaryExpression), tokens.Peek.Span, new StackTrace(true)));
             break;
@@ -320,110 +233,15 @@ public class Parser
     {
         Expression left = ParseExpression();
 
-        switch (tokens.Peek.Type)
+        var peekType = tokens.Peek.Type;
+
+        if (peekType == TokenType.EqualEqual)
         {
-            case TokenType.EqualEqual:
             tokens.EatToken(TokenType.EqualEqual);
-            break;
-            case TokenType.Eol:
-            break;
-            case TokenType.Eof:
-            break;
-            case TokenType.Garbage:
-            break;
-            case TokenType.Identifier:
-            break;
-            case TokenType.Comment:
-            break;
-            case TokenType.IntegerLiteral:
-            break;
-            case TokenType.FloatLiteral:
-            break;
-            case TokenType.StringLiteral:
-            break;
-            case TokenType.CharLiteral:
-            break;
-            case TokenType.OpenParenthesis:
-            break;
-            case TokenType.CloseParenthesis:
-            break;
-            case TokenType.OpenBracket:
-            break;
-            case TokenType.CloseBracket:
-            break;
-            case TokenType.OpenScope:
-            break;
-            case TokenType.CloseScope:
-            break;
-            case TokenType.Dot:
-            break;
-            case TokenType.Comma:
-            break;
-            case TokenType.Addition:
-            break;
-            case TokenType.Subtraction:
-            break;
-            case TokenType.Multiplication:
-            break;
-            case TokenType.Division:
-            break;
-            case TokenType.Modulo:
-            break;
-            case TokenType.LessThan:
-            break;
-            case TokenType.GreaterThan:
-            break;
-            case TokenType.LessThanEqual:
-            break;
-            case TokenType.GreaterThanEqual:
-            break;
-            case TokenType.NotEqual:
-            break;
-            case TokenType.LogicalAnd:
-            break;
-            case TokenType.LogicalOr:
-            break;
-            case TokenType.LogicalNot:
-            break;
-            case TokenType.Assignment:
-            break;
-            case TokenType.AdditionAssignment:
-            break;
-            case TokenType.SubtractionAssignment:
-            break;
-            case TokenType.MultiplicationAssignment:
-            break;
-            case TokenType.DivisionAssignment:
-            break;
-            case TokenType.ModuloAssignment:
-            break;
-            case TokenType.BitwiseComplement:
-            break;
-            case TokenType.BitwiseAnd:
-            break;
-            case TokenType.BitwiseOr:
-            break;
-            case TokenType.BitwiseXOr:
-            break;
-            case TokenType.BitwiseShiftLeft:
-            break;
-            case TokenType.BitwiseShiftRight:
-            break;
-            case TokenType.Keyword_Func:
-            break;
-            case TokenType.Keyword_True:
-            break;
-            case TokenType.Keyword_False:
-            break;
-            case TokenType.Keyword_If:
-            break;
-            case TokenType.Keyword_Else:
-            break;
-            case TokenType.Keyword_Return:
-            break;
-            default:
+        }
+        else
+        {
             tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBooleanExpression), tokens.Peek.Span, new StackTrace(true)));
-            break;
         }
 
         Expression right = ParseExpression();
@@ -441,10 +259,5 @@ public class Parser
     {
         int token = tokens.EatNumber(TokenType.IntegerLiteral);
         return new IntegerLiteral(token);
-    }
-
-    public void PrintErrors()
-    {
-        tokens.ListErrors();
     }
 }
