@@ -27,13 +27,23 @@ public class Tokens
     }
 
     [DebuggerStepThrough]
-    public string EatToken(TokenType type)
+    public string EatToken(TokenType type, string? errorOverride = null)
     {
         Token p = Peek;
 
         if (Peek.Type != type && TokenType.Eof != type)
         {
-            ParseError error = new($"Expected token of type {type} but got {Peek.Type} with value '{Peek.Value}'", Peek.Span, new StackTrace(true));
+            string message;
+            if (errorOverride != null)
+            {
+                message = errorOverride;
+            }
+            else
+            {
+                message = $"Expected token of type {type} but got {Peek.Type} with value '{Peek.Value}'";
+            }
+
+            ParseError error = new(message, Peek.Span, new StackTrace(true));
             if (throwOnErrors)
             {
                 throw new ParseException(error);

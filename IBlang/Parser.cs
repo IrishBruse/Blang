@@ -156,13 +156,30 @@ public class Parser
 
     Expression ParseExpression()
     {
-        return tokens.Peek.Type switch
+        var lhs = ParseAtom();
+
+
+    }
+
+    Expression ParseAtom()
+    {
+        if (tokens.Peek.Type == TokenType.OpenParenthesis)
         {
-            TokenType.Identifier => ParseIdentifierExpression(),
-            TokenType.StringLiteral => ParseStringLiteral(),
-            TokenType.IntegerLiteral => ParseIntegerLiteral(),
-            _ => tokens.Error($"{tokens.Peek.Type} is not a valid parameter type in " + nameof(ParseExpression)),
-        };
+            var expression = ParseExpression();
+            tokens.EatToken(TokenType.CloseParenthesis, "Mismatched parenthesis, expected ')'");
+            return expression;
+        }
+        else
+        {
+            return tokens.Peek.Type switch
+            {
+                TokenType.Identifier => ParseIdentifierExpression(),
+                TokenType.StringLiteral => ParseStringLiteral(),
+                TokenType.IntegerLiteral => ParseIntegerLiteral(),
+                TokenType.FloatLiteral => ParseFloatLiteral(),
+                _ => tokens.Error($"{tokens.Peek.Type} is not a valid parameter type in " + nameof(ParseExpression)),
+            };
+        }
     }
 
     Expression ParseIdentifierExpression()
@@ -239,6 +256,10 @@ public class Parser
         {
             tokens.EatToken(TokenType.EqualEqual);
         }
+        else if (peekType == TokenType.LessThanEqual)
+        {
+            tokens.EatToken(TokenType.LessThanEqual);
+        }
         else
         {
             tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBooleanExpression), tokens.Peek.Span, new StackTrace(true)));
@@ -259,5 +280,11 @@ public class Parser
     {
         int token = tokens.EatNumber(TokenType.IntegerLiteral);
         return new IntegerLiteral(token);
+    }
+
+    FloatLiteral ParseFloatLiteral()
+    {
+        int token = tokens.EatNumber(TokenType.FloatLiteral);
+        return new FloatLiteral(token);
     }
 }
