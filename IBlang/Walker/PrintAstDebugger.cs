@@ -16,80 +16,71 @@ public class PrintAstDebugger : IVisitor
 
     public void Visit(FileAst node)
     {
-        PrintIndent();
-        Console.WriteLine($"FileAst: ({node.Functions.Length})");
+        Log($"FileAst: ({node.Functions.Length})");
     }
 
     public void Visit(FunctionDecleration node)
     {
-        PrintIndent();
-        Console.WriteLine("FunctionDecleration: " + node.Name);
+        Console.WriteLine();
+        Log("FunctionDecleration: " + node.Name);
     }
 
     public void Visit(BooleanExpression node)
     {
-        PrintIndent();
-        Console.WriteLine($"BooleanExpression: {node.BooleanOperator}");
+        Log($"BooleanExpression: {node.BooleanOperator}");
+        Log($"  Left: {node.Left}");
+        Log($"  Right: {node.Right}");
     }
 
     public void Visit(BinaryExpression node)
     {
-        PrintIndent();
-        Console.WriteLine($"BinaryExpression: {node.BinaryOperator}");
+        Log($"BinaryExpression: {node.BinaryOperator}");
     }
 
     public void Visit(IfStatement node)
     {
-        PrintIndent();
-        Console.WriteLine("IfStatement: ");
+        Log("IfStatement: ");
     }
 
     public void Visit(ParameterDefinition node)
     {
-        PrintIndent();
-        Console.WriteLine("ParameterDefinition: " + node);
+        node.Deconstruct(out string type, out string name);
+        Log($"ParameterDefinition: {type} {name}");
     }
 
     public void Visit(FunctionCallExpression node)
     {
-        PrintIndent();
-        Console.WriteLine("FunctionCallExpression: " + node.Name + "()");
+        Log("FunctionCallExpression: " + node.Name + "()");
     }
 
     public void Visit(BooleanLiteral node)
     {
-        PrintIndent();
-        Console.WriteLine("BooleanLiteral: " + node.Value);
+        Log("BooleanLiteral: " + node.Value);
     }
 
     public void Visit(StringLiteral node)
     {
-        PrintIndent();
-        Console.WriteLine($"StringLiteral: \"{node.Value}\"");
+        Log($"StringLiteral: \"{node.Value}\"");
     }
 
     public void Visit(IntegerLiteral node)
     {
-        PrintIndent();
-        Console.WriteLine("IntegerLiteral: " + node.Value);
+        Log("IntegerLiteral: " + node.Value);
     }
 
     public void Visit(FloatLiteral node)
     {
-        PrintIndent();
-        Console.WriteLine("FloatLiteral: " + node.Value);
+        Log("FloatLiteral: " + node.Value);
     }
 
     public void Visit(Identifier node)
     {
-        PrintIndent();
-        Console.WriteLine($"Identifier: ({node.Name})");
+        Log($"Identifier: {node.Name}");
     }
 
     public void Visit(ReturnStatement node)
     {
-        PrintIndent();
-        Console.WriteLine($"Return:");
+        Log($"Return:");
     }
 
     public void Visit(Error<string> node)
@@ -102,7 +93,12 @@ public class PrintAstDebugger : IVisitor
 
     public void Visit(AssignmentStatement node)
     {
+        Log($"AssignmentStatement: {node.Name} =");
+    }
+
+    public void Log(string msg)
+    {
         PrintIndent();
-        Console.WriteLine($"AssignmentStatement: {node.Name} =");
+        Console.WriteLine(msg);
     }
 }

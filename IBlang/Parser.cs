@@ -123,6 +123,17 @@ public class Parser
         };
     }
 
+    Expression ParseIdentifierExpression()
+    {
+        string identifier = tokens.EatToken(TokenType.Identifier);
+
+        return tokens.Peek.Type switch
+        {
+            TokenType.OpenParenthesis => ParseFunctionCall(identifier),
+            _ => new Identifier(identifier),
+        };
+    }
+
     AssignmentStatement ParseAssignmentStatement(string identifier)
     {
         tokens.EatKeyword(TokenType.Assignment);
@@ -216,18 +227,6 @@ public class Parser
         }
     }
 
-    Expression ParseIdentifierExpression()
-    {
-        string identifier = tokens.EatToken(TokenType.Identifier);
-
-        return tokens.Peek.Type switch
-        {
-            TokenType.OpenParenthesis => ParseFunctionCall(identifier),
-            TokenType.CloseParenthesis => new Identifier(identifier), // variable identifier
-            _ => tokens.Error($"{tokens.Peek.Type} is not a valid parameter type in " + nameof(ParseExpression)),
-        };
-    }
-
     /// <summary> if <BinaryExpression> { } </summary>
     IfStatement ParseIfStatement()
     {
@@ -304,6 +303,12 @@ public class Parser
         Expression right = ParseExpression();
 
         return new BooleanExpression(operation, left, right);
+    }
+
+    Identifier ParseIdentifier()
+    {
+        string token = tokens.EatToken(TokenType.Identifier);
+        return new Identifier(token);
     }
 
     StringLiteral ParseStringLiteral()

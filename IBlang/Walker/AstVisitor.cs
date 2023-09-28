@@ -35,44 +35,35 @@ public class AstVisitor
 
     public void Visit(FunctionDecleration functionDecleration)
     {
-        Indent();
+        Visitor.Visit(functionDecleration);
+        foreach (ParameterDefinition parameter in functionDecleration.Parameters)
         {
-            Visitor.Visit(functionDecleration);
             Indent();
-            foreach (ParameterDefinition parameter in functionDecleration.Parameters)
-            {
-                Indent();
-                Visit(parameter);
-                Dedent();
-            }
-            Visit(functionDecleration.Body);
+            Visit(parameter);
             Dedent();
         }
-        Dedent();
+        Visit(functionDecleration.Body);
     }
 
     public void Visit(ParameterDefinition parameter)
     {
         Indent();
-        {
-            Visitor.Visit(parameter);
-        }
+        Visitor.Visit(parameter);
         Dedent();
     }
 
     public void Visit(IfStatement ifStatement)
     {
         Indent();
-        {
-            Visitor.Visit(ifStatement);
-            Visit(ifStatement.Condition);
-            Visit(ifStatement.Body);
-            if (ifStatement.ElseBody != null)
-            {
-                Visit(ifStatement.ElseBody);
-            }
-        }
+        Visitor.Visit(ifStatement);
+        Visit(ifStatement.Condition);
         Dedent();
+
+        Visit(ifStatement.Body);
+        if (ifStatement.ElseBody != null)
+        {
+            Visit(ifStatement.ElseBody);
+        }
     }
 
     public void Visit(ReturnStatement statement)
@@ -80,6 +71,7 @@ public class AstVisitor
         Indent();
         {
             Visitor.Visit(statement);
+            Visit(statement.Result);
         }
         Dedent();
     }
@@ -115,12 +107,10 @@ public class AstVisitor
 
     public void Visit(BlockBody blockBody)
     {
-        Indent();
         foreach (Statement statement in blockBody)
         {
             Visit(statement);
         }
-        Dedent();
     }
 
     public void Visit(Statement statement)
@@ -168,9 +158,7 @@ public class AstVisitor
         Visitor.Visit(functionCall);
         foreach (Expression arg in functionCall.Args)
         {
-            Indent();
             Visit(arg);
-            Dedent();
         }
         Dedent();
     }
@@ -179,8 +167,6 @@ public class AstVisitor
     {
         Indent();
         Visitor.Visit(node);
-        Visit(node.Left);
-        Visit(node.Right);
         Dedent();
     }
 
@@ -188,12 +174,6 @@ public class AstVisitor
     {
         Indent();
         Visitor.Visit(node);
-        Indent();
-        {
-            Visit(node.Left);
-            Visit(node.Right);
-        }
-        Dedent();
         Dedent();
     }
 
