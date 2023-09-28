@@ -67,7 +67,7 @@ public class Parser
             string identifier = tokens.EatIdentifier();
             parameters.Add(new ParameterDefinition(type, identifier));
 
-            tokens.EatToken(TokenType.Identifier); // Name
+            // tokens.EatToken(TokenType.Identifier); // Name
 
             if (tokens.TryEatToken(TokenType.Comma))
             {
@@ -154,11 +154,37 @@ public class Parser
         return new FunctionCallExpression(identifier, args.ToArray());
     }
 
-    Expression ParseExpression()
+    static Dictionary<TokenType, int> precedence = new()
+    {
+        { TokenType.Addition, 1 },
+        { TokenType.Subtraction, 1 },
+        { TokenType.Multiplication, 2 },
+        { TokenType.Division, 2 },
+        { TokenType.Modulo, 2 },
+    };
+
+    Expression ParseExpression(int minPrecedence = 1)
     {
         var lhs = ParseAtom();
 
+        while (true)
+        {
+            if (tokens.Eof() || !tokens.Peek.IsBinaryOperator() || precedence[tokens.Peek.Type] < minPrecedence)
+            {
+                return lhs;
+            }
 
+            Debug.Assert(tokens.Peek.IsBinaryOperator());
+
+            int nextPrecedence = precedence[tokens.Peek.Type] + 1;
+
+            var operation = tokens.Peek.Type;
+            tokens.Skip();
+
+            Expression rhs = ParseExpression(nextPrecedence);
+
+            lhs = new BinaryExpression(operation, lhs, rhs);
+        }
     }
 
     Expression ParseAtom()
@@ -169,6 +195,14 @@ public class Parser
             tokens.EatToken(TokenType.CloseParenthesis, "Mismatched parenthesis, expected ')'");
             return expression;
         }
+        else if (tokens.Peek.Type == TokenType.Eof)
+        {
+            return tokens.Error($"{tokens.Peek.Type} is not a valid value in expression " + nameof(ParseAtom));
+        }
+        else if (tokens.Peek.IsBinaryOperator())
+        {
+            return tokens.Error($"{tokens.Peek.Type} is not a Atom value in expression " + nameof(ParseAtom));
+        }
         else
         {
             return tokens.Peek.Type switch
@@ -177,7 +211,7 @@ public class Parser
                 TokenType.StringLiteral => ParseStringLiteral(),
                 TokenType.IntegerLiteral => ParseIntegerLiteral(),
                 TokenType.FloatLiteral => ParseFloatLiteral(),
-                _ => tokens.Error($"{tokens.Peek.Type} is not a valid parameter type in " + nameof(ParseExpression)),
+                _ => tokens.Error($"{tokens.Peek.Type} is not a valid value in expression " + nameof(ParseAtom)),
             };
         }
     }
@@ -214,6 +248,8 @@ public class Parser
     {
         Expression left = ParseExpression();
 
+        var operation = tokens.Peek.Type;
+
         switch (tokens.Peek.Type)
         {
             case TokenType.Addition:
@@ -243,20 +279,20 @@ public class Parser
 
         Expression right = ParseExpression();
 
-        return new BinaryExpression(left, right);
+        return new BinaryExpression(operation, left, right);
     }
 
     BooleanExpression ParseBooleanExpression()
     {
         Expression left = ParseExpression();
 
-        var peekType = tokens.Peek.Type;
+        var operation = tokens.Peek.Type;
 
-        if (peekType == TokenType.EqualEqual)
+        if (operation == TokenType.EqualEqual)
         {
             tokens.EatToken(TokenType.EqualEqual);
         }
-        else if (peekType == TokenType.LessThanEqual)
+        else if (operation == TokenType.LessThanEqual)
         {
             tokens.EatToken(TokenType.LessThanEqual);
         }
@@ -267,7 +303,7 @@ public class Parser
 
         Expression right = ParseExpression();
 
-        return new BooleanExpression(left, right);
+        return new BooleanExpression(operation, left, right);
     }
 
     StringLiteral ParseStringLiteral()

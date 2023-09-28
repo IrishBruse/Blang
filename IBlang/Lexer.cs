@@ -18,6 +18,19 @@ public class Lexer : IDisposable
         { "false", TokenType.Keyword_False },
     };
 
+    public static readonly HashSet<TokenType> BinaryOperators = new()
+    {
+        { TokenType.Addition },
+        { TokenType.Subtraction },
+        { TokenType.Multiplication },
+        { TokenType.Division },
+        { TokenType.Modulo },
+        { TokenType.BitwiseAnd },
+        { TokenType.BitwiseOr },
+        { TokenType.BitwiseShiftLeft },
+        { TokenType.BitwiseShiftRight },
+    };
+
     static readonly Dictionary<string, TokenType> ControlflowKeywords = new()
     {
         { "if", TokenType.Keyword_If },

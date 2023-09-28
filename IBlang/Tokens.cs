@@ -7,7 +7,7 @@ using IBlang.Data;
 
 using OneOf.Types;
 
-[DebuggerStepThrough, DebuggerDisplay("{Peek}")]
+[DebuggerStepThrough]
 public class Tokens
 {
     readonly IEnumerator<Token> tokens;
@@ -150,6 +150,11 @@ public class Tokens
         tokens.MoveNext();
 
         return new Error<string>(message);
+    }
+
+    public bool Eof()
+    {
+        return Peek.Type == TokenType.Eof;
     }
 
     public void AddError(ParseError error)

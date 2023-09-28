@@ -2,6 +2,8 @@ namespace IBlang;
 
 using System.Collections;
 
+using IBlang.Data;
+
 using OneOf;
 using OneOf.Types;
 
@@ -15,8 +17,8 @@ public record ReturnStatement(Expression Result) : INode { }
 public record ParameterDefinition(string Type, string Identifier) : INode { }
 
 public record FunctionCallExpression(string Name, Expression[] Args) : INode { }
-public record BinaryExpression(Expression Left, Expression Right) : INode { }
-public record BooleanExpression(Expression Left, Expression Right) : INode { }
+public record BinaryExpression(TokenType BinaryOperator, Expression Left, Expression Right) : INode { }
+public record BooleanExpression(TokenType BooleanOperator, Expression Left, Expression Right) : INode { }
 public record AssignmentStatement(string Name, Expression Value) : INode { }
 
 public record BooleanLiteral(bool Value) : INode { }
@@ -70,7 +72,7 @@ public record BlockBody(Statement[] Statements) : INode, IEnumerator<Statement>,
 public partial class Statement : OneOfBase<IfStatement, FunctionCallExpression, ReturnStatement, AssignmentStatement, Error<string>>, INode { }
 
 [GenerateOneOf]
-public partial class Expression : OneOfBase<StringLiteral, FloatLiteral, IntegerLiteral, Identifier, FunctionCallExpression, Error<string>>, INode { }
+public partial class Expression : OneOfBase<StringLiteral, FloatLiteral, IntegerLiteral, Identifier, BinaryExpression, BooleanExpression, FunctionCallExpression, Error<string>>, INode { }
 
 public interface IVisitor
 {
@@ -92,7 +94,6 @@ public interface IVisitor
     public void Visit(IntegerLiteral node);
     public void Visit(FloatLiteral node);
     public void Visit(Identifier node);
-    public void Visit(BlockBody node);
 
     public void Visit(Error<string> node);
 }

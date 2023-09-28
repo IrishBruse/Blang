@@ -26,29 +26,22 @@ public class PrintAstDebugger : IVisitor
         Console.WriteLine("FunctionDecleration: " + node.Name);
     }
 
-    public void Visit(BinaryExpression node)
-    {
-        PrintIndent();
-        Console.WriteLine("BinaryExpression: " + node);
-    }
-
     public void Visit(BooleanExpression node)
     {
         PrintIndent();
-        Visit(node.Left);
-        Visit(node.Right);
+        Console.WriteLine($"BooleanExpression: {node.BooleanOperator}");
+    }
+
+    public void Visit(BinaryExpression node)
+    {
+        PrintIndent();
+        Console.WriteLine($"BinaryExpression: {node.BinaryOperator}");
     }
 
     public void Visit(IfStatement node)
     {
         PrintIndent();
         Console.WriteLine("IfStatement: ");
-        Visit(node.Condition);
-        Visit(node.Body);
-        if (node.ElseBody is not null)
-        {
-            Visit(node.ElseBody);
-        }
     }
 
     public void Visit(ParameterDefinition node)
@@ -93,30 +86,10 @@ public class PrintAstDebugger : IVisitor
         Console.WriteLine($"Identifier: ({node.Name})");
     }
 
-    public void Visit(BlockBody node)
-    {
-        foreach (Statement item in node.Statements)
-        {
-            Visit(item);
-        }
-    }
-
     public void Visit(ReturnStatement node)
     {
         PrintIndent();
         Console.WriteLine($"Return:");
-
-        Visit(node.Result);
-    }
-
-    void Visit(Expression expression)
-    {
-        expression.Switch(Visit, Visit, Visit, Visit, Visit, Visit);
-    }
-
-    void Visit(Statement statement)
-    {
-        statement.Switch(Visit, Visit, Visit, Visit, Visit);
     }
 
     public void Visit(Error<string> node)

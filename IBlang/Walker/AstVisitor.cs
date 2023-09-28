@@ -1,6 +1,8 @@
 namespace IBlang;
 
-#pragma warning disable IDE0200,IDE0052
+using Microsoft.VisualBasic;
+
+#pragma warning disable IDE0200, IDE0052
 
 public class AstVisitor
 {
@@ -23,31 +25,29 @@ public class AstVisitor
 
     public void Visit(FileAst file)
     {
-        Indent();
         Visitor.Visit(file);
 
         foreach (FunctionDecleration function in file.Functions)
         {
             Visit(function);
         }
-        Dedent();
     }
 
     public void Visit(FunctionDecleration functionDecleration)
     {
         Indent();
-        Visitor.Visit(functionDecleration);
-        Dedent();
-
-        foreach (ParameterDefinition parameter in functionDecleration.Parameters)
         {
+            Visitor.Visit(functionDecleration);
             Indent();
-            Visit(parameter);
+            foreach (ParameterDefinition parameter in functionDecleration.Parameters)
+            {
+                Indent();
+                Visit(parameter);
+                Dedent();
+            }
+            Visit(functionDecleration.Body);
             Dedent();
         }
-
-        Indent();
-        Visit(functionDecleration.Body);
         Dedent();
     }
 
@@ -65,6 +65,12 @@ public class AstVisitor
         Indent();
         {
             Visitor.Visit(ifStatement);
+            Visit(ifStatement.Condition);
+            Visit(ifStatement.Body);
+            if (ifStatement.ElseBody != null)
+            {
+                Visit(ifStatement.ElseBody);
+            }
         }
         Dedent();
     }
@@ -110,7 +116,10 @@ public class AstVisitor
     public void Visit(BlockBody blockBody)
     {
         Indent();
-        Visitor.Visit(blockBody);
+        foreach (Statement statement in blockBody)
+        {
+            Visit(statement);
+        }
         Dedent();
     }
 
@@ -132,6 +141,8 @@ public class AstVisitor
             floatLiteral => Visit(floatLiteral),
             integerLiteral => Visit(integerLiteral),
             identifier => Visit(identifier),
+            binaryExpression => Visit(binaryExpression),
+            booleanExpression => Visit(booleanExpression),
             functionCall => Visit(functionCall),
             error => Visit(error)
         );
@@ -161,6 +172,28 @@ public class AstVisitor
             Visit(arg);
             Dedent();
         }
+        Dedent();
+    }
+
+    public void Visit(BinaryExpression node)
+    {
+        Indent();
+        Visitor.Visit(node);
+        Visit(node.Left);
+        Visit(node.Right);
+        Dedent();
+    }
+
+    public void Visit(BooleanExpression node)
+    {
+        Indent();
+        Visitor.Visit(node);
+        Indent();
+        {
+            Visit(node.Left);
+            Visit(node.Right);
+        }
+        Dedent();
         Dedent();
     }
 
