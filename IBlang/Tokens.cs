@@ -5,8 +5,6 @@ using System.Diagnostics;
 
 using IBlang.Data;
 
-using OneOf.Types;
-
 [DebuggerStepThrough]
 public class Tokens
 {
@@ -135,7 +133,7 @@ public class Tokens
         return p.Value;
     }
 
-    public Error<string> Error(string message)
+    public Error Error(string message)
     {
         ParseError error = new(message, Peek.Span, new StackTrace(true));
         if (throwOnErrors)
@@ -149,7 +147,7 @@ public class Tokens
 
         tokens.MoveNext();
 
-        return new Error<string>(message);
+        return new Error(message);
     }
 
     public bool Eof()

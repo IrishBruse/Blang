@@ -20,6 +20,8 @@ public class Parser
     {
         List<FunctionDecleration> functions = new();
 
+        string file = tokens.Peek.Span.File;
+
         while (tokens.Peek.Type != TokenType.Eof)
         {
             if (tokens.Peek.Type == TokenType.Keyword_Func)
@@ -32,7 +34,7 @@ public class Parser
             }
             else if (tokens.Peek.Type == TokenType.Eof)
             {
-                return new FileAst(functions.ToArray());
+                return new FileAst(functions.ToArray(), file);
             }
             else
             {
@@ -40,7 +42,7 @@ public class Parser
                 tokens.Skip();
             }
         }
-        return new FileAst(functions.ToArray());
+        return new FileAst(functions.ToArray(), file);
     }
 
     FunctionDecleration ParseFunctionDecleration()
@@ -97,7 +99,7 @@ public class Parser
 
         tokens.EatToken(TokenType.CloseScope);
 
-        return new(statements);
+        return new(statements.ToArray());
     }
 
     Statement ParseStatement()
@@ -172,6 +174,7 @@ public class Parser
         { TokenType.Multiplication, 2 },
         { TokenType.Division, 2 },
         { TokenType.Modulo, 2 },
+        { TokenType.Identifier, 3 }, // Function call
     };
 
     Expression ParseExpression(int minPrecedence = 1)
@@ -189,7 +192,7 @@ public class Parser
 
             int nextPrecedence = precedence[tokens.Peek.Type] + 1;
 
-            var operation = tokens.Peek.Type;
+            var operation = tokens.Peek;
             tokens.Skip();
 
             Expression rhs = ParseExpression(nextPrecedence);
@@ -208,11 +211,11 @@ public class Parser
         }
         else if (tokens.Peek.Type == TokenType.Eof)
         {
-            return tokens.Error($"{tokens.Peek.Type} is not a valid value in expression " + nameof(ParseAtom));
+            return tokens.Error($"Unexpected End Of File reached in " + nameof(ParseAtom));
         }
         else if (tokens.Peek.IsBinaryOperator())
         {
-            return tokens.Error($"{tokens.Peek.Type} is not a Atom value in expression " + nameof(ParseAtom));
+            return tokens.Error($"{tokens.Peek.Type} is not an Atom value in expression " + nameof(ParseAtom));
         }
         else
         {
@@ -247,7 +250,7 @@ public class Parser
     {
         Expression left = ParseExpression();
 
-        var operation = tokens.Peek.Type;
+        var operation = tokens.Peek;
 
         switch (tokens.Peek.Type)
         {
@@ -285,13 +288,13 @@ public class Parser
     {
         Expression left = ParseExpression();
 
-        var operation = tokens.Peek.Type;
+        var operation = tokens.Peek;
 
-        if (operation == TokenType.EqualEqual)
+        if (operation.Type == TokenType.EqualEqual)
         {
             tokens.EatToken(TokenType.EqualEqual);
         }
-        else if (operation == TokenType.LessThanEqual)
+        else if (operation.Type == TokenType.LessThanEqual)
         {
             tokens.EatToken(TokenType.LessThanEqual);
         }

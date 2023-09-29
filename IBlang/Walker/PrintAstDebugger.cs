@@ -1,7 +1,5 @@
 namespace IBlang;
 
-using OneOf.Types;
-
 public class PrintAstDebugger : IVisitor
 {
     public int Indent { get; set; }
@@ -83,7 +81,7 @@ public class PrintAstDebugger : IVisitor
         Log($"Return:");
     }
 
-    public void Visit(Error<string> node)
+    public void Visit(Error node)
     {
         PrintIndent();
         Console.ForegroundColor = ConsoleColor.Red;

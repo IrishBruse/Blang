@@ -1,6 +1,7 @@
 namespace IBlang;
 
 using IBlang.Data;
+using IBlang.Walker;
 
 public class Compiler
 {
@@ -23,8 +24,10 @@ public class Compiler
 
         AstVisitor debugVisitor = new(new PrintAstDebugger());
         debugVisitor.Visit(ast);
-
         tokens.ListErrors();
+
+        Transpiler transpiler = new();
+        transpiler.Emit(ast);
     }
 
     public static bool Test(string file)

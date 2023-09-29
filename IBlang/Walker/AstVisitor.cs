@@ -1,7 +1,5 @@
 namespace IBlang;
 
-using Microsoft.VisualBasic;
-
 #pragma warning disable IDE0200, IDE0052
 
 public class AstVisitor
@@ -69,25 +67,16 @@ public class AstVisitor
     public void Visit(ReturnStatement statement)
     {
         Indent();
-        {
-            Visitor.Visit(statement);
-            Visit(statement.Result);
-        }
+        Visitor.Visit(statement);
+        Visit(statement.Result);
         Dedent();
     }
 
     public void Visit(AssignmentStatement statement)
     {
         Indent();
-        {
-            Visitor.Visit(statement);
-
-            Indent();
-            {
-                Visit(statement.Value);
-            }
-            Dedent();
-        }
+        Visitor.Visit(statement);
+        Visit(statement.Value);
         Dedent();
     }
 
@@ -105,9 +94,9 @@ public class AstVisitor
         Dedent();
     }
 
-    public void Visit(BlockBody blockBody)
+    public void Visit(BlockBody block)
     {
-        foreach (Statement statement in blockBody)
+        foreach (Statement statement in block.Statements)
         {
             Visit(statement);
         }
@@ -177,7 +166,7 @@ public class AstVisitor
         Dedent();
     }
 
-    public void Visit(OneOf.Types.Error<string> error)
+    public void Visit(Error error)
     {
         Indent();
         Visitor.Visit(error);
