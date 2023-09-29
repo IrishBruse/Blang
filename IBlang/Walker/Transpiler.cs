@@ -1,5 +1,6 @@
 namespace IBlang.Walker;
 
+using System.Diagnostics;
 using System.Text;
 
 public class Transpiler
@@ -20,7 +21,26 @@ public class Transpiler
         indention--;
     }
 
-    public void Emit(FileAst file)
+    public void TranspileToC(FileAst file)
+    {
+        Prelude();
+
+        foreach (FunctionDecleration function in file.Functions)
+        {
+            EmitCFunctionHeader(function);
+            WriteLine(";");
+        }
+
+        foreach (FunctionDecleration function in file.Functions)
+        {
+            Emit(function);
+        }
+
+        File.WriteAllText(Path.ChangeExtension(file.Path, "c"), output.ToString());
+    }
+
+
+    public void Compile(FileAst file)
     {
         Prelude();
 
@@ -30,18 +50,50 @@ public class Transpiler
             Emit(function);
         }
 
-        File.WriteAllText(Path.ChangeExtension(file.Path, "c"), output.ToString());
+        Process? tcc = Process.Start(new ProcessStartInfo()
+        {
+            FileName = "tcc",
+            Arguments = "-Wall " + Path.ChangeExtension(file.Path, "c"),
+            RedirectStandardInput = true,
+        });
+
+        if (tcc == null)
+        {
+            Console.WriteLine("Failed to launch tcc");
+            return;
+        }
+
+        tcc.StandardInput.Write(output);
     }
 
     void Prelude()
     {
-        WriteLineIndented("#include <stdio.h>");
+        foreach (string text in File.ReadAllLines("Prelude/Prelude.c"))
+        {
+            WriteLine(text);
+        }
     }
 
     void Emit(FunctionDecleration function)
     {
-        WriteLine($"void {function.Name}({string.Join(", ", function.Parameters.Select(p => p.Type + " " + p.Identifier))})");
+        WriteLineIndented();
+        EmitCFunctionHeader(function);
+        WriteLine();
         Emit(function.Body);
+    }
+
+    void EmitCFunctionHeader(FunctionDecleration function)
+    {
+        string name = function.Name;
+
+        if (name == "Main")
+        {
+            name = "main";
+        }
+
+        string parameters = string.Join(", ", function.Parameters.Select(p => p.Type + " " + p.Identifier));
+
+        Write($"{function.ReturnType.Value} {name}({parameters})");
     }
 
     void Emit(BlockBody block)
@@ -60,7 +112,7 @@ public class Transpiler
 
     void Emit(StringLiteral expression)
     {
-        Write(expression.Value);
+        Write($"\"{expression.Value}\"");
     }
 
     void Emit(FloatLiteral expression)
@@ -99,6 +151,7 @@ public class Transpiler
         WriteLine(")");
 
         Emit(statement.Body);
+
         if (statement.ElseBody != null)
         {
             WriteLineIndented("else");
@@ -106,11 +159,11 @@ public class Transpiler
         }
     }
 
-    void Emit(FunctionCallExpression statement)
+    void Emit(FunctionCallExpression expression)
     {
-        WriteIntend(statement.Name + "(");
+        Write(expression.Name + "(");
         bool start = true;
-        foreach (Expression arg in statement.Args)
+        foreach (Expression arg in expression.Args)
         {
             if (!start)
             {
@@ -120,19 +173,33 @@ public class Transpiler
             EmitExpression(arg);
             start = false;
         }
-        WriteLine(");");
+        Write(")");
+    }
+
+    void Emit(FunctionCallStatement statement)
+    {
+        WriteIndention();
+        Emit((FunctionCallExpression)statement);
+        Semicolon();
     }
 
     void Emit(ReturnStatement statement)
     {
         WriteIntend("return ");
         EmitExpression(statement.Result);
-        WriteLine(";");
+        Semicolon();
     }
 
     void Emit(AssignmentStatement statement)
     {
-        WriteLine("AssignmentStatement");
+        WriteIntend($"int {statement.Name} = ");
+        EmitExpression(statement.Value);
+        Semicolon();
+    }
+
+    void Semicolon()
+    {
+        WriteLine(";");
     }
 
     void Emit(Error statement)
@@ -167,11 +234,7 @@ public class Transpiler
 
     void WriteIntend(string? text = null)
     {
-        for (int i = 0; i < indention; i++)
-        {
-            _ = output.Append("    ");
-        }
-
+        WriteIndention();
         _ = output.Append(text);
     }
 
@@ -182,12 +245,16 @@ public class Transpiler
 
     void WriteLineIndented(string? text = null)
     {
+        WriteIndention();
+        _ = output.Append(text + "\n");
+    }
+
+    void WriteIndention()
+    {
         for (int i = 0; i < indention; i++)
         {
             _ = output.Append("    ");
         }
-
-        _ = output.Append(text + "\n");
     }
 
     void WriteLine(string? text = null)

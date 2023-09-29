@@ -8,10 +8,23 @@ func Main(string[] args)
     Console.WriteLine("Welcome to the future!")
 
     Raylib.InitWindow(1280, 720, "raylib [core] example - future")
+    defer Raylib.CloseWindow()
 
     // Main game loop
     while (!Raylib.WindowShouldClose())
     {
 
+    }
+}
+
+class Something
+{
+    int x
+    int y
+
+    func Something(int x, int y)
+    {
+        .x = x
+        .y = y
     }
 }

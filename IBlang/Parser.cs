@@ -8,11 +8,8 @@ public class Parser
 {
     readonly Tokens tokens;
 
-    readonly bool debug;
-
-    public Parser(Tokens tokens, bool debug = false)
+    public Parser(Tokens tokens)
     {
-        this.debug = debug;
         this.tokens = tokens;
     }
 
@@ -52,9 +49,21 @@ public class Parser
         string name = tokens.EatToken(TokenType.Identifier);
 
         ParameterDefinition[] parameters = ParseParameterDefinitions();
+
+        Token returnType = tokens.Peek;
+
+        if (returnType.Type == TokenType.Identifier)
+        {
+            tokens.EatToken(TokenType.Identifier);
+        }
+        else
+        {
+            returnType = new Token("void", TokenType.Identifier, returnType.Span);
+        }
+
         BlockBody statements = ParseBlock();
 
-        return new FunctionDecleration(name, parameters, statements);
+        return new FunctionDecleration(name, returnType, parameters, statements);
     }
 
     ParameterDefinition[] ParseParameterDefinitions()
@@ -119,7 +128,7 @@ public class Parser
 
         return tokens.Peek.Type switch
         {
-            TokenType.OpenParenthesis => ParseFunctionCall(identifier),
+            TokenType.OpenParenthesis => ParseFunctionCallStatement(identifier),
             TokenType.Assignment => ParseAssignmentStatement(identifier),
             _ => tokens.Error($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseIdentifierStatement)),
         };
@@ -165,6 +174,14 @@ public class Parser
         tokens.EatToken(TokenType.CloseParenthesis);
 
         return new FunctionCallExpression(identifier, args.ToArray());
+    }
+
+
+    FunctionCallStatement ParseFunctionCallStatement(string identifier)
+    {
+        var functionCall = ParseFunctionCall(identifier);
+
+        return new FunctionCallStatement(functionCall.Name, functionCall.Args);
     }
 
     static Dictionary<TokenType, int> precedence = new()

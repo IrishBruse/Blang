@@ -71,5 +71,6 @@ public enum TokenType
     Keyword_If,
     Keyword_Else,
     Keyword_Return,
+    Keyword_IntType,
 #pragma warning restore CA1707
 }

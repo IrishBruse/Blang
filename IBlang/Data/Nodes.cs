@@ -8,13 +8,13 @@ public interface INode { }
 
 public record FileAst(FunctionDecleration[] Functions, string Path) : INode { }
 
-public record FunctionDecleration(string Name, ParameterDefinition[] Parameters, BlockBody Body) : INode { }
+public record FunctionDecleration(string Name, Token ReturnType, ParameterDefinition[] Parameters, BlockBody Body) : INode { }
 public record IfStatement(BooleanExpression Condition, BlockBody Body, BlockBody? ElseBody = null) : INode { }
 public record ReturnStatement(Expression Result) : INode { }
 public record ParameterDefinition(string Type, string Identifier) : INode { }
 
 public record FunctionCallExpression(string Name, Expression[] Args) : INode { }
-public record FunctionCallStatement(string Name, Expression[] Args) : INode { }
+public record FunctionCallStatement(string Name, Expression[] Args) : FunctionCallExpression(Name, Args) { }
 public record BinaryExpression(Token BinaryOperator, Expression Left, Expression Right) : INode { }
 public record BooleanExpression(Token BooleanOperator, Expression Left, Expression Right) : INode { }
 public record AssignmentStatement(string Name, Expression Value) : INode { }
@@ -53,6 +53,7 @@ public interface IVisitor
     public void Visit(IntegerLiteral node);
     public void Visit(FloatLiteral node);
     public void Visit(Identifier node);
+    public void Visit(Token node);
 
     public void Visit(Error node);
 }

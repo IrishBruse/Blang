@@ -40,6 +40,7 @@ public class AstVisitor
             Visit(parameter);
             Dedent();
         }
+
         Visit(functionDecleration.Body);
     }
 
@@ -68,7 +69,7 @@ public class AstVisitor
     {
         Indent();
         Visitor.Visit(statement);
-        Visit(statement.Result);
+        VisitExpression(statement.Result);
         Dedent();
     }
 
@@ -76,7 +77,7 @@ public class AstVisitor
     {
         Indent();
         Visitor.Visit(statement);
-        Visit(statement.Value);
+        VisitExpression(statement.Value);
         Dedent();
     }
 
@@ -98,11 +99,11 @@ public class AstVisitor
     {
         foreach (Statement statement in block.Statements)
         {
-            Visit(statement);
+            VisitStatement(statement);
         }
     }
 
-    public void Visit(Statement statement)
+    public void VisitStatement(Statement statement)
     {
         statement.Switch(
             ifStatement => Visit(ifStatement),
@@ -113,9 +114,9 @@ public class AstVisitor
         );
     }
 
-    public void Visit(Expression statement)
+    public void VisitExpression(Expression expression)
     {
-        statement.Switch(
+        expression.Switch(
             stringLiteral => Visit(stringLiteral),
             floatLiteral => Visit(floatLiteral),
             integerLiteral => Visit(integerLiteral),
@@ -141,13 +142,20 @@ public class AstVisitor
         Dedent();
     }
 
+    public void Visit(Data.Token token)
+    {
+        Indent();
+        Visitor.Visit(token);
+        Dedent();
+    }
+
     public void Visit(FunctionCallExpression functionCall)
     {
         Indent();
         Visitor.Visit(functionCall);
         foreach (Expression arg in functionCall.Args)
         {
-            Visit(arg);
+            VisitExpression(arg);
         }
         Dedent();
     }

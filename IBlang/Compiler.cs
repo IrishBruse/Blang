@@ -16,8 +16,8 @@ public class Compiler
         Console.WriteLine("\n-------- Lexer  --------");
 
         Lexer lexer = new(sourceFile, file, LexerDebug.Print);
-        Tokens tokens = new(lexer.Lex(), lexer.LineEndings, false);
-        Parser parser = new(tokens, true);
+        Tokens tokens = new(lexer.Lex(), lexer.LineEndings, true);
+        Parser parser = new(tokens);
         FileAst ast = parser.Parse();
 
         Console.WriteLine("\n-------- Parser --------");
@@ -27,7 +27,8 @@ public class Compiler
         tokens.ListErrors();
 
         Transpiler transpiler = new();
-        transpiler.Emit(ast);
+        transpiler.TranspileToC(ast);
+        transpiler.Compile(ast);
     }
 
     public static bool Test(string file)

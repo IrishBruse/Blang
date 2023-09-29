@@ -20,19 +20,23 @@ public class PrintAstDebugger : IVisitor
     public void Visit(FunctionDecleration node)
     {
         Console.WriteLine();
-        Log("FunctionDecleration: " + node.Name);
+        Log($"FunctionDecleration: {node.ReturnType.Value} {node.Name}()");
     }
 
     public void Visit(BooleanExpression node)
     {
-        Log($"BooleanExpression: {node.BooleanOperator}");
+        var op = node.BooleanOperator;
+        Log($"BooleanExpression: {op.Type} {op.Value}");
         Log($"  Left: {node.Left}");
         Log($"  Right: {node.Right}");
     }
 
     public void Visit(BinaryExpression node)
     {
-        Log($"BinaryExpression: {node.BinaryOperator}");
+        var op = node.BinaryOperator;
+        Log($"BinaryExpression: {op.Type} {op.Value}");
+        Log($"  Left: {node.Left}");
+        Log($"  Right: {node.Right}");
     }
 
     public void Visit(IfStatement node)
@@ -74,6 +78,10 @@ public class PrintAstDebugger : IVisitor
     public void Visit(Identifier node)
     {
         Log($"Identifier: {node.Name}");
+    }
+    public void Visit(Data.Token node)
+    {
+        Log($"Token: {node.Type} {node.Value}");
     }
 
     public void Visit(ReturnStatement node)

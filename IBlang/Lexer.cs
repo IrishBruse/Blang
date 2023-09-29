@@ -7,7 +7,7 @@ using System.Text;
 
 using IBlang.Data;
 
-public class Lexer : IDisposable
+public class Lexer
 {
     public SortedList<int, int> LineEndings { get; private set; } = new();
 
@@ -138,6 +138,8 @@ public class Lexer : IDisposable
                 };
             }
         }
+
+        sourceFile.Close();
 
         yield return new Token(string.Empty, TokenType.Eof, new(file, startIndex, endIndex));
     }
@@ -275,15 +277,18 @@ public class Lexer : IDisposable
         StringBuilder literal = new();
 
         // Eat first "
-        char c = Next(StringColor);
-        literal.Append(c);
+        Next(StringColor);
+
+        char c;
 
         do
         {
             c = Next(StringColor);
             literal.Append(c);
         }
-        while (c != '"' && !IsLineBreak(c));
+        while (Peek() != '"' && !IsLineBreak(Peek()));
+
+        Next(StringColor);
 
         return new Token(literal.ToString(), TokenType.StringLiteral, new(file, startIndex, endIndex));
     }
@@ -385,12 +390,5 @@ public class Lexer : IDisposable
         Console.ForegroundColor = foreground;
         Console.Write(str);
         Console.ResetColor();
-    }
-
-    public void Dispose()
-    {
-        GC.SuppressFinalize(this);
-
-        sourceFile.Dispose();
     }
 }

@@ -51,6 +51,14 @@ public class LexerTests
     }
 
     [Fact]
+    public void LexFloat()
+    {
+        Token[] tokens = Lex("12.34");
+
+        Assert.Equal(TokenType.FloatLiteral, tokens[0].Type);
+    }
+
+    [Fact]
     public void LexString()
     {
         Token[] tokens = Lex("\"Hello World\"");
@@ -103,17 +111,25 @@ public class LexerTests
     [InlineData("<<", TokenType.BitwiseShiftLeft)]
     [InlineData(">>", TokenType.BitwiseShiftRight)]
     [Theory]
-    public void LexBinaryOperators(string op, TokenType tokenType)
+    public void LexBinaryOperators(string source, TokenType tokenType)
     {
-        Token[] tokens = Lex(op);
+        Token[] tokens = Lex(source);
 
         Assert.Equal(new TokenType[] { tokenType, TokenType.Eof }, TestUtility.GetTokenTypes(tokens));
     }
 
     static Token[] Lex(string source)
     {
-        using Lexer lexer = new(source);
-        IEnumerable<Token> tokens = (IEnumerable<Token>)lexer.Lex();
+        List<Token> tokens = new();
+        Lexer lexer = new(source);
+
+        IEnumerator<Token> lexerEnumerator = lexer.Lex();
+
+        while (lexerEnumerator.MoveNext())
+        {
+            tokens.Add(lexerEnumerator.Current);
+        }
+
         return tokens.ToArray();
     }
 }

@@ -1,4 +1,4 @@
-func Fibonacci(int n)
+func Fibonacci(int n) int
 {
     if n <= 1
     {
@@ -10,10 +10,10 @@ func Fibonacci(int n)
     }
 }
 
-func Main()
+func Main() int
 {
     result = Fibonacci(10)
     PrintNumber(result)
 
-    return 1
+    return 42
 }
