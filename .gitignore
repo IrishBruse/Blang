@@ -5,3 +5,4 @@
 *.pdb
 *.log
 IBlang.Tests/lcov.info
+Tests/**.c
