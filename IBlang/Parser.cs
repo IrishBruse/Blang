@@ -176,7 +176,6 @@ public class Parser
         return new FunctionCallExpression(identifier, args.ToArray());
     }
 
-
     FunctionCallStatement ParseFunctionCallStatement(string identifier)
     {
         var functionCall = ParseFunctionCall(identifier);

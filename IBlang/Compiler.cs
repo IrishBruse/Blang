@@ -10,6 +10,7 @@ public class Compiler
         Console.WriteLine($"\nCompiling {Path.GetFullPath(file)}");
 
         file = Path.GetFullPath(file);
+        Project project = new();
 
         StreamReader sourceFile = File.OpenText(file);
 
@@ -26,7 +27,14 @@ public class Compiler
         debugVisitor.Visit(ast);
         tokens.ListErrors();
 
-        Transpiler transpiler = new();
+        Console.WriteLine("\n-------- TypeChecker --------");
+
+        TypeChecker typeChecker = new(project);
+        typeChecker.Check(ast);
+
+        Console.WriteLine("\n-------- Transpiler --------");
+
+        Transpiler transpiler = new(project);
         transpiler.TranspileToC(ast);
         transpiler.Compile(ast);
     }

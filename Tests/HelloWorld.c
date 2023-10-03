@@ -13,3 +13,10 @@ void PrintString(const char* s)
 void Example__Print__int() {}
 
 typedef char* string;
+
+void main();
+
+void main()
+{
+    PrintString("Hello, World!\n");
+}

@@ -6,10 +6,13 @@ using System.Text;
 public class Transpiler
 {
     StringBuilder output = new();
-
-    public Transpiler() { }
-
     int indention;
+    readonly Project project;
+
+    public Transpiler(Project project)
+    {
+        this.project = project;
+    }
 
     void Indent()
     {
@@ -72,6 +75,7 @@ public class Transpiler
         {
             WriteLine(text);
         }
+        WriteLine();
     }
 
     void Emit(FunctionDecleration function)
@@ -91,7 +95,7 @@ public class Transpiler
             name = "main";
         }
 
-        string parameters = string.Join(", ", function.Parameters.Select(p => p.Type + " " + p.Identifier));
+        string parameters = string.Join(", ", function.Parameters.Select(p => p.Type + " " + p.Name));
 
         Write($"{function.ReturnType.Value} {name}({parameters})");
     }

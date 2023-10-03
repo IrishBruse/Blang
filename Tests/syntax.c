@@ -14,24 +14,28 @@ void Example__Print__int() {}
 
 typedef char* string;
 
-int Fibonacci(int n);
 int main();
-
-int Fibonacci(int n)
-{
-    if (n <= 1)
-    {
-        return n;
-    }
-    else
-    {
-        return Fibonacci(n - 1) + Fibonacci(n - 2);
-    }
-}
+int foo();
+void test(string s);
 
 int main()
 {
-    int result = Fibonacci(10);
-    PrintNumber(result);
-    return 42;
+    if (foo() == 4)
+    {
+        return 0;
+    }
+    else
+    {
+        test("Hello World \n");
+    }
+}
+
+int foo()
+{
+    return 4;
+}
+
+void test(string s)
+{
+    PrintString(s);
 }

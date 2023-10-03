@@ -11,7 +11,7 @@ public record FileAst(FunctionDecleration[] Functions, string Path) : INode { }
 public record FunctionDecleration(string Name, Token ReturnType, ParameterDefinition[] Parameters, BlockBody Body) : INode { }
 public record IfStatement(BooleanExpression Condition, BlockBody Body, BlockBody? ElseBody = null) : INode { }
 public record ReturnStatement(Expression Result) : INode { }
-public record ParameterDefinition(string Type, string Identifier) : INode { }
+public record ParameterDefinition(string Type, string Name) : INode { }
 
 public record FunctionCallExpression(string Name, Expression[] Args) : INode { }
 public record FunctionCallStatement(string Name, Expression[] Args) : FunctionCallExpression(Name, Args) { }
@@ -26,6 +26,9 @@ public record FloatLiteral(float Value) : INode { }
 public record Identifier(string Name) : INode { }
 public record BlockBody(Statement[] Statements) : INode { }
 public record Error(string Value) : INode { }
+
+public record Type(string Value) { }
+
 
 [GenerateOneOf]
 public partial class Statement : OneOfBase<IfStatement, FunctionCallStatement, ReturnStatement, AssignmentStatement, Error>, INode { }

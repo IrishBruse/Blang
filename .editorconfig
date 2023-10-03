@@ -69,7 +69,8 @@ csharp_new_line_before_members_in_anonymous_types = true
 dotnet_diagnostic.IDE0003.severity = suggestion         # Simplify name
 dotnet_diagnostic.IDE0001.severity = suggestion         # Simplify name
 
-dotnet_diagnostic.IDE0010.severity = refactoring              # Populate switch
+dotnet_diagnostic.CA1822.severity = none                # Mark members as static
+dotnet_diagnostic.IDE0010.severity = refactoring        # Populate switch
 dotnet_diagnostic.IDE0022.severity = refactoring        # Use block scope
 dotnet_diagnostic.IDE0044.severity = refactoring        # Make field readonly
 dotnet_diagnostic.IDE0046.severity = refactoring        # If statement can be simplified
