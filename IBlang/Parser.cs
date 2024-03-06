@@ -4,39 +4,34 @@ using System.Diagnostics;
 
 using IBlang.Data;
 
-public class Parser
+public class Parser(Tokens tokens)
 {
-    readonly Tokens tokens;
-
-    public Parser(Tokens tokens)
-    {
-        this.tokens = tokens;
-    }
+    readonly Tokens tokens = tokens;
 
     public FileAst Parse()
     {
-        List<FunctionDecleration> functions = new();
+        List<FunctionDecleration> functions = [];
 
         string file = tokens.Peek.Span.File;
 
         while (tokens.Peek.Type != TokenType.Eof)
         {
-            if (tokens.Peek.Type == TokenType.Keyword_Func)
+            switch (tokens.Peek.Type)
             {
+                case TokenType.Keyword_Func:
                 functions.Add(ParseFunctionDecleration());
-            }
-            else if (tokens.Peek.Type == TokenType.Comment)
-            {
-                tokens.EatToken(TokenType.Comment);
-            }
-            else if (tokens.Peek.Type == TokenType.Eof)
-            {
-                return new FileAst(functions.ToArray(), file);
-            }
-            else
-            {
-                tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value}", tokens.Peek.Span, new StackTrace(true)));
+                break;
+
+                case TokenType.Comment:
+                _ = tokens.EatToken(TokenType.Comment);
+                break;
+
+                case TokenType.Eof: return new FileAst(functions.ToArray(), file);
+
+                default:
+                tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value}", tokens.Peek.Span, null));
                 tokens.Skip();
+                break;
             }
         }
         return new FileAst(functions.ToArray(), file);
@@ -44,7 +39,7 @@ public class Parser
 
     FunctionDecleration ParseFunctionDecleration()
     {
-        tokens.EatToken(TokenType.Keyword_Func);
+        _ = tokens.EatToken(TokenType.Keyword_Func);
 
         string name = tokens.EatToken(TokenType.Identifier);
 
@@ -54,7 +49,7 @@ public class Parser
 
         if (returnType.Type == TokenType.Identifier)
         {
-            tokens.EatToken(TokenType.Identifier);
+            _ = tokens.EatToken(TokenType.Identifier);
         }
         else
         {
@@ -68,9 +63,9 @@ public class Parser
 
     ParameterDefinition[] ParseParameterDefinitions()
     {
-        tokens.EatToken(TokenType.OpenParenthesis);
+        _ = tokens.EatToken(TokenType.OpenParenthesis);
 
-        List<ParameterDefinition> parameters = new();
+        List<ParameterDefinition> parameters = [];
 
         while (tokens.Peek.Type != TokenType.CloseParenthesis)
         {
@@ -90,23 +85,23 @@ public class Parser
             }
         }
 
-        tokens.EatToken(TokenType.CloseParenthesis);
+        _ = tokens.EatToken(TokenType.CloseParenthesis);
 
         return parameters.ToArray();
     }
 
     BlockBody ParseBlock()
     {
-        tokens.EatToken(TokenType.OpenScope);
+        _ = tokens.EatToken(TokenType.OpenScope);
 
-        List<Statement> statements = new();
+        List<Statement> statements = [];
 
         while (tokens.Peek.Type != TokenType.CloseScope)
         {
             statements.Add(ParseStatement());
         }
 
-        tokens.EatToken(TokenType.CloseScope);
+        _ = tokens.EatToken(TokenType.CloseScope);
 
         return new(statements.ToArray());
     }
@@ -162,23 +157,23 @@ public class Parser
 
     FunctionCallExpression ParseFunctionCall(string identifier)
     {
-        List<Expression> args = new();
+        List<Expression> args = [];
 
-        tokens.EatToken(TokenType.OpenParenthesis);
+        _ = tokens.EatToken(TokenType.OpenParenthesis);
         while (tokens.Peek.Type != TokenType.CloseParenthesis)
         {
             args.Add(ParseExpression());
-            tokens.TryEatToken(TokenType.Comma);
+            _ = tokens.TryEatToken(TokenType.Comma);
         }
 
-        tokens.EatToken(TokenType.CloseParenthesis);
+        _ = tokens.EatToken(TokenType.CloseParenthesis);
 
         return new FunctionCallExpression(identifier, args.ToArray());
     }
 
     FunctionCallStatement ParseFunctionCallStatement(string identifier)
     {
-        var functionCall = ParseFunctionCall(identifier);
+        FunctionCallExpression functionCall = ParseFunctionCall(identifier);
 
         return new FunctionCallStatement(functionCall.Name, functionCall.Args);
     }
@@ -195,7 +190,7 @@ public class Parser
 
     Expression ParseExpression(int minPrecedence = 1)
     {
-        var lhs = ParseAtom();
+        Expression lhs = ParseAtom();
 
         while (true)
         {
@@ -208,7 +203,7 @@ public class Parser
 
             int nextPrecedence = precedence[tokens.Peek.Type] + 1;
 
-            var operation = tokens.Peek;
+            Token operation = tokens.Peek;
             tokens.Skip();
 
             Expression rhs = ParseExpression(nextPrecedence);
@@ -221,8 +216,8 @@ public class Parser
     {
         if (tokens.Peek.Type == TokenType.OpenParenthesis)
         {
-            var expression = ParseExpression();
-            tokens.EatToken(TokenType.CloseParenthesis, "Mismatched parenthesis, expected ')'");
+            Expression expression = ParseExpression();
+            _ = tokens.EatToken(TokenType.CloseParenthesis, "Mismatched parenthesis, expected ')'");
             return expression;
         }
         else if (tokens.Peek.Type == TokenType.Eof)
@@ -249,7 +244,7 @@ public class Parser
     /// <summary> if <BinaryExpression> { } </summary>
     IfStatement ParseIfStatement()
     {
-        tokens.EatToken(TokenType.Keyword_If);
+        _ = tokens.EatToken(TokenType.Keyword_If);
         BooleanExpression condition = ParseBooleanExpression();
         BlockBody body = ParseBlock();
         BlockBody? elseBody = null;
@@ -266,28 +261,28 @@ public class Parser
     {
         Expression left = ParseExpression();
 
-        var operation = tokens.Peek;
+        Token operation = tokens.Peek;
 
         switch (tokens.Peek.Type)
         {
             case TokenType.Addition:
-            tokens.EatToken(TokenType.Addition);
+            _ = tokens.EatToken(TokenType.Addition);
             break;
 
             case TokenType.Subtraction:
-            tokens.EatToken(TokenType.Subtraction);
+            _ = tokens.EatToken(TokenType.Subtraction);
             break;
 
             case TokenType.Multiplication:
-            tokens.EatToken(TokenType.Multiplication);
+            _ = tokens.EatToken(TokenType.Multiplication);
             break;
 
             case TokenType.Division:
-            tokens.EatToken(TokenType.Division);
+            _ = tokens.EatToken(TokenType.Division);
             break;
 
             case TokenType.EqualEqual:
-            tokens.EatToken(TokenType.EqualEqual);
+            _ = tokens.EatToken(TokenType.EqualEqual);
             break;
 
             default:
@@ -304,15 +299,15 @@ public class Parser
     {
         Expression left = ParseExpression();
 
-        var operation = tokens.Peek;
+        Token operation = tokens.Peek;
 
         if (operation.Type == TokenType.EqualEqual)
         {
-            tokens.EatToken(TokenType.EqualEqual);
+            _ = tokens.EatToken(TokenType.EqualEqual);
         }
         else if (operation.Type == TokenType.LessThanEqual)
         {
-            tokens.EatToken(TokenType.LessThanEqual);
+            _ = tokens.EatToken(TokenType.LessThanEqual);
         }
         else
         {

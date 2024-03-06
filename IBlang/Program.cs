@@ -1,15 +1,13 @@
-namespace IBlang;
+using IBlang;
 
-public class Program
-{
-    public static void Main()
-    {
-        // Error tests
-        // Compiler.Run("../Tests/Error.ib");
-        // Compiler.Run("../Tests/Syntax.ib");
+var arguments = Environment.GetCommandLineArgs()[1..];
+Console.WriteLine(string.Join(", ", arguments));
 
-        Compiler.Run("../Tests/HelloWorld.ib");
-        Compiler.Run("../Tests/Fibonacci.ib");
-        Compiler.Run("../Tests/syntax.ib");
-    }
-}
+// Error tests
+Compiler.Run("../Tests/Error.ib");
+// Compiler.Run("../Tests/Syntax.ib");
+
+
+// Compiler.Run("../Tests/HelloWorld.ib");
+// Compiler.Run("../Tests/Fibonacci.ib");
+// Compiler.Run("../Tests/syntax.ib");

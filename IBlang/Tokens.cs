@@ -8,20 +8,20 @@ using IBlang.Data;
 [DebuggerStepThrough]
 public class Tokens
 {
+    static readonly bool ThrowOnErrors = false;
+
     readonly IEnumerator<Token> tokens;
     readonly SortedList<int, int> lineEndings;
-    readonly bool throwOnErrors;
 
     public Token Peek => tokens.Current;
 
-    List<ParseError> Errors { get; } = new();
+    List<ParseError> Errors { get; } = [];
 
-    public Tokens(IEnumerator<Token> tokens, SortedList<int, int> lineEndings, bool throwOnErrors = false)
+    public Tokens(IEnumerator<Token> tokens, SortedList<int, int> lineEndings)
     {
         this.tokens = tokens;
         this.lineEndings = lineEndings;
-        this.throwOnErrors = throwOnErrors;
-        tokens.MoveNext();
+        _ = tokens.MoveNext();
     }
 
     [DebuggerStepThrough]
@@ -42,7 +42,7 @@ public class Tokens
             }
 
             ParseError error = new(message, Peek.Span, new StackTrace(true));
-            if (throwOnErrors)
+            if (ThrowOnErrors)
             {
                 throw new ParseException(error);
             }
@@ -53,7 +53,7 @@ public class Tokens
             return string.Empty;
         }
 
-        tokens.MoveNext();
+        _ = tokens.MoveNext();
         return p.Value;
     }
 
@@ -64,7 +64,7 @@ public class Tokens
 
     public void Skip()
     {
-        tokens.MoveNext();
+        _ = tokens.MoveNext();
     }
 
     public int EatNumber(TokenType type)
@@ -74,7 +74,7 @@ public class Tokens
         if (Peek.Type != type)
         {
             ParseError error = new($"Expected {type} but got {Peek.Type} with value '{Peek.Value}'", Peek.Span, new StackTrace(true));
-            if (throwOnErrors)
+            if (ThrowOnErrors)
             {
                 throw new ParseException(error);
             }
@@ -85,7 +85,7 @@ public class Tokens
             return 0;
         }
 
-        tokens.MoveNext();
+        _ = tokens.MoveNext();
 
         if (int.TryParse(p.Value, out int result))
         {
@@ -101,7 +101,7 @@ public class Tokens
 
         if (p.Type == type)
         {
-            tokens.MoveNext();
+            _ = tokens.MoveNext();
             return true;
         }
         else
@@ -117,7 +117,7 @@ public class Tokens
         if (p.Type != TokenType.Identifier)
         {
             ParseError error = new($"Expected identifier but got {p.Type} with value '{p.Value}'", p.Span, new StackTrace(true));
-            if (throwOnErrors)
+            if (ThrowOnErrors)
             {
                 throw new ParseException(error);
             }
@@ -128,7 +128,7 @@ public class Tokens
             return string.Empty;
         }
 
-        tokens.MoveNext();
+        _ = tokens.MoveNext();
 
         return p.Value;
     }
@@ -136,7 +136,7 @@ public class Tokens
     public Error Error(string message)
     {
         ParseError error = new(message, Peek.Span, new StackTrace(true));
-        if (throwOnErrors)
+        if (ThrowOnErrors)
         {
             throw new ParseException(error);
         }
@@ -145,7 +145,7 @@ public class Tokens
             Errors.Add(error);
         }
 
-        tokens.MoveNext();
+        _ = tokens.MoveNext();
 
         return new Error(message);
     }
@@ -157,7 +157,7 @@ public class Tokens
 
     public void AddError(ParseError error)
     {
-        if (throwOnErrors)
+        if (ThrowOnErrors)
         {
             throw new ParseException(error);
         }

@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "Build IBlang",
-            "program": "${workspaceFolder}/IBlang/bin/Debug/net7.0/IBlang.dll",
+            "program": "${workspaceFolder}/IBlang/bin/Debug/net8.0/IBlang.dll",
             "cwd": "${workspaceFolder}/IBlang",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",

@@ -10,6 +10,6 @@ public class CompilerTests
     {
         file = $"Tests/{file}.ib";
 
-        Compiler.Test(file);
+        _ = Compiler.Test(file);
     }
 }

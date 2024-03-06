@@ -7,9 +7,9 @@ using System.Text;
 
 using IBlang.Data;
 
-public class Lexer
+public class Lexer : IDisposable
 {
-    public SortedList<int, int> LineEndings { get; private set; } = new();
+    public SortedList<int, int> LineEndings { get; private set; } = [];
 
     public static readonly Dictionary<string, TokenType> Keywords = new()
     {
@@ -148,22 +148,22 @@ public class Lexer
     {
         if (c == '\r')
         {
-            Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "\\r" : "", foreground: WhitespaceColor);
+            _ = Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "\\r" : "", foreground: WhitespaceColor);
         }
         else if (c == '\n')
         {
             line++;
             LineEndings.Add(endIndex, line);
-            Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "\\n\n" : "\n", foreground: WhitespaceColor);
+            _ = Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "\\n\n" : "\n", foreground: WhitespaceColor);
         }
         else if (c == '\t')
         {
-            Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "»   " : "    ", foreground: WhitespaceColor);
+            _ = Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "»   " : "    ", foreground: WhitespaceColor);
         }
         else
         {
             // Eat all other whitespace
-            Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "·" : " ", foreground: WhitespaceColor);
+            _ = Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "·" : " ", foreground: WhitespaceColor);
         }
     }
 
@@ -259,7 +259,7 @@ public class Lexer
 
         while (!IsLineBreak(Peek()) && !sourceFile.EndOfStream)
         {
-            comment.Append(Next(CommentColor));
+            _ = comment.Append(Next(CommentColor));
         }
 
         return new Token(comment.ToString(), TokenType.Comment, new(file, startIndex, endIndex));
@@ -277,18 +277,18 @@ public class Lexer
         StringBuilder literal = new();
 
         // Eat first "
-        Next(StringColor);
+        _ = Next(StringColor);
 
         char c;
 
         do
         {
             c = Next(StringColor);
-            literal.Append(c);
+            _ = literal.Append(c);
         }
         while (Peek() != '"' && !IsLineBreak(Peek()));
 
-        Next(StringColor);
+        _ = Next(StringColor);
 
         return new Token(literal.ToString(), TokenType.StringLiteral, new(file, startIndex, endIndex));
     }
@@ -301,7 +301,7 @@ public class Lexer
         do
         {
             c = Next(IdentifierColor);
-            identifierBuilder.Append(c);
+            _ = identifierBuilder.Append(c);
         }
         while (char.IsLetterOrDigit(Peek()) && !IsLineBreak(c));
 
@@ -343,7 +343,7 @@ public class Lexer
         do
         {
             c = Next(NumberColor);
-            number.Append(c);
+            _ = number.Append(c);
         }
         while (char.IsDigit(Peek()));
 
@@ -390,5 +390,11 @@ public class Lexer
         Console.ForegroundColor = foreground;
         Console.Write(str);
         Console.ResetColor();
+    }
+
+    public void Dispose()
+    {
+        sourceFile.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
