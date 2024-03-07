@@ -3,16 +3,13 @@ namespace IBlang.Walker;
 using System.Diagnostics;
 using System.Text;
 
-public class Transpiler
+using IBlang.Data;
+
+public class Transpiler(Tokens tokens)
 {
     StringBuilder output = new();
     int indention;
-    readonly Project project;
-
-    public Transpiler(Project project)
-    {
-        this.project = project;
-    }
+    readonly Tokens tokens = tokens;
 
     void Indent()
     {
@@ -42,7 +39,6 @@ public class Transpiler
         File.WriteAllText(Path.ChangeExtension(file.Path, "c"), output.ToString());
     }
 
-
     public void Compile(FileAst file)
     {
         Prelude();
@@ -58,6 +54,8 @@ public class Transpiler
             FileName = "tcc",
             Arguments = "-Wall " + Path.ChangeExtension(file.Path, "c"),
             RedirectStandardInput = true,
+            RedirectStandardError = true,
+            RedirectStandardOutput = true,
         });
 
         if (tcc == null)
@@ -66,7 +64,14 @@ public class Transpiler
             return;
         }
 
-        tcc.StandardInput.Write(output);
+        tcc.WaitForExit();
+
+        Console.Write(tcc.StandardOutput.ReadToEnd());
+
+        if (tcc.ExitCode != 0)
+        {
+            tokens.AddError(new ParseError(tcc.StandardError.ReadToEnd(), null, new StackTrace(true)));
+        }
     }
 
     void Prelude()

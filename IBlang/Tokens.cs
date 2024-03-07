@@ -1,6 +1,5 @@
 namespace IBlang;
 
-using System;
 using System.Diagnostics;
 
 using IBlang.Data;
@@ -8,23 +7,21 @@ using IBlang.Data;
 [DebuggerStepThrough]
 public class Tokens
 {
-    static readonly bool ThrowOnErrors = false;
+    public Token Peek => tokens.Current;
+    public List<ParseError> Errors { get; } = [];
+    public readonly SortedList<int, int> LineEndings;
 
     readonly IEnumerator<Token> tokens;
-    readonly SortedList<int, int> lineEndings;
 
-    public Token Peek => tokens.Current;
-
-    List<ParseError> Errors { get; } = [];
+    static readonly bool ThrowOnErrors;
 
     public Tokens(IEnumerator<Token> tokens, SortedList<int, int> lineEndings)
     {
         this.tokens = tokens;
-        this.lineEndings = lineEndings;
+        LineEndings = lineEndings;
         _ = tokens.MoveNext();
     }
 
-    [DebuggerStepThrough]
     public string EatToken(TokenType type, string? errorOverride = null)
     {
         Token p = Peek;
@@ -117,6 +114,7 @@ public class Tokens
         if (p.Type != TokenType.Identifier)
         {
             ParseError error = new($"Expected identifier but got {p.Type} with value '{p.Value}'", p.Span, new StackTrace(true));
+
             if (ThrowOnErrors)
             {
                 throw new ParseException(error);
@@ -125,6 +123,7 @@ public class Tokens
             {
                 Errors.Add(error);
             }
+
             return string.Empty;
         }
 
@@ -164,42 +163,6 @@ public class Tokens
         else
         {
             Errors.Add(error);
-        }
-    }
-
-    public void ListErrors(bool showStackTrace = false)
-    {
-        if (Errors.Count > 0)
-        {
-            Console.WriteLine("\n\n-------- Errors --------");
-        }
-
-        foreach (ParseError error in Errors)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-
-            int line = 0;
-            int column = 0;
-            int lastIndex = 0;
-            foreach ((int index, int newLine) in lineEndings)
-            {
-                if (error.Span.Start >= lastIndex && error.Span.Start <= index)
-                {
-                    line = newLine;
-                    column = error.Span.Start - lastIndex;
-                    break;
-                }
-
-                lastIndex = index;
-            }
-
-            Console.Error.WriteLine($"{error.Span.File}:{line}:{column} {error.Message}");
-
-            if (showStackTrace)
-            {
-                Console.Error.Write(error.StackTrace);
-            }
-            Console.ResetColor();
         }
     }
 }

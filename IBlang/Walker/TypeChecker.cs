@@ -1,13 +1,8 @@
 namespace IBlang.Walker;
 
-public class TypeChecker
+public class TypeChecker(Project project)
 {
-    readonly Project project;
-
-    public TypeChecker(Project project)
-    {
-        this.project = project;
-    }
+    readonly Project project = project;
 
     public void Check(FileAst ast)
     {

@@ -1,4 +1,4 @@
-namespace IBlang;
+namespace IBlang.Walker;
 
 public class PrintAstDebugger : IVisitor
 {
@@ -25,7 +25,7 @@ public class PrintAstDebugger : IVisitor
 
     public void Visit(BooleanExpression node)
     {
-        var op = node.BooleanOperator;
+        Data.Token op = node.BooleanOperator;
         Log($"BooleanExpression: {op.Type} {op.Value}");
         Log($"  Left: {node.Left}");
         Log($"  Right: {node.Right}");
@@ -33,7 +33,7 @@ public class PrintAstDebugger : IVisitor
 
     public void Visit(BinaryExpression node)
     {
-        var op = node.BinaryOperator;
+        Data.Token op = node.BinaryOperator;
         Log($"BinaryExpression: {op.Type} {op.Value}");
         Log($"  Left: {node.Left}");
         Log($"  Right: {node.Right}");

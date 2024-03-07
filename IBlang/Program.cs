@@ -1,10 +1,11 @@
 using IBlang;
 
-var arguments = Environment.GetCommandLineArgs()[1..];
+string[] arguments = Environment.GetCommandLineArgs()[1..];
 Console.WriteLine(string.Join(", ", arguments));
 
 // Error tests
-Compiler.Run("../Tests/Error.ib");
+Compiler.Run("../Tests/Empty.ib");
+// Compiler.Run("../Tests/Error.ib");
 // Compiler.Run("../Tests/Syntax.ib");
 
 

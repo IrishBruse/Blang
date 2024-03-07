@@ -1,3 +1,4 @@
+//42
 func Main()
 {
     PrintNumber(42)

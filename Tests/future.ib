@@ -28,3 +28,9 @@ class Something
         .y = y
     }
 }
+
+class List<T>
+{
+    T[] items
+    int count
+}

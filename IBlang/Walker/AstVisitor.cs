@@ -1,10 +1,10 @@
-namespace IBlang;
+namespace IBlang.Walker;
 
 #pragma warning disable IDE0200, IDE0052
 
-public class AstVisitor
+public class AstVisitor(IVisitor visitor)
 {
-    IVisitor Visitor { get; set; }
+    IVisitor Visitor { get; set; } = visitor;
 
     void Indent()
     {
@@ -14,11 +14,6 @@ public class AstVisitor
     void Dedent()
     {
         Visitor.Indent--;
-    }
-
-    public AstVisitor(IVisitor visitor)
-    {
-        Visitor = visitor;
     }
 
     public void Visit(FileAst file)

@@ -26,14 +26,21 @@ public class Parser(Tokens tokens)
                 _ = tokens.EatToken(TokenType.Comment);
                 break;
 
-                case TokenType.Eof: return new FileAst(functions.ToArray(), file);
+                case TokenType.Eof:
+                break;
 
                 default:
-                tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value}", tokens.Peek.Span, null));
+                tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value}", tokens.Peek.Span, new StackTrace(true)));
                 tokens.Skip();
                 break;
             }
         }
+
+        if (!functions.Any(decl => decl.Name == "main"))
+        {
+            tokens.AddError(new ParseError("Entry Main() not found", new Span(file, 0, 0), new StackTrace(true)));
+        }
+
         return new FileAst(functions.ToArray(), file);
     }
 

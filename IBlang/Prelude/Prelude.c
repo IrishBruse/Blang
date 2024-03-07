@@ -7,9 +7,11 @@ void PrintNumber(int n)
 
 void PrintString(const char* s)
 {
-    puts(s);
+    printf("%s\n", s);
 }
 
-void Example__Print__int() {}
-
-typedef char* string;
+typedef struct
+{
+    char* data;
+    int length;
+} string;

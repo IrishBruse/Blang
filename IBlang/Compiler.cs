@@ -7,37 +7,56 @@ public class Compiler
 {
     public static void Run(string file)
     {
-        Console.WriteLine($"\nCompiling {Path.GetFullPath(file)}");
-
         file = Path.GetFullPath(file);
-        Project project = new();
 
+        Console.WriteLine($"Compiling {file}");
         StreamReader sourceFile = File.OpenText(file);
 
-        Console.WriteLine("\n-------- Lexer  --------");
+        Project project = new();
 
+        Console.WriteLine("-------- Lexer  --------");
         Lexer lexer = new(sourceFile, file, LexerDebug.Print);
         Tokens tokens = new(lexer.Lex(), lexer.LineEndings);
+
+        if (tokens.Errors.Count > 0)
+        {
+            PrintErrors(tokens);
+            return;
+        }
+
+        Console.WriteLine("-------- Parser --------");
         Parser parser = new(tokens);
         FileAst ast = parser.Parse();
-
-        Console.WriteLine("\n-------- Parser --------");
-
         AstVisitor debugVisitor = new(new PrintAstDebugger());
         debugVisitor.Visit(ast);
 
-        Console.WriteLine("\n-------- TypeChecker --------");
+        if (tokens.Errors.Count > 0)
+        {
+            PrintErrors(tokens);
+            return;
+        }
 
+        Console.WriteLine("-------- TypeChecker --------");
         TypeChecker typeChecker = new(project);
         typeChecker.Check(ast);
 
-        Console.WriteLine("\n-------- Transpiler --------");
+        if (tokens.Errors.Count > 0)
+        {
+            PrintErrors(tokens);
+            return;
+        }
 
-        Transpiler transpiler = new(project);
+        Console.WriteLine("-------- Transpiler --------");
+        Transpiler transpiler = new(tokens);
         transpiler.TranspileToC(ast);
         transpiler.Compile(ast);
 
-        tokens.ListErrors();
+        if (tokens.Errors.Count > 0)
+        {
+            PrintErrors(tokens);
+            return;
+        }
+
     }
 
     public static bool Test(string file)
@@ -60,6 +79,53 @@ public class Compiler
 
         Run(file);
 
-        return expected.Equals(source);
+        return expected.Equals(source, StringComparison.Ordinal);
+    }
+
+    public static void PrintErrors(Tokens tokens, bool showStackTrace = false)
+    {
+        if (tokens.Errors.Count > 0)
+        {
+            Console.Write("-------- ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("Errors");
+            Console.ResetColor();
+            Console.WriteLine(" --------");
+        }
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        foreach (ParseError error in tokens.Errors)
+        {
+            int line = 0;
+            int column = 0;
+            int lastIndex = 0;
+
+            if (error.Span != null)
+            {
+                foreach ((int index, int newLine) in tokens.LineEndings)
+                {
+                    if (error.Span.Start >= lastIndex && error.Span.Start <= index)
+                    {
+                        line = newLine;
+                        column = error.Span.Start - lastIndex;
+                        break;
+                    }
+
+                    lastIndex = index;
+                }
+
+                Console.Error.WriteLine($"{error.Span.File}:{line}:{column} {error.Message}");
+            }
+            else
+            {
+                Console.Error.WriteLine(error.Message);
+            }
+
+            if (showStackTrace)
+            {
+                Console.Error.Write(error.StackTrace);
+            }
+        }
+        Console.ResetColor();
     }
 }
