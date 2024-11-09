@@ -51,13 +51,13 @@ public class Lexer : IDisposable
     StreamReader sourceFile;
     readonly string file;
 
-    readonly LexerDebug flags;
+    readonly CompilationFlags flags;
 
     int endIndex;
     int startIndex;
     int line;
 
-    public Lexer(StreamReader sourceFile, string file, LexerDebug flags = LexerDebug.None)
+    public Lexer(StreamReader sourceFile, string file, CompilationFlags flags = CompilationFlags.None)
     {
         this.sourceFile = sourceFile;
         this.file = file;
@@ -65,7 +65,7 @@ public class Lexer : IDisposable
         this.flags = flags;
     }
 
-    public Lexer(string sourceText, LexerDebug flags = LexerDebug.None)
+    public Lexer(string sourceText, CompilationFlags flags = CompilationFlags.None)
     {
         file = "__NOFILE__.ib";
         MemoryStream stream = new();
@@ -89,6 +89,11 @@ public class Lexer : IDisposable
 
     public IEnumerator<Token> Lex()
     {
+        if (flags.HasFlag(CompilationFlags.Print))
+        {
+            Console.WriteLine("-------- Lexer  --------");
+        }
+
         while (!sourceFile.EndOfStream)
         {
             char c = Peek();
@@ -148,22 +153,22 @@ public class Lexer : IDisposable
     {
         if (c == '\r')
         {
-            _ = Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "\\r" : "", foreground: WhitespaceColor);
+            _ = Next(display: flags.HasFlag(CompilationFlags.Whitespace) ? "\\r" : "", foreground: WhitespaceColor);
         }
         else if (c == '\n')
         {
             line++;
             LineEndings.Add(endIndex, line);
-            _ = Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "\\n\n" : "\n", foreground: WhitespaceColor);
+            _ = Next(display: flags.HasFlag(CompilationFlags.Whitespace) ? "\\n\n" : "\n", foreground: WhitespaceColor);
         }
         else if (c == '\t')
         {
-            _ = Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "»   " : "    ", foreground: WhitespaceColor);
+            _ = Next(display: flags.HasFlag(CompilationFlags.Whitespace) ? "»   " : "    ", foreground: WhitespaceColor);
         }
         else
         {
             // Eat all other whitespace
-            _ = Next(display: flags.HasFlag(LexerDebug.Whitespace) ? "·" : " ", foreground: WhitespaceColor);
+            _ = Next(display: flags.HasFlag(CompilationFlags.Whitespace) ? "·" : " ", foreground: WhitespaceColor);
         }
     }
 
@@ -249,7 +254,7 @@ public class Lexer : IDisposable
 
     Token LexSingleLineComment()
     {
-        if (flags.HasFlag(LexerDebug.Print))
+        if (flags.HasFlag(CompilationFlags.Print))
         {
             Console.CursorLeft--;
             Print('/', foreground: CommentColor);
@@ -309,7 +314,7 @@ public class Lexer : IDisposable
 
         if (Keywords.TryGetValue(identifier, out TokenType keyword))
         {
-            if (flags.HasFlag(LexerDebug.Print))
+            if (flags.HasFlag(CompilationFlags.Print))
             {
                 // Recolor keywords
                 if (!Console.IsOutputRedirected)
@@ -361,7 +366,7 @@ public class Lexer : IDisposable
 
         endIndex++;
 
-        if (flags.HasFlag(LexerDebug.Print))
+        if (flags.HasFlag(CompilationFlags.Print))
         {
             if (display != null)
             {

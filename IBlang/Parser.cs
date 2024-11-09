@@ -4,41 +4,40 @@ using System.Diagnostics;
 
 using IBlang.Data;
 
-public class Parser(Tokens tokens)
+public class Parser(Project compilation)
 {
-    readonly Tokens tokens = tokens;
+    readonly Project compilation = compilation;
 
     public FileAst Parse()
     {
         List<FunctionDecleration> functions = [];
 
-        string file = tokens.Peek.Span.File;
+        string file = compilation.Peek.Span.File;
 
-        while (tokens.Peek.Type != TokenType.Eof)
+        while (compilation.Peek.Type != TokenType.Eof)
         {
-            switch (tokens.Peek.Type)
+            switch (compilation.Peek.Type)
             {
                 case TokenType.Keyword_Func:
                 functions.Add(ParseFunctionDecleration());
                 break;
 
                 case TokenType.Comment:
-                _ = tokens.EatToken(TokenType.Comment);
+                _ = compilation.EatToken(TokenType.Comment);
                 break;
 
-                case TokenType.Eof:
-                break;
+                case TokenType.Eof: break;
 
                 default:
-                tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value}", tokens.Peek.Span, new StackTrace(true)));
-                tokens.Skip();
+                compilation.AddError(new ParseError($"Unexpected token {compilation.Peek.Type}: {compilation.Peek.Value}", compilation.Peek.Span, new StackTrace(true)));
+                compilation.Skip();
                 break;
             }
         }
 
-        if (!functions.Any(decl => decl.Name == "main"))
+        if (!functions.Any(decl => decl.Name == "Main"))
         {
-            tokens.AddError(new ParseError("Entry Main() not found", new Span(file, 0, 0), new StackTrace(true)));
+            compilation.AddError(new ParseError("Entry Main() not found", new Span(file, 0, 0), new StackTrace(true)));
         }
 
         return new FileAst(functions.ToArray(), file);
@@ -46,17 +45,17 @@ public class Parser(Tokens tokens)
 
     FunctionDecleration ParseFunctionDecleration()
     {
-        _ = tokens.EatToken(TokenType.Keyword_Func);
+        _ = compilation.EatToken(TokenType.Keyword_Func);
 
-        string name = tokens.EatToken(TokenType.Identifier);
+        string name = compilation.EatToken(TokenType.Identifier);
 
         ParameterDefinition[] parameters = ParseParameterDefinitions();
 
-        Token returnType = tokens.Peek;
+        Token returnType = compilation.Peek;
 
         if (returnType.Type == TokenType.Identifier)
         {
-            _ = tokens.EatToken(TokenType.Identifier);
+            _ = compilation.EatToken(TokenType.Identifier);
         }
         else
         {
@@ -70,19 +69,19 @@ public class Parser(Tokens tokens)
 
     ParameterDefinition[] ParseParameterDefinitions()
     {
-        _ = tokens.EatToken(TokenType.OpenParenthesis);
+        _ = compilation.EatToken(TokenType.OpenParenthesis);
 
         List<ParameterDefinition> parameters = [];
 
-        while (tokens.Peek.Type != TokenType.CloseParenthesis)
+        while (compilation.Peek.Type != TokenType.CloseParenthesis)
         {
-            string type = tokens.EatIdentifier();
-            string identifier = tokens.EatIdentifier();
+            string type = compilation.EatIdentifier();
+            string identifier = compilation.EatIdentifier();
             parameters.Add(new ParameterDefinition(type, identifier));
 
             // tokens.EatToken(TokenType.Identifier); // Name
 
-            if (tokens.TryEatToken(TokenType.Comma))
+            if (compilation.TryEatToken(TokenType.Comma))
             {
                 continue;
             }
@@ -92,55 +91,55 @@ public class Parser(Tokens tokens)
             }
         }
 
-        _ = tokens.EatToken(TokenType.CloseParenthesis);
+        _ = compilation.EatToken(TokenType.CloseParenthesis);
 
         return parameters.ToArray();
     }
 
     BlockBody ParseBlock()
     {
-        _ = tokens.EatToken(TokenType.OpenScope);
+        _ = compilation.EatToken(TokenType.OpenScope);
 
         List<Statement> statements = [];
 
-        while (tokens.Peek.Type != TokenType.CloseScope)
+        while (compilation.Peek.Type != TokenType.CloseScope)
         {
             statements.Add(ParseStatement());
         }
 
-        _ = tokens.EatToken(TokenType.CloseScope);
+        _ = compilation.EatToken(TokenType.CloseScope);
 
         return new(statements.ToArray());
     }
 
     Statement ParseStatement()
     {
-        return tokens.Peek.Type switch
+        return compilation.Peek.Type switch
         {
             TokenType.Identifier => ParseIdentifierStatement(),
             TokenType.Keyword_If => ParseIfStatement(),
             TokenType.Keyword_Return => ParseReturn(),
-            _ => tokens.Error($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in ParseStatement"),
+            _ => compilation.Error($"Unexpected token {compilation.Peek.Type}: {compilation.Peek.Value} in ParseStatement"),
         };
     }
 
     Statement ParseIdentifierStatement()
     {
-        string identifier = tokens.EatToken(TokenType.Identifier);
+        string identifier = compilation.EatToken(TokenType.Identifier);
 
-        return tokens.Peek.Type switch
+        return compilation.Peek.Type switch
         {
             TokenType.OpenParenthesis => ParseFunctionCallStatement(identifier),
             TokenType.Assignment => ParseAssignmentStatement(identifier),
-            _ => tokens.Error($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseIdentifierStatement)),
+            _ => compilation.Error($"Unexpected token {compilation.Peek.Type}: {compilation.Peek.Value} in " + nameof(ParseIdentifierStatement)),
         };
     }
 
     Expression ParseIdentifierExpression()
     {
-        string identifier = tokens.EatToken(TokenType.Identifier);
+        string identifier = compilation.EatToken(TokenType.Identifier);
 
-        return tokens.Peek.Type switch
+        return compilation.Peek.Type switch
         {
             TokenType.OpenParenthesis => ParseFunctionCall(identifier),
             _ => new Identifier(identifier),
@@ -149,14 +148,14 @@ public class Parser(Tokens tokens)
 
     AssignmentStatement ParseAssignmentStatement(string identifier)
     {
-        tokens.EatKeyword(TokenType.Assignment);
+        compilation.EatKeyword(TokenType.Assignment);
 
         return new(identifier, ParseExpression());
     }
 
     ReturnStatement ParseReturn()
     {
-        tokens.EatKeyword(TokenType.Keyword_Return);
+        compilation.EatKeyword(TokenType.Keyword_Return);
 
         Expression expression = ParseExpression();
         return new ReturnStatement(expression);
@@ -166,14 +165,14 @@ public class Parser(Tokens tokens)
     {
         List<Expression> args = [];
 
-        _ = tokens.EatToken(TokenType.OpenParenthesis);
-        while (tokens.Peek.Type != TokenType.CloseParenthesis)
+        _ = compilation.EatToken(TokenType.OpenParenthesis);
+        while (compilation.Peek.Type != TokenType.CloseParenthesis)
         {
             args.Add(ParseExpression());
-            _ = tokens.TryEatToken(TokenType.Comma);
+            _ = compilation.TryEatToken(TokenType.Comma);
         }
 
-        _ = tokens.EatToken(TokenType.CloseParenthesis);
+        _ = compilation.EatToken(TokenType.CloseParenthesis);
 
         return new FunctionCallExpression(identifier, args.ToArray());
     }
@@ -201,17 +200,17 @@ public class Parser(Tokens tokens)
 
         while (true)
         {
-            if (tokens.Eof() || !tokens.Peek.IsBinaryOperator() || precedence[tokens.Peek.Type] < minPrecedence)
+            if (compilation.Eof() || !compilation.Peek.IsBinaryOperator() || precedence[compilation.Peek.Type] < minPrecedence)
             {
                 return lhs;
             }
 
-            Debug.Assert(tokens.Peek.IsBinaryOperator());
+            Debug.Assert(compilation.Peek.IsBinaryOperator());
 
-            int nextPrecedence = precedence[tokens.Peek.Type] + 1;
+            int nextPrecedence = precedence[compilation.Peek.Type] + 1;
 
-            Token operation = tokens.Peek;
-            tokens.Skip();
+            Token operation = compilation.Peek;
+            compilation.Skip();
 
             Expression rhs = ParseExpression(nextPrecedence);
 
@@ -221,29 +220,29 @@ public class Parser(Tokens tokens)
 
     Expression ParseAtom()
     {
-        if (tokens.Peek.Type == TokenType.OpenParenthesis)
+        if (compilation.Peek.Type == TokenType.OpenParenthesis)
         {
             Expression expression = ParseExpression();
-            _ = tokens.EatToken(TokenType.CloseParenthesis, "Mismatched parenthesis, expected ')'");
+            _ = compilation.EatToken(TokenType.CloseParenthesis, "Mismatched parenthesis, expected ')'");
             return expression;
         }
-        else if (tokens.Peek.Type == TokenType.Eof)
+        else if (compilation.Peek.Type == TokenType.Eof)
         {
-            return tokens.Error($"Unexpected End Of File reached in " + nameof(ParseAtom));
+            return compilation.Error($"Unexpected End Of File reached in " + nameof(ParseAtom));
         }
-        else if (tokens.Peek.IsBinaryOperator())
+        else if (compilation.Peek.IsBinaryOperator())
         {
-            return tokens.Error($"{tokens.Peek.Type} is not an Atom value in expression " + nameof(ParseAtom));
+            return compilation.Error($"{compilation.Peek.Type} is not an Atom value in expression " + nameof(ParseAtom));
         }
         else
         {
-            return tokens.Peek.Type switch
+            return compilation.Peek.Type switch
             {
                 TokenType.Identifier => ParseIdentifierExpression(),
                 TokenType.StringLiteral => ParseStringLiteral(),
                 TokenType.IntegerLiteral => ParseIntegerLiteral(),
                 TokenType.FloatLiteral => ParseFloatLiteral(),
-                _ => tokens.Error($"{tokens.Peek.Type} is not a valid value in expression " + nameof(ParseAtom)),
+                _ => compilation.Error($"{compilation.Peek.Type} is not a valid value in expression " + nameof(ParseAtom)),
             };
         }
     }
@@ -251,12 +250,12 @@ public class Parser(Tokens tokens)
     /// <summary> if <BinaryExpression> { } </summary>
     IfStatement ParseIfStatement()
     {
-        _ = tokens.EatToken(TokenType.Keyword_If);
+        _ = compilation.EatToken(TokenType.Keyword_If);
         BooleanExpression condition = ParseBooleanExpression();
         BlockBody body = ParseBlock();
         BlockBody? elseBody = null;
 
-        if (tokens.TryEatToken(TokenType.Keyword_Else))
+        if (compilation.TryEatToken(TokenType.Keyword_Else))
         {
             elseBody = ParseBlock();
         }
@@ -268,32 +267,32 @@ public class Parser(Tokens tokens)
     {
         Expression left = ParseExpression();
 
-        Token operation = tokens.Peek;
+        Token operation = compilation.Peek;
 
-        switch (tokens.Peek.Type)
+        switch (compilation.Peek.Type)
         {
             case TokenType.Addition:
-            _ = tokens.EatToken(TokenType.Addition);
+            _ = compilation.EatToken(TokenType.Addition);
             break;
 
             case TokenType.Subtraction:
-            _ = tokens.EatToken(TokenType.Subtraction);
+            _ = compilation.EatToken(TokenType.Subtraction);
             break;
 
             case TokenType.Multiplication:
-            _ = tokens.EatToken(TokenType.Multiplication);
+            _ = compilation.EatToken(TokenType.Multiplication);
             break;
 
             case TokenType.Division:
-            _ = tokens.EatToken(TokenType.Division);
+            _ = compilation.EatToken(TokenType.Division);
             break;
 
             case TokenType.EqualEqual:
-            _ = tokens.EatToken(TokenType.EqualEqual);
+            _ = compilation.EatToken(TokenType.EqualEqual);
             break;
 
             default:
-            tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBinaryExpression), tokens.Peek.Span, new StackTrace(true)));
+            compilation.AddError(new ParseError($"Unexpected token {compilation.Peek.Type}: {compilation.Peek.Value} in " + nameof(ParseBinaryExpression), compilation.Peek.Span, new StackTrace(true)));
             break;
         }
 
@@ -306,19 +305,19 @@ public class Parser(Tokens tokens)
     {
         Expression left = ParseExpression();
 
-        Token operation = tokens.Peek;
+        Token operation = compilation.Peek;
 
         if (operation.Type == TokenType.EqualEqual)
         {
-            _ = tokens.EatToken(TokenType.EqualEqual);
+            _ = compilation.EatToken(TokenType.EqualEqual);
         }
         else if (operation.Type == TokenType.LessThanEqual)
         {
-            _ = tokens.EatToken(TokenType.LessThanEqual);
+            _ = compilation.EatToken(TokenType.LessThanEqual);
         }
         else
         {
-            tokens.AddError(new ParseError($"Unexpected token {tokens.Peek.Type}: {tokens.Peek.Value} in " + nameof(ParseBooleanExpression), tokens.Peek.Span, new StackTrace(true)));
+            compilation.AddError(new ParseError($"Unexpected token {compilation.Peek.Type}: {compilation.Peek.Value} in " + nameof(ParseBooleanExpression), compilation.Peek.Span, new StackTrace(true)));
         }
 
         Expression right = ParseExpression();
@@ -328,25 +327,26 @@ public class Parser(Tokens tokens)
 
     Identifier ParseIdentifier()
     {
-        string token = tokens.EatToken(TokenType.Identifier);
+        string token = compilation.EatToken(TokenType.Identifier);
         return new Identifier(token);
     }
 
     StringLiteral ParseStringLiteral()
     {
-        string token = tokens.EatToken(TokenType.StringLiteral);
+        string token = compilation.EatToken(TokenType.StringLiteral);
+        compilation.AddString(token);
         return new StringLiteral(token);
     }
 
     IntegerLiteral ParseIntegerLiteral()
     {
-        int token = tokens.EatNumber(TokenType.IntegerLiteral);
+        int token = compilation.EatNumber(TokenType.IntegerLiteral);
         return new IntegerLiteral(token);
     }
 
     FloatLiteral ParseFloatLiteral()
     {
-        int token = tokens.EatNumber(TokenType.FloatLiteral);
+        int token = compilation.EatNumber(TokenType.FloatLiteral);
         return new FloatLiteral(token);
     }
 }

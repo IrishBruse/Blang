@@ -1,15 +1,16 @@
 namespace IBlang.Walker;
 
+using System;
 using System.Diagnostics;
 using System.Text;
 
 using IBlang.Data;
 
-public class Transpiler(Tokens tokens)
+public class Transpiler(Project project)
 {
     StringBuilder output = new();
     int indention;
-    readonly Tokens tokens = tokens;
+    readonly Project project = project;
 
     void Indent()
     {
@@ -39,20 +40,17 @@ public class Transpiler(Tokens tokens)
         File.WriteAllText(Path.ChangeExtension(file.Path, "c"), output.ToString());
     }
 
-    public void Compile(FileAst file)
+    public string Compile(FileAst file, CompilationFlags flags)
     {
-        Prelude();
-
-        foreach (FunctionDecleration function in file.Functions)
+        if (flags.HasFlag(CompilationFlags.Print))
         {
-            WriteLineIndented();
-            Emit(function);
+            Console.WriteLine("-------- Output --------");
         }
 
         Process? tcc = Process.Start(new ProcessStartInfo()
         {
             FileName = "tcc",
-            Arguments = "-Wall " + Path.ChangeExtension(file.Path, "c"),
+            Arguments = (flags.HasFlag(CompilationFlags.Run) ? "-run" : string.Empty) + " -Wall " + Path.ChangeExtension(file.Path, "c"),
             RedirectStandardInput = true,
             RedirectStandardError = true,
             RedirectStandardOutput = true,
@@ -61,17 +59,24 @@ public class Transpiler(Tokens tokens)
         if (tcc == null)
         {
             Console.WriteLine("Failed to launch tcc");
-            return;
+            return "";
         }
 
         tcc.WaitForExit();
 
-        Console.Write(tcc.StandardOutput.ReadToEnd());
+        string output = tcc.StandardOutput.ReadToEnd();
+
+        if (flags.HasFlag(CompilationFlags.Run))
+        {
+            Console.Write(output);
+        }
 
         if (tcc.ExitCode != 0)
         {
-            tokens.AddError(new ParseError(tcc.StandardError.ReadToEnd(), null, new StackTrace(true)));
+            project.AddError(new ParseError("C Compilation Errors\n" + tcc.StandardError.ReadToEnd(), null, new StackTrace(true)));
         }
+
+        return output;
     }
 
     void Prelude()
@@ -80,6 +85,22 @@ public class Transpiler(Tokens tokens)
         {
             WriteLine(text);
         }
+        WriteLine();
+
+        GenerateStringInterning();
+    }
+
+    void GenerateStringInterning()
+    {
+        WriteLine($"static const string __strings[{project.Strings.Count}] =");
+        WriteLineIndented("{");
+        Indent();
+        foreach (KeyValuePair<string, int> test in project.Strings)
+        {
+            WriteLineIndented($"{{ \"{test.Key}\", {test.Key.Length} }}");
+        }
+        Dedent();
+        WriteLineIndented("};");
         WriteLine();
     }
 
@@ -121,7 +142,7 @@ public class Transpiler(Tokens tokens)
 
     void Emit(StringLiteral expression)
     {
-        Write($"\"{expression.Value}\"");
+        Write($"__strings[{project.GetString(expression.Value)}]");
     }
 
     void Emit(FloatLiteral expression)
@@ -213,7 +234,7 @@ public class Transpiler(Tokens tokens)
 
     void Emit(Error statement)
     {
-        Write("// Error: " + statement.Value + "\n");
+        Write("// Error: " + statement.Message + "\n");
     }
 
     void EmitStatement(Statement statement)
@@ -268,6 +289,6 @@ public class Transpiler(Tokens tokens)
 
     void WriteLine(string? text = null)
     {
-        _ = output.Append(text + "\n");
+        _ = output.AppendLine(text);
     }
 }

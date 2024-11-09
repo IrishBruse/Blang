@@ -1,4 +1,5 @@
+//Test
 func Main()
 {
-    PrintString("Test")
+    Print("Test")
 }

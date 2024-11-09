@@ -2,11 +2,11 @@ namespace IBlang.Walker;
 
 public class PrintAstDebugger : IVisitor
 {
-    public int Indent { get; set; }
+    public int Depth { get; set; }
 
     void PrintIndent()
     {
-        for (int i = 0; i < Indent; i++)
+        for (int i = 0; i < Depth; i++)
         {
             Console.Write("  ");
         }
@@ -93,7 +93,7 @@ public class PrintAstDebugger : IVisitor
     {
         PrintIndent();
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("Error: " + node.Value);
+        Console.WriteLine("Error: " + node.Message);
         Console.ResetColor();
     }
 

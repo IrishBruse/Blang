@@ -3,10 +3,11 @@ namespace IBlang.Data;
 using System;
 
 [Flags]
-public enum LexerDebug
+public enum CompilationFlags
 {
     None,
     Print,
     Whitespace,
-    Tokens
+    Tokens,
+    Run,
 }

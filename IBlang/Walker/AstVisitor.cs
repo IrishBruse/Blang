@@ -1,23 +1,32 @@
 namespace IBlang.Walker;
 
+using IBlang.Data;
+
 #pragma warning disable IDE0200, IDE0052
 
-public class AstVisitor(IVisitor visitor)
+public class AstVisitor(IVisitor visitor, CompilationFlags flags)
 {
+    readonly CompilationFlags flags = flags;
+
     IVisitor Visitor { get; set; } = visitor;
 
     void Indent()
     {
-        Visitor.Indent++;
+        Visitor.Depth++;
     }
 
     void Dedent()
     {
-        Visitor.Indent--;
+        Visitor.Depth--;
     }
 
     public void Visit(FileAst file)
     {
+        if (flags.HasFlag(CompilationFlags.Print))
+        {
+            Console.WriteLine("-------- Parser --------");
+        }
+
         Visitor.Visit(file);
 
         foreach (FunctionDecleration function in file.Functions)
@@ -137,7 +146,7 @@ public class AstVisitor(IVisitor visitor)
         Dedent();
     }
 
-    public void Visit(Data.Token token)
+    public void Visit(Token token)
     {
         Indent();
         Visitor.Visit(token);

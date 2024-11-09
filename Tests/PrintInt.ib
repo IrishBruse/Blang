@@ -1,5 +1,5 @@
 //42
-func Main()
+func Main() int
 {
-    PrintNumber(42)
+    Print(42)
 }

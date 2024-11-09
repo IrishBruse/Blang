@@ -3,67 +3,58 @@ namespace IBlang;
 using IBlang.Data;
 using IBlang.Walker;
 
-public class Compiler
+public static class Compiler
 {
-    public static void Run(string file)
+    public static string Run(string file, CompilationFlags flags)
     {
         file = Path.GetFullPath(file);
 
         Console.WriteLine($"Compiling {file}");
+
         StreamReader sourceFile = File.OpenText(file);
 
-        Project project = new();
+        Lexer lexer = new(sourceFile, file, flags);
+        IEnumerator<Token> tokens = lexer.Lex();
+        Project project = new(tokens, lexer.LineEndings);
 
-        Console.WriteLine("-------- Lexer  --------");
-        Lexer lexer = new(sourceFile, file, LexerDebug.Print);
-        Tokens tokens = new(lexer.Lex(), lexer.LineEndings);
-
-        if (tokens.Errors.Count > 0)
+        if (project.Errors.Count > 0)
         {
-            PrintErrors(tokens);
-            return;
+            PrintErrors(project);
+            return string.Empty;
         }
 
-        Console.WriteLine("-------- Parser --------");
-        Parser parser = new(tokens);
+        Parser parser = new(project);
         FileAst ast = parser.Parse();
-        AstVisitor debugVisitor = new(new PrintAstDebugger());
-        debugVisitor.Visit(ast);
 
-        if (tokens.Errors.Count > 0)
+        if (flags.HasFlag(CompilationFlags.Print))
         {
-            PrintErrors(tokens);
-            return;
+            AstVisitor debugVisitor = new(new PrintAstDebugger(), flags);
+            debugVisitor.Visit(ast);
         }
 
-        Console.WriteLine("-------- TypeChecker --------");
-        TypeChecker typeChecker = new(project);
-        typeChecker.Check(ast);
-
-        if (tokens.Errors.Count > 0)
+        if (project.Errors.Count > 0)
         {
-            PrintErrors(tokens);
-            return;
+            PrintErrors(project);
+            return string.Empty;
         }
 
-        Console.WriteLine("-------- Transpiler --------");
-        Transpiler transpiler = new(tokens);
+        Transpiler transpiler = new(project);
         transpiler.TranspileToC(ast);
-        transpiler.Compile(ast);
 
-        if (tokens.Errors.Count > 0)
+        string output = transpiler.Compile(ast, flags);
+
+        if (project.Errors.Count > 0)
         {
-            PrintErrors(tokens);
-            return;
+            PrintErrors(project);
+            return string.Empty;
         }
 
+        return output;
     }
 
     public static bool Test(string file)
     {
-        string source = File.ReadAllText(file);
-
-        string[] lines = source.Split("\n");
+        string[] lines = File.ReadAllLines(file);
 
         string expected = "";
 
@@ -75,23 +66,19 @@ public class Compiler
             {
                 expected += line[2..] + "\n";
             }
+            else
+            {
+                break;
+            }
         }
 
-        Run(file);
-
-        return expected.Equals(source, StringComparison.Ordinal);
+        string output = Run(file, CompilationFlags.Run);
+        return expected.Equals(output, StringComparison.Ordinal);
     }
 
-    public static void PrintErrors(Tokens tokens, bool showStackTrace = false)
+    public static void PrintErrors(Project tokens, bool showStackTrace = false)
     {
-        if (tokens.Errors.Count > 0)
-        {
-            Console.Write("-------- ");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("Errors");
-            Console.ResetColor();
-            Console.WriteLine(" --------");
-        }
+        Console.WriteLine("-------- Errors --------");
 
         Console.ForegroundColor = ConsoleColor.Red;
         foreach (ParseError error in tokens.Errors)
