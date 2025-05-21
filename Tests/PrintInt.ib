@@ -1,5 +1,0 @@
-//42
-func Main() int
-{
-    Print(42)
-}

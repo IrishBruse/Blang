@@ -1,4 +1,0 @@
-func Main() int
-{
-    PrintString("Hello, World!\n")
-}

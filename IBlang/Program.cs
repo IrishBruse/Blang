@@ -1,21 +1,31 @@
-using IBlang;
+namespace IBlang;
 
-string[] arguments = Environment.GetCommandLineArgs()[1..];
-Console.WriteLine(string.Join(", ", arguments));
+using System;
+using System.IO;
+using IBlang.Utility;
 
-// Error tests
-// Compiler.Run("../Tests/Empty.ib");
-// Compiler.Run("../Tests/Error.ib");
-// Compiler.Run("../Tests/Syntax.ib");
+public class Program
+{
+    public static void Main()
+    {
+        string[] files = Directory.GetFiles("Examples/");
+        string[] fileNames = new string[files.Length];
 
-int passed = 0;
-int failed = 0;
+        for (int i = 0; i < files.Length; i++)
+        {
+            fileNames[i] = Path.GetFileNameWithoutExtension(files[i]);
+        }
 
-_ = Compiler.Test("../Tests/PrintInt.ib") ? passed++ : failed++;
-_ = Compiler.Test("../Tests/PrintString.ib") ? passed++ : failed++;
+        int index = Terminal.ShowMenu(fileNames, "Pick Example:\n");
 
-Console.WriteLine($"Total Tests: {passed + failed}. Passed: {passed}. Failed: {failed}");
+        string file = files[index];
 
-// Compiler.Run("../Tests/HelloWorld.ib");
-// Compiler.Run("../Tests/Fibonacci.ib", CompilationFlags.Print);
-// Compiler.Run("../Tests/Syntax.ib");
+        var fileStream = File.OpenText(file);
+
+        Lexer lexer = new(fileStream, file, CompilationFlags.None);
+
+        lexer.Lex()
+
+        Console.WriteLine(File.ReadAllText(file));
+    }
+}

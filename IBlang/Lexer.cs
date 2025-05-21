@@ -1,42 +1,41 @@
 namespace IBlang;
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
 
-using IBlang.Data;
-
-public class Lexer : IDisposable
+public class Lexer
 {
     public SortedList<int, int> LineEndings { get; private set; } = [];
 
-    public static readonly Dictionary<string, TokenType> Keywords = new()
-    {
-        { "func", TokenType.Keyword_Func },
-        { "true", TokenType.Keyword_True },
-        { "false", TokenType.Keyword_False },
-    };
+    // public static readonly Dictionary<string, TokenType> Keywords = new()
+    // {
+    //     { "func", TokenType.Keyword_Func },
+    //     { "true", TokenType.Keyword_True },
+    //     { "false", TokenType.Keyword_False },
+    // };
 
-    public static readonly HashSet<TokenType> BinaryOperators = new()
-    {
-        { TokenType.Addition },
-        { TokenType.Subtraction },
-        { TokenType.Multiplication },
-        { TokenType.Division },
-        { TokenType.Modulo },
-        { TokenType.BitwiseAnd },
-        { TokenType.BitwiseOr },
-        { TokenType.BitwiseShiftLeft },
-        { TokenType.BitwiseShiftRight },
-    };
+    // public static readonly HashSet<TokenType> BinaryOperators = new()
+    // {
+    //     { TokenType.Addition },
+    //     { TokenType.Subtraction },
+    //     { TokenType.Multiplication },
+    //     { TokenType.Division },
+    //     { TokenType.Modulo },
+    //     { TokenType.BitwiseAnd },
+    //     { TokenType.BitwiseOr },
+    //     { TokenType.BitwiseShiftLeft },
+    //     { TokenType.BitwiseShiftRight },
+    // };
 
-    static readonly Dictionary<string, TokenType> ControlflowKeywords = new()
-    {
-        { "if", TokenType.Keyword_If },
-        { "else", TokenType.Keyword_Else },
-        { "return", TokenType.Keyword_Return },
-    };
+    // static readonly Dictionary<string, TokenType> ControlflowKeywords = new()
+    // {
+    //     { "if", TokenType.Keyword_If },
+    //     { "else", TokenType.Keyword_Else },
+    //     { "return", TokenType.Keyword_Return },
+    // };
 
     const ConsoleColor CommentColor = ConsoleColor.DarkGray;
     const ConsoleColor WhitespaceColor = ConsoleColor.DarkGray;
@@ -65,40 +64,40 @@ public class Lexer : IDisposable
         this.flags = flags;
     }
 
-    public Lexer(string sourceText, CompilationFlags flags = CompilationFlags.None)
-    {
-        file = "__NOFILE__.ib";
-        MemoryStream stream = new();
-        StreamWriter writer = new(stream);
-        writer.Write(sourceText);
-        writer.Flush();
-        stream.Position = 0;
+    // public Lexer(string sourceText, CompilationFlags flags = CompilationFlags.None)
+    // {
+    //     file = "__NOFILE__.ib";
+    //     MemoryStream stream = new();
+    //     StreamWriter writer = new(stream);
+    //     writer.Write(sourceText);
+    //     writer.Flush();
+    //     stream.Position = 0;
 
-        sourceFile = new StreamReader(stream);
+    //     sourceFile = new StreamReader(stream);
 
-        this.flags = flags;
-    }
+    //     this.flags = flags;
+    // }
 
-    static Lexer()
-    {
-        foreach ((string key, TokenType value) in ControlflowKeywords)
-        {
-            Keywords.Add(key, value);
-        }
-    }
+    // static Lexer()
+    // {
+    //     foreach ((string key, TokenType value) in ControlflowKeywords)
+    //     {
+    //         Keywords.Add(key, value);
+    //     }
+    // }
 
     public IEnumerator<Token> Lex()
     {
-        if (flags.HasFlag(CompilationFlags.Print))
-        {
-            Console.WriteLine("-------- Lexer  --------");
-        }
+        // if (flags.HasFlag(CompilationFlags.Print))
+        // {
+        //     Console.WriteLine("-------- Lexer  --------");
+        // }
 
         while (!sourceFile.EndOfStream)
         {
             char c = Peek();
 
-            startIndex = endIndex;
+            StartTokenRange();
 
             if (char.IsWhiteSpace(c))
             {
@@ -139,14 +138,14 @@ public class Lexer : IDisposable
                     '!' => LexOperator(TokenType.LogicalNot),
                     '=' => LexOperator(TokenType.Assignment),
 
-                    _ => new Token(c.ToString(), TokenType.Garbage, new(file, startIndex, endIndex))
+                    _ => new Token(c.ToString(), TokenType.Garbage, EndTokenRange())
                 };
             }
         }
 
         sourceFile.Close();
 
-        yield return new Token(string.Empty, TokenType.Eof, new(file, startIndex, endIndex));
+        yield return new Token(string.Empty, TokenType.Eof, EndTokenRange());
     }
 
     void EatWhitespace(char c)
@@ -249,7 +248,7 @@ public class Lexer : IDisposable
             return LexSingleLineComment();
         }
 
-        return new Token(op, type, new(file, startIndex, endIndex));
+        return new Token(op, type, EndTokenRange());
     }
 
     Token LexSingleLineComment()
@@ -267,14 +266,14 @@ public class Lexer : IDisposable
             _ = comment.Append(Next(CommentColor));
         }
 
-        return new Token(comment.ToString(), TokenType.Comment, new(file, startIndex, endIndex));
+        return new Token(comment.ToString(), TokenType.Comment, EndTokenRange());
     }
 
     Token LexBracket(TokenType type)
     {
         char c = Next(BracketsColor);
 
-        return new Token(c.ToString(), type, new(file, startIndex, endIndex));
+        return new Token(c.ToString(), type, EndTokenRange());
     }
 
     Token LexString()
@@ -295,7 +294,7 @@ public class Lexer : IDisposable
 
         _ = Next(StringColor);
 
-        return new Token(literal.ToString(), TokenType.StringLiteral, new(file, startIndex, endIndex));
+        return new Token(literal.ToString(), TokenType.StringLiteral, EndTokenRange());
     }
 
     Token LexIdentifier()
@@ -310,28 +309,28 @@ public class Lexer : IDisposable
         }
         while (char.IsLetterOrDigit(Peek()) && !IsLineBreak(c));
 
-        string identifier = identifierBuilder.ToString().ToLower(CultureInfo.CurrentCulture);
+        // string identifier = identifierBuilder.ToString().ToLower(CultureInfo.CurrentCulture);
 
-        if (Keywords.TryGetValue(identifier, out TokenType keyword))
-        {
-            if (flags.HasFlag(CompilationFlags.Print))
-            {
-                // Recolor keywords
-                if (!Console.IsOutputRedirected)
-                {
-                    Console.CursorLeft -= identifier.Length;
-                }
+        // if (Keywords.TryGetValue(identifier, out TokenType keyword))
+        // {
+        //     if (flags.HasFlag(CompilationFlags.Print))
+        //     {
+        //         // Recolor keywords
+        //         if (!Console.IsOutputRedirected)
+        //         {
+        //             Console.CursorLeft -= identifier.Length;
+        //         }
 
-                ConsoleColor color = ControlflowKeywords.TryGetValue(identifier, out _) ? ControlflowColor : KeywordColor;
-                Print(identifier, foreground: color);
-            }
+        //         ConsoleColor color = ControlflowKeywords.TryGetValue(identifier, out _) ? ControlflowColor : KeywordColor;
+        //         Print(identifier, foreground: color);
+        //     }
 
-            return new Token(identifierBuilder.ToString(), keyword, new(file, startIndex, endIndex));
-        }
-        else
-        {
-            return new Token(identifierBuilder.ToString(), TokenType.Identifier, new(file, startIndex, endIndex));
-        }
+        //     return new Token(identifierBuilder.ToString(), keyword, EndTokenRange());
+        // }
+        // else
+        // {
+        return new Token(identifierBuilder.ToString(), TokenType.Identifier, EndTokenRange());
+        // }
     }
 
     char Peek()
@@ -352,7 +351,7 @@ public class Lexer : IDisposable
         }
         while (char.IsDigit(Peek()));
 
-        return new Token(number.ToString(), TokenType.IntegerLiteral, new(file, startIndex, endIndex));
+        return new Token(number.ToString(), TokenType.IntegerLiteral, EndTokenRange());
     }
 
     static bool IsLineBreak(char c)
@@ -397,9 +396,20 @@ public class Lexer : IDisposable
         Console.ResetColor();
     }
 
-    public void Dispose()
+    public void StartTokenRange()
     {
-        sourceFile.Dispose();
-        GC.SuppressFinalize(this);
+        startIndex = endIndex;
     }
+
+    public Range EndTokenRange()
+    {
+        return new Range(startIndex, endIndex);
+    }
+}
+
+public enum CompilationFlags
+{
+    None,
+    Whitespace,
+    Print
 }
