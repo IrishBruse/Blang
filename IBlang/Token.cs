@@ -68,4 +68,6 @@ public enum TokenType
     BitwiseXOr,
     BitwiseShiftLeft,
     BitwiseShiftRight,
+
+    Semicolon,
 }

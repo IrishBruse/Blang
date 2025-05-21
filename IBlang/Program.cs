@@ -1,6 +1,7 @@
 namespace IBlang;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using IBlang.Utility;
 
@@ -20,11 +21,24 @@ public class Program
 
         string file = files[index];
 
-        var fileStream = File.OpenText(file);
+        StreamReader fileStream = File.OpenText(file);
 
         Lexer lexer = new(fileStream, file, CompilationFlags.None);
 
-        lexer.Lex()
+        IEnumerator<Token> tokens = lexer.Lex();
+
+        while (tokens.MoveNext())
+        {
+            Token token = tokens.Current;
+
+            if (token.TokenType == TokenType.Garbage || token.TokenType == TokenType.Eof || token.TokenType == TokenType.Eol)
+            {
+                Console.WriteLine(token);
+                break;
+            }
+
+            Console.WriteLine(token);
+        }
 
         Console.WriteLine(File.ReadAllText(file));
     }

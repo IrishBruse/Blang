@@ -138,6 +138,8 @@ public class Lexer
                     '!' => LexOperator(TokenType.LogicalNot),
                     '=' => LexOperator(TokenType.Assignment),
 
+                    ';' => LexOperator(TokenType.Semicolon),
+
                     _ => new Token(c.ToString(), TokenType.Garbage, EndTokenRange())
                 };
             }
