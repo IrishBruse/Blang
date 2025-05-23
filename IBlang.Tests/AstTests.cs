@@ -13,7 +13,7 @@ public class AstTests
 
     static FileAst Parse(string file)
     {
-        Lexer lexer = new(file);
+        Lexer lexer = new();
         Project tokens = new(lexer.Lex(), lexer.LineEndings);
         Parser parser = new(tokens);
 

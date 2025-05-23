@@ -7,7 +7,47 @@ using IBlang.Utility;
 
 public class Program
 {
-    public static void Main()
+    static readonly Lexer lexer = new(CompilationFlags.None);
+    static readonly Parser parser = new();
+    static readonly AstPrinter astPrinter = new();
+
+    public static void Main(string[] args)
+    {
+        Console.Clear();
+
+        try
+        {
+            Run(args);
+        }
+        catch (Exception e)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Error.WriteLine(e);
+            Console.ResetColor();
+        }
+    }
+
+    public static void Run(string[] args)
+    {
+        string file;
+
+        if (args.Length == 0)
+        {
+            file = PickFile();
+        }
+        else
+        {
+            file = args[0];
+        }
+
+        StreamReader fileStream = File.OpenText(file);
+        IEnumerator<Token> tokens = lexer.Lex(fileStream, file);
+        CompilationUnit unit = parser.Parse(tokens);
+
+        Console.WriteLine(astPrinter.VisitCompilationUnit(unit));
+    }
+
+    static string PickFile()
     {
         string[] files = Directory.GetFiles("Examples/");
         string[] fileNames = new string[files.Length];
@@ -20,26 +60,14 @@ public class Program
         int index = Terminal.ShowMenu(fileNames, "Pick Example:\n");
 
         string file = files[index];
+        return file;
+    }
 
-        StreamReader fileStream = File.OpenText(file);
-
-        Lexer lexer = new(fileStream, file, CompilationFlags.None);
-
-        IEnumerator<Token> tokens = lexer.Lex();
-
+    public static void DebugTokens(IEnumerator<Token> tokens)
+    {
         while (tokens.MoveNext())
         {
-            Token token = tokens.Current;
-
-            if (token.TokenType == TokenType.Garbage || token.TokenType == TokenType.Eof || token.TokenType == TokenType.Eol)
-            {
-                Console.WriteLine(token);
-                break;
-            }
-
-            Console.WriteLine(token);
+            Console.WriteLine(tokens.Current);
         }
-
-        Console.WriteLine(File.ReadAllText(file));
     }
 }

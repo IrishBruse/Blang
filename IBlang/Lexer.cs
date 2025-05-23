@@ -2,98 +2,39 @@ namespace IBlang;
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text;
 
-public class Lexer
+public class Lexer(CompilationFlags Flags)
 {
-    public SortedList<int, int> LineEndings { get; private set; } = [];
+    private readonly List<int> lineEndingIndexes = [0];
 
-    // public static readonly Dictionary<string, TokenType> Keywords = new()
-    // {
-    //     { "func", TokenType.Keyword_Func },
-    //     { "true", TokenType.Keyword_True },
-    //     { "false", TokenType.Keyword_False },
-    // };
-
-    // public static readonly HashSet<TokenType> BinaryOperators = new()
-    // {
-    //     { TokenType.Addition },
-    //     { TokenType.Subtraction },
-    //     { TokenType.Multiplication },
-    //     { TokenType.Division },
-    //     { TokenType.Modulo },
-    //     { TokenType.BitwiseAnd },
-    //     { TokenType.BitwiseOr },
-    //     { TokenType.BitwiseShiftLeft },
-    //     { TokenType.BitwiseShiftRight },
-    // };
-
-    // static readonly Dictionary<string, TokenType> ControlflowKeywords = new()
-    // {
-    //     { "if", TokenType.Keyword_If },
-    //     { "else", TokenType.Keyword_Else },
-    //     { "return", TokenType.Keyword_Return },
-    // };
+    public StreamReader Source = null!;
+    public string FilePath = "";
 
     const ConsoleColor CommentColor = ConsoleColor.DarkGray;
     const ConsoleColor WhitespaceColor = ConsoleColor.DarkGray;
-    const ConsoleColor KeywordColor = ConsoleColor.Blue;
     const ConsoleColor BracketsColor = ConsoleColor.DarkGreen;
     const ConsoleColor OperatorColor = ConsoleColor.Red;
     const ConsoleColor NumberColor = ConsoleColor.Cyan;
     const ConsoleColor StringColor = ConsoleColor.Yellow;
     const ConsoleColor IdentifierColor = ConsoleColor.Gray;
-    const ConsoleColor ControlflowColor = ConsoleColor.Magenta;
-
-    StreamReader sourceFile;
-    readonly string file;
-
-    readonly CompilationFlags flags;
 
     int endIndex;
     int startIndex;
-    int line;
 
-    public Lexer(StreamReader sourceFile, string file, CompilationFlags flags = CompilationFlags.None)
+    public IEnumerator<Token> Lex(string text)
     {
-        this.sourceFile = sourceFile;
-        this.file = file;
-
-        this.flags = flags;
+        MemoryStream stream = new(Encoding.UTF8.GetBytes(text));
+        StreamReader reader = new(stream);
+        return Lex(reader, "");
     }
 
-    // public Lexer(string sourceText, CompilationFlags flags = CompilationFlags.None)
-    // {
-    //     file = "__NOFILE__.ib";
-    //     MemoryStream stream = new();
-    //     StreamWriter writer = new(stream);
-    //     writer.Write(sourceText);
-    //     writer.Flush();
-    //     stream.Position = 0;
-
-    //     sourceFile = new StreamReader(stream);
-
-    //     this.flags = flags;
-    // }
-
-    // static Lexer()
-    // {
-    //     foreach ((string key, TokenType value) in ControlflowKeywords)
-    //     {
-    //         Keywords.Add(key, value);
-    //     }
-    // }
-
-    public IEnumerator<Token> Lex()
+    public IEnumerator<Token> Lex(StreamReader fileStream, string path)
     {
-        // if (flags.HasFlag(CompilationFlags.Print))
-        // {
-        //     Console.WriteLine("-------- Lexer  --------");
-        // }
-
-        while (!sourceFile.EndOfStream)
+        Source = fileStream;
+        FilePath = path;
+        while (!Source.EndOfStream)
         {
             char c = Peek();
 
@@ -128,6 +69,7 @@ public class Lexer
 
                     '<' => LexOperator(TokenType.LessThan),
                     '>' => LexOperator(TokenType.GreaterThan),
+
                     '+' => LexOperator(TokenType.Addition),
                     '-' => LexOperator(TokenType.Subtraction),
                     '*' => LexOperator(TokenType.Multiplication),
@@ -140,37 +82,38 @@ public class Lexer
 
                     ';' => LexOperator(TokenType.Semicolon),
 
-                    _ => new Token(c.ToString(), TokenType.Garbage, EndTokenRange())
+                    _ => new Token(TokenType.Garbage, c.ToString(), EndTokenRange())
                 };
             }
         }
 
-        sourceFile.Close();
+        Source.Close();
 
-        yield return new Token(string.Empty, TokenType.Eof, EndTokenRange());
+        yield return new Token(TokenType.Eof, string.Empty, EndTokenRange());
     }
 
     void EatWhitespace(char c)
     {
         if (c == '\r')
         {
-            _ = Next(display: flags.HasFlag(CompilationFlags.Whitespace) ? "\\r" : "", foreground: WhitespaceColor);
+            _ = Next(display: Flags.HasFlag(CompilationFlags.Whitespace) ? "\\r" : "", foreground: WhitespaceColor);
         }
         else if (c == '\n')
         {
-            line++;
-            LineEndings.Add(endIndex, line);
-            _ = Next(display: flags.HasFlag(CompilationFlags.Whitespace) ? "\\n\n" : "\n", foreground: WhitespaceColor);
+            lineEndingIndexes.Add(startIndex);
+            _ = Next(display: Flags.HasFlag(CompilationFlags.Whitespace) ? "\\n\n" : "\n", foreground: WhitespaceColor);
         }
         else if (c == '\t')
         {
-            _ = Next(display: flags.HasFlag(CompilationFlags.Whitespace) ? "»   " : "    ", foreground: WhitespaceColor);
+            _ = Next(display: Flags.HasFlag(CompilationFlags.Whitespace) ? "»   " : "    ", foreground: WhitespaceColor);
         }
         else
         {
             // Eat all other whitespace
-            _ = Next(display: flags.HasFlag(CompilationFlags.Whitespace) ? "·" : " ", foreground: WhitespaceColor);
+            _ = Next(display: Flags.HasFlag(CompilationFlags.Whitespace) ? "·" : " ", foreground: WhitespaceColor);
         }
+
+        EndTokenRange();
     }
 
     Token LexOperator(TokenType type)
@@ -249,13 +192,17 @@ public class Lexer
         {
             return LexSingleLineComment();
         }
+        else if (c == '/' && p == '*') // Multiline line comment
+        {
+            return LexMultiLineComment();
+        }
 
-        return new Token(op, type, EndTokenRange());
+        return new Token(type, op, EndTokenRange());
     }
 
     Token LexSingleLineComment()
     {
-        if (flags.HasFlag(CompilationFlags.Print))
+        if (Flags.HasFlag(CompilationFlags.Print))
         {
             Console.CursorLeft--;
             Print('/', foreground: CommentColor);
@@ -263,19 +210,53 @@ public class Lexer
 
         StringBuilder comment = new("/");
 
-        while (!IsLineBreak(Peek()) && !sourceFile.EndOfStream)
+        while (!IsLineBreak(Peek()) && !Source.EndOfStream)
         {
             _ = comment.Append(Next(CommentColor));
         }
 
-        return new Token(comment.ToString(), TokenType.Comment, EndTokenRange());
+        return new Token(TokenType.Comment, comment.ToString(), EndTokenRange());
+    }
+
+    Token LexMultiLineComment()
+    {
+        if (Flags.HasFlag(CompilationFlags.Print))
+        {
+            Console.CursorLeft--;
+            Print('/', foreground: CommentColor);
+        }
+
+        StringBuilder comment = new("/*");
+
+        Next(); // Eat *
+
+        while (!Source.EndOfStream)
+        {
+            char c = Next(CommentColor);
+            if (c == '\n')
+            {
+                _ = comment.Append("\\n");
+            }
+            else
+            {
+                _ = comment.Append(c);
+            }
+
+            if (c == '*' && Peek() == '/')
+            {
+                comment.Append(Next());
+                break;
+            }
+        }
+
+        return new Token(TokenType.Comment, comment.ToString(), EndTokenRange());
     }
 
     Token LexBracket(TokenType type)
     {
         char c = Next(BracketsColor);
 
-        return new Token(c.ToString(), type, EndTokenRange());
+        return new Token(type, c.ToString(), EndTokenRange());
     }
 
     Token LexString()
@@ -296,7 +277,7 @@ public class Lexer
 
         _ = Next(StringColor);
 
-        return new Token(literal.ToString(), TokenType.StringLiteral, EndTokenRange());
+        return new Token(TokenType.StringLiteral, literal.ToString(), EndTokenRange());
     }
 
     Token LexIdentifier()
@@ -311,33 +292,21 @@ public class Lexer
         }
         while (char.IsLetterOrDigit(Peek()) && !IsLineBreak(c));
 
-        // string identifier = identifierBuilder.ToString().ToLower(CultureInfo.CurrentCulture);
+        string identifier = identifierBuilder.ToString();
 
-        // if (Keywords.TryGetValue(identifier, out TokenType keyword))
-        // {
-        //     if (flags.HasFlag(CompilationFlags.Print))
-        //     {
-        //         // Recolor keywords
-        //         if (!Console.IsOutputRedirected)
-        //         {
-        //             Console.CursorLeft -= identifier.Length;
-        //         }
-
-        //         ConsoleColor color = ControlflowKeywords.TryGetValue(identifier, out _) ? ControlflowColor : KeywordColor;
-        //         Print(identifier, foreground: color);
-        //     }
-
-        //     return new Token(identifierBuilder.ToString(), keyword, EndTokenRange());
-        // }
-        // else
-        // {
-        return new Token(identifierBuilder.ToString(), TokenType.Identifier, EndTokenRange());
-        // }
+        return identifier switch
+        {
+            "extrn" => new Token(TokenType.ExternKeyword, identifier, EndTokenRange()),
+            "if" => new Token(TokenType.IfKeyword, identifier, EndTokenRange()),
+            "while" => new Token(TokenType.WhileKeyword, identifier, EndTokenRange()),
+            "auto" => new Token(TokenType.AutoKeyword, identifier, EndTokenRange()),
+            _ => new Token(TokenType.Identifier, identifier, EndTokenRange()),
+        };
     }
 
     char Peek()
     {
-        return (char)sourceFile.Peek();
+        return (char)Source.Peek();
     }
 
     Token LexNumber()
@@ -353,46 +322,42 @@ public class Lexer
         }
         while (char.IsDigit(Peek()));
 
-        return new Token(number.ToString(), TokenType.IntegerLiteral, EndTokenRange());
+        return new Token(TokenType.IntegerLiteral, number.ToString(), EndTokenRange());
     }
 
-    static bool IsLineBreak(char c)
-    {
-        return c is '\n' or '\r';
-    }
+    static bool IsLineBreak(char c) => c is '\n' or '\r';
 
-    char Next(ConsoleColor foreground = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black, string? display = null)
+    char Next(ConsoleColor foreground = ConsoleColor.White, string? display = null)
     {
-        char c = (char)sourceFile.Read();
+        char c = (char)Source.Read();
 
         endIndex++;
 
-        if (flags.HasFlag(CompilationFlags.Print))
+        if (Flags.HasFlag(CompilationFlags.Print))
         {
             if (display != null)
             {
-                Print(display, background, foreground);
+                Print(display, foreground);
             }
             else
             {
-                Print(c, background, foreground);
+                Print(c, foreground);
             }
         }
 
         return c;
     }
 
-    static void Print(char c, ConsoleColor background = ConsoleColor.Black, ConsoleColor foreground = ConsoleColor.White)
+    static void Print(char c, ConsoleColor foreground = ConsoleColor.White)
     {
-        Console.BackgroundColor = background;
+        // Console.BackgroundColor = background;
         Console.ForegroundColor = foreground;
         Console.Write(c);
         Console.ResetColor();
     }
 
-    static void Print(string str, ConsoleColor background = ConsoleColor.Black, ConsoleColor foreground = ConsoleColor.White)
+    static void Print(string str, ConsoleColor foreground = ConsoleColor.White)
     {
-        Console.BackgroundColor = background;
         Console.ForegroundColor = foreground;
         Console.Write(str);
         Console.ResetColor();
@@ -405,7 +370,33 @@ public class Lexer
 
     public Range EndTokenRange()
     {
-        return new Range(startIndex, endIndex);
+        int start = startIndex;
+        int end = endIndex;
+        (int line, int column) = GetLineColumnFromIndex(start);
+        return new Range(FilePath, start, end, line, column);
+    }
+
+    public (int Line, int Column) GetLineColumnFromIndex(int index)
+    {
+        if (lineEndingIndexes.Count == 0)
+        {
+            return (1, index + 1);
+        }
+
+        int line = 0;
+        int lineOffset = 0;
+        for (int i = 0; i < lineEndingIndexes.Count; i++)
+        {
+            if (index > lineEndingIndexes[i])
+            {
+                lineOffset = lineEndingIndexes[i];
+                line = i;
+            }
+        }
+
+        int column = index - lineOffset;
+
+        return (line + 1, column);
     }
 }
 

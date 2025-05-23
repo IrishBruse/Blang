@@ -1,14 +1,21 @@
 namespace IBlang;
 
-public record Token(string Content, TokenType TokenType, Range Span);
+public record Token(TokenType TokenType, string Content, Range Range)
+{
+    public override string ToString()
+    {
+        return $"{Range,-30} {TokenType,-18} {Content}";
+    }
 
-public record Range(int Begin, int End);
+    public static implicit operator string(Token s)
+    {
+        return s.Content;
+    }
+}
 
 public enum TokenType
 {
-
     // Misc
-    Eol = -3,
     Eof = -2,
     Garbage = -1,
 
@@ -22,11 +29,18 @@ public enum TokenType
     CharLiteral,
 
     // Bracket Pairs
+
+    /// <summary> ( </summary>
     OpenParenthesis,
+    /// <summary> ) </summary>
     CloseParenthesis,
+    /// <summary> [ </summary>
     OpenBracket,
+    /// <summary> ] </summary>
     CloseBracket,
+    /// <summary> { </summary>
     OpenScope,
+    /// <summary> } </summary>
     CloseScope,
 
     // Punctuation
@@ -70,4 +84,18 @@ public enum TokenType
     BitwiseShiftRight,
 
     Semicolon,
+
+    // Keywords
+    ExternKeyword,
+    IfKeyword,
+    WhileKeyword,
+    AutoKeyword,
+}
+
+public static class Extensions
+{
+    public static bool IsEndOrGarbage(this TokenType t)
+    {
+        return t == TokenType.Garbage || t == TokenType.Eof;
+    }
 }
