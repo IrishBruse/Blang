@@ -3,13 +3,18 @@ namespace IBlang;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using IBlang.AstParser;
+using IBlang.Targets;
+using IBlang.Tokenizer;
 using IBlang.Utility;
 
 public class Program
 {
     static readonly Lexer lexer = new(CompilationFlags.None);
     static readonly Parser parser = new();
-    static readonly AstPrinter astPrinter = new();
+
+    static readonly AstTarget astTarget = new();
+    static readonly QbeTarget qbeTarget = new();
 
     public static void Main(string[] args)
     {
@@ -29,22 +34,54 @@ public class Program
 
     public static void Run(string[] args)
     {
-        string file;
+        Dictionary<string, string> flags = ParseArgs(args, out string? file);
 
-        if (args.Length == 0)
-        {
-            file = PickFile();
-        }
-        else
-        {
-            file = args[0];
-        }
+        file ??= PickFile();
+
+        file = Path.GetFullPath(file);
 
         StreamReader fileStream = File.OpenText(file);
         IEnumerator<Token> tokens = lexer.Lex(fileStream, file);
         CompilationUnit unit = parser.Parse(tokens);
 
-        Console.WriteLine(astPrinter.VisitCompilationUnit(unit));
+        string target = flags.GetValueOrDefault("target", "ast").ToLower();
+
+        _ = target switch
+        {
+            AstTarget.Target => astTarget.Output(unit, file),
+            QbeTarget.Target => qbeTarget.Output(unit, file),
+
+            _ => astTarget.Output(unit, file),
+        };
+    }
+
+    private static Dictionary<string, string> ParseArgs(string[] args, out string? file)
+    {
+        Dictionary<string, string> flags = [];
+
+        file = null;
+
+        int index = 0;
+        while (index < args.Length)
+        {
+            if (args[index].StartsWith("--"))
+            {
+                if (args[index + 1].StartsWith("--"))
+                {
+                    throw new Exception("error parsing args");
+                }
+
+                flags.Add(args[index][2..], args[index + 1]);
+                index += 2;
+            }
+            else
+            {
+                file = args[index];
+                index++;
+            }
+        }
+
+        return flags;
     }
 
     static string PickFile()

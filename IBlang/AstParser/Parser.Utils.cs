@@ -1,13 +1,13 @@
-namespace IBlang;
+namespace IBlang.AstParser;
 
-using System;
 using IBlang.Exceptions;
+using IBlang.Tokenizer;
 
 public partial class Parser
 {
-    Token Peek()
+    TokenType Peek()
     {
-        return tokens.Current;
+        return tokens.Current.TokenType;
     }
 
     Token Next()

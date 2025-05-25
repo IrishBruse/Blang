@@ -1,6 +1,8 @@
-namespace IBlang;
+namespace IBlang.Tokenizer;
 
-public record Token(TokenType TokenType, string Content, Range Range)
+using IBlang;
+
+public record Token(TokenType TokenType, string Content, SourceRange Range)
 {
     public override string ToString()
     {

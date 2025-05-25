@@ -1,9 +1,10 @@
-namespace IBlang;
+namespace IBlang.Tokenizer;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using IBlang;
 
 public class Lexer(CompilationFlags Flags)
 {
@@ -368,12 +369,9 @@ public class Lexer(CompilationFlags Flags)
         startIndex = endIndex;
     }
 
-    public Range EndTokenRange()
+    public SourceRange EndTokenRange()
     {
-        int start = startIndex;
-        int end = endIndex;
-        (int line, int column) = GetLineColumnFromIndex(start);
-        return new Range(FilePath, start, end, line, column);
+        return new SourceRange(startIndex, endIndex);
     }
 
     public (int Line, int Column) GetLineColumnFromIndex(int index)

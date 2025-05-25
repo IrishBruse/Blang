@@ -1,8 +1,10 @@
-namespace IBlang;
+namespace IBlang.AstParser;
 
 using System;
 using System.Collections.Generic;
 using IBlang.Exceptions;
+using IBlang.Tokenizer;
+
 
 public partial class Parser
 {
@@ -20,9 +22,8 @@ public partial class Parser
         List<FunctionDeclaration> functions = [];
 
         Token identifier = Eat(TokenType.Identifier);
-        Token peek = Peek();
 
-        if (peek.TokenType == TokenType.OpenParenthesis)
+        if (Peek() == TokenType.OpenParenthesis)
         {
             functions.Add(ParseFunctionDecleration(identifier));
         }
@@ -35,21 +36,25 @@ public partial class Parser
 
     FunctionDeclaration ParseFunctionDecleration(Token identifier)
     {
-        Range begin = identifier.Range;
+        SourceRange begin = identifier.Range;
 
         Eat(TokenType.OpenParenthesis);
-        // ParseParameters();
+        List<Expression> parameters = [];
+        while (Peek() != TokenType.CloseParenthesis)
+        {
+            parameters.Add(ParseExpression());
+        }
         Eat(TokenType.CloseParenthesis);
 
         Eat(TokenType.OpenScope);
         List<Statement> statements = [];
-        while (Peek().TokenType != TokenType.CloseScope)
+        while (Peek() != TokenType.CloseScope)
         {
             statements.Add(ParseStatement());
         }
         Token end = Eat(TokenType.CloseScope);
 
-        return new FunctionDeclaration(statements.ToArray())
+        return new FunctionDeclaration(identifier, parameters.ToArray(), statements.ToArray())
         {
             Range = begin.Merge(end.Range),
         };
@@ -57,13 +62,11 @@ public partial class Parser
 
     Statement ParseStatement()
     {
-        Token peek = Peek();
-
-        return peek.TokenType switch
+        return Peek() switch
         {
             TokenType.ExternKeyword => ParseExternalDefinition(),
             TokenType.Identifier => ParseIdentifierStatement(),
-            _ => throw new InvalidTokenException("Unexpected Token of type " + peek.TokenType)
+            _ => throw new InvalidTokenException("Unexpected Token of type " + Peek())
         };
     }
 
@@ -87,7 +90,7 @@ public partial class Parser
 
         List<Expression> parameters = [];
 
-        switch (Peek().TokenType)
+        switch (Peek())
         {
             case TokenType.OpenParenthesis:
 
