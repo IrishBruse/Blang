@@ -10,19 +10,15 @@ using IBlang.Utility;
 
 public class Program
 {
-    static readonly Lexer lexer = new(CompilationFlags.None);
-    static readonly Parser parser = new();
-
-    static readonly AstTarget astTarget = new();
-    static readonly QbeTarget qbeTarget = new();
-
     public static void Main(string[] args)
     {
         Console.Clear();
 
+        Flags = ParseArgs(args, out string? file);
+
         try
         {
-            Run(args);
+            Compile(file);
         }
         catch (Exception e)
         {
@@ -32,27 +28,92 @@ public class Program
         }
     }
 
-    public static void Run(string[] args)
+    public static void Compile(string? file)
     {
-        Dictionary<string, string> flags = ParseArgs(args, out string? file);
+        CompilationData data = new()
+        {
+            File = file
+        };
+
+        Lexer lexer = new(data);
+        Parser parser = new(data);
+
+        AstTarget astTarget = new();
+        QbeTarget qbeTarget = new();
+
+        HandleFlags();
 
         file ??= PickFile();
-
-        file = Path.GetFullPath(file);
 
         StreamReader fileStream = File.OpenText(file);
         IEnumerator<Token> tokens = lexer.Lex(fileStream, file);
         CompilationUnit unit = parser.Parse(tokens);
 
-        string target = flags.GetValueOrDefault("target", "ast").ToLower();
-
-        _ = target switch
+        if (parser.Errors.Count > 0)
         {
-            AstTarget.Target => astTarget.Output(unit, file),
-            QbeTarget.Target => qbeTarget.Output(unit, file),
+            foreach (string error in parser.Errors)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(error);
+                Console.ResetColor();
+            }
+            return;
+        }
 
-            _ => astTarget.Output(unit, file),
-        };
+        string target = Flags.GetValueOrDefault("target", "qbe").ToLower();
+
+        if (target == astTarget.Target)
+        {
+            astTarget.Output(unit, file);
+        }
+        else if (target == qbeTarget.Target)
+        {
+            qbeTarget.Output(unit, file);
+        }
+        else
+        {
+            throw new ArgumentException("Unknown target " + target);
+        }
+    }
+
+    private static void HandleFlags()
+    {
+        if (Flags.GetValueOrDefault("help", "") == "true")
+        {
+            string[] message = [
+                "Description:",
+                "  b compiler",
+                "",
+                "Usage:",
+                "  bc <source-file> [options]",
+                "",
+                "Options:",
+                "  --run                                Executes the compiled output.",
+                "  -t, --target <TARGET>                The target runtime to run for.",
+                "  --list-targets                       List all supported targets.",
+                "  -h, --help                           Show this help message.",
+            ];
+
+            Console.WriteLine(string.Join("\n", message));
+
+            Environment.Exit(0);
+        }
+
+        if (Flags.GetValueOrDefault("list-targets", "") == "true")
+        {
+            string[] message = [
+                "Supported targets:",
+                "  * qbe (Default)",
+                "  * ast (Debug)",
+                // "  * gb (TODO)",
+                // "  * wasm (TODO)",
+                // "  * js (TODO)",
+            ];
+
+            Console.WriteLine(string.Join("\n", message));
+
+            Environment.Exit(0);
+        }
     }
 
     private static Dictionary<string, string> ParseArgs(string[] args, out string? file)
@@ -62,22 +123,33 @@ public class Program
         file = null;
 
         int index = 0;
+        string? Peek() { return index < args.Length ? args[index] : null; }
+        string Next() { return args[index++]; }
+
         while (index < args.Length)
         {
-            if (args[index].StartsWith("--"))
+            string? peek = Peek();
+            if (peek != null && peek.StartsWith("--"))
             {
-                if (args[index + 1].StartsWith("--"))
-                {
-                    throw new Exception("error parsing args");
-                }
+                string flagName = Next()[2..];
 
-                flags.Add(args[index][2..], args[index + 1]);
-                index += 2;
+                peek = Peek();
+                if (peek != null && !peek.StartsWith("--"))
+                {
+                    flags.Add(flagName, Next());
+                }
+                else
+                {
+                    flags.Add(flagName, "true");
+                }
+            }
+            else if (peek != null)
+            {
+                file = Path.GetFullPath(Next());
             }
             else
             {
-                file = args[index];
-                index++;
+                break;
             }
         }
 

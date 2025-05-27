@@ -1,18 +1,21 @@
 namespace IBlang.Targets;
 
 using System;
+using System.IO;
 using IBlang.AstParser;
 
-public class AstTarget : BaseTarget, IAstVisitor
+public class AstTarget : BaseTarget, ITargetVisitor
 {
-    public const string Target = "ast";
+    public override string Target => "ast";
 
-    public bool Output(CompilationUnit node, string file)
+    public void Output(CompilationUnit node, string file)
     {
-        output = new(Console.Out);
+        (string objFile, _) = GetOutputFile(file);
+        output = new(Console.Out, new StreamWriter(objFile + ".ast"));
+
         VisitCompilationUnit(node);
 
-        return true;
+        output.Dispose();
     }
 
     public void VisitCompilationUnit(CompilationUnit node)
@@ -50,7 +53,7 @@ public class AstTarget : BaseTarget, IAstVisitor
     public void VisitExternalDeclaration(ExternalStatement node)
     {
         WriteIndentation();
-        WriteLine($"ExternalStatement: {node.ExternalName}");
+        WriteLine($"ExternalStatement: {node.Externals}");
     }
 
     public void VisitFunctionCall(FunctionCall node)

@@ -1,12 +1,11 @@
 namespace IBlang.AstParser;
 
-using System;
 using System.Collections.Generic;
 using IBlang.Exceptions;
 using IBlang.Tokenizer;
+using IBlang.Utility;
 
-
-public partial class Parser
+public partial class Parser(CompilationData data)
 {
     IEnumerator<Token> tokens = null!;
 
@@ -21,11 +20,27 @@ public partial class Parser
     {
         List<FunctionDeclaration> functions = [];
 
-        Token identifier = Eat(TokenType.Identifier);
-
-        if (Peek() == TokenType.OpenParenthesis)
+        while (Peek() == TokenType.Identifier && Peek() != TokenType.Eof && Peek() != TokenType.Garbage)
         {
-            functions.Add(ParseFunctionDecleration(identifier));
+            Token identifier = Eat(TokenType.Identifier);
+
+            if (Peek() == TokenType.OpenParenthesis)
+            {
+                try
+                {
+                    functions.Add(ParseFunctionDecleration(identifier));
+                }
+                catch (ParserException e)
+                {
+                    Error(e);
+                }
+            }
+            else
+            {
+                Next();
+                Error($"Expected '(' or ';' but got {Peek()}");
+                break;
+            }
         }
 
         return new(functions, [])
@@ -38,19 +53,30 @@ public partial class Parser
     {
         SourceRange begin = identifier.Range;
 
-        Eat(TokenType.OpenParenthesis);
         List<Expression> parameters = [];
-        while (Peek() != TokenType.CloseParenthesis)
+
+        Eat(TokenType.OpenParenthesis);
+        while (Peek() != TokenType.CloseParenthesis && Peek() != TokenType.Eof)
         {
             parameters.Add(ParseExpression());
         }
         Eat(TokenType.CloseParenthesis);
 
-        Eat(TokenType.OpenScope);
         List<Statement> statements = [];
+
+        Eat(TokenType.OpenScope);
         while (Peek() != TokenType.CloseScope)
         {
-            statements.Add(ParseStatement());
+            Statement? statement = ParseStatement();
+
+            if (statement != null)
+            {
+                statements.Add(statement);
+            }
+            else
+            {
+                break;
+            }
         }
         Token end = Eat(TokenType.CloseScope);
 
@@ -60,7 +86,7 @@ public partial class Parser
         };
     }
 
-    Statement ParseStatement()
+    Statement? ParseStatement()
     {
         return Peek() switch
         {
@@ -74,17 +100,25 @@ public partial class Parser
     {
         Token start = Eat(TokenType.ExternKeyword);
 
-        // TODO: handle multiple externals and commas
         Token identifier = Eat(TokenType.Identifier);
+
+        List<string> externs = [identifier];
+        if (Peek() == TokenType.Comma)
+        {
+            Eat(TokenType.Comma);
+            identifier = Eat(TokenType.Identifier);
+            externs.Add(identifier);
+        }
+
         Token end = Eat(TokenType.Semicolon);
 
-        return new ExternalStatement(identifier)
+        return new ExternalStatement(externs.ToArray())
         {
             Range = start.Range.Merge(end.Range),
         };
     }
 
-    FunctionCall ParseIdentifierStatement()
+    FunctionCall? ParseIdentifierStatement()
     {
         Token identifier = Eat(TokenType.Identifier);
 
@@ -96,7 +130,14 @@ public partial class Parser
 
             // TODO: parse more values
             Eat(TokenType.OpenParenthesis);
-            parameters.Add(ParseExpression());
+            while (Peek() != TokenType.CloseParenthesis)
+            {
+                parameters.Add(ParseExpression());
+                if (Peek() == TokenType.Comma)
+                {
+                    Eat(TokenType.Comma);
+                }
+            }
             Eat(TokenType.CloseParenthesis);
             Eat(TokenType.Semicolon);
 
@@ -105,18 +146,32 @@ public partial class Parser
                 Range = identifier.Range,
             };
 
-            default:
-            throw new NotImplementedException();
+            default: return null;
         }
     }
 
     Expression ParseExpression()
     {
-        Token str = Eat(TokenType.StringLiteral);
-
-        return new StringValue(str.Content)
+        switch (Peek())
         {
-            Range = new()
-        };
+            case TokenType.StringLiteral:
+            Token str = Eat(TokenType.StringLiteral);
+
+            return new StringValue(str.Content)
+            {
+                Range = new()
+            };
+
+            case TokenType.IntegerLiteral:
+            Token integer = Eat(TokenType.IntegerLiteral);
+
+            return new IntValue(int.Parse(integer.Content))
+            {
+                Range = new()
+            };
+
+            default: throw new ParserException("ParseExpression: " + Peek());
+        }
+
     }
 }

@@ -96,7 +96,7 @@ public enum TokenType
 
 public static class Extensions
 {
-    public static bool IsEndOrGarbage(this TokenType t)
+    public static bool IsEnd(this TokenType t)
     {
         return t == TokenType.Garbage || t == TokenType.Eof;
     }

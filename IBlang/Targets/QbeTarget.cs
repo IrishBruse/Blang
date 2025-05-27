@@ -2,30 +2,66 @@ namespace IBlang.Targets;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using IBlang.AstParser;
 
-public class QbeTarget : BaseTarget, IAstVisitor
+public class QbeTarget : BaseTarget, ITargetVisitor
 {
-    public const string Target = "qbe";
+    public override string Target => "qbe";
 
     readonly Dictionary<string, string> strings = [];
     readonly HashSet<string> externs = [];
 
     int stringIndex = 0;
 
-    public bool Output(CompilationUnit node, string file)
+
+    public void Output(CompilationUnit node, string file)
     {
-        string projectDirectory = Path.GetDirectoryName(file)!;
-        string sourceFileName = Path.GetFileNameWithoutExtension(file);
+        (string objFile, string binFile) = GetOutputFile(file);
 
-        string qbeOutputFile = Path.Combine(projectDirectory, "obj", "qbe", sourceFileName + ".ssa");
-        output = new(Console.Out, new StreamWriter(qbeOutputFile));
-
+        Console.WriteLine("========== Parser ==========");
+        output = new(new StreamWriter(objFile + ".ssa"));
         VisitCompilationUnit(node);
+        output.Dispose();
 
-        return true;
+        Console.WriteLine("==========  QBE   ==========");
+        GenerateAssembly(objFile);
+
+        Console.WriteLine("==========  GCC   ==========");
+        GenerateExecutable(objFile + ".s", binFile);
+
+        if (Flags.GetValueOrDefault("run", "false") == "true")
+        {
+            Console.WriteLine("==========  RUN   ==========");
+            RunExecutable(binFile);
+        }
     }
+
+    private void RunExecutable(string executable)
+    {
+        using Process? qbe = Process.Start(executable);
+        qbe?.WaitForExit();
+    }
+
+    private static void GenerateAssembly(string output)
+    {
+        using Process? qbe = Process.Start(new ProcessStartInfo("qbe", output + ".ssa") { RedirectStandardOutput = true, RedirectStandardError = true });
+        qbe?.WaitForExit();
+
+        string assemblyText = qbe?.StandardOutput?.ReadToEnd() ?? "";
+        string errorOutput = qbe?.StandardError?.ReadToEnd() ?? "";
+
+        File.WriteAllText(output + ".s", assemblyText);
+    }
+
+    private static void GenerateExecutable(string outputAssembly, string outputFile)
+    {
+        string arguments = $"{outputAssembly} -o {outputFile}";
+        using Process? gcc = Process.Start(new ProcessStartInfo("gcc", arguments));
+        gcc?.WaitForExit();
+    }
+
 
     public void VisitCompilationUnit(CompilationUnit node)
     {
@@ -46,7 +82,7 @@ public class QbeTarget : BaseTarget, IAstVisitor
     private void GenerateDataSection()
     {
         WriteLine("# Data");
-        foreach ((string name, string value) in strings)
+        foreach ((string value, string name) in strings)
         {
             WriteLine($"data ${name} = {{ b \"{value}\", b 0 }}");
         }
@@ -65,7 +101,8 @@ public class QbeTarget : BaseTarget, IAstVisitor
 
     public void VisitFunctionDeclaration(FunctionDeclaration node)
     {
-        WriteLine($"export function w ${node.FunctionName}()");
+        string returnType = node.FunctionName == "main" ? "w " : "";
+        WriteLine($"export function {returnType}${node.FunctionName}()");
         BeginScope();
         {
             WriteLine("@start");
@@ -78,6 +115,10 @@ public class QbeTarget : BaseTarget, IAstVisitor
             {
                 WriteIndented($"ret 0");
             }
+            else
+            {
+                WriteIndented($"ret");
+            }
         }
         EndScope();
         WriteLine();
@@ -85,7 +126,10 @@ public class QbeTarget : BaseTarget, IAstVisitor
 
     public void VisitExternalDeclaration(ExternalStatement node)
     {
-        externs.Add(node.ExternalName);
+        foreach (string extrn in node.Externals)
+        {
+            externs.Add(extrn);
+        }
     }
 
     public void VisitFunctionCall(FunctionCall node)
@@ -94,8 +138,7 @@ public class QbeTarget : BaseTarget, IAstVisitor
         Write($"call ${node.IdentifierName}");
         Write("(");
         VisitExpressions(node.Parameters);
-        Write(")");
-        WriteLine();
+        WriteLine(")");
     }
 
     public void VisitExpressions(Expression[] expressions)
@@ -115,14 +158,21 @@ public class QbeTarget : BaseTarget, IAstVisitor
 
     public void VisitString(StringValue stringValue)
     {
-        string dataVarName = $"str_{stringIndex++}";
-        strings.Add(dataVarName, stringValue.Value);
-        Write($"l ${dataVarName}");
+        if (strings.TryGetValue(stringValue.Value, out string? dataVarName))
+        {
+            Write($"l ${dataVarName}");
+        }
+        else
+        {
+            dataVarName = $"string_{stringIndex++}";
+            strings.Add(stringValue.Value, dataVarName);
+            Write($"l ${dataVarName}");
+        }
     }
 
     public void VisitInt(IntValue intValue)
     {
-        Write(intValue.Value.ToString());
+        Write("w " + intValue.Value.ToString());
     }
 
     private void BeginScope()

@@ -1,4 +1,4 @@
-namespace IBlang;
+namespace IBlang.Utility;
 
 using System;
 using System.IO;
