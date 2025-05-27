@@ -128,7 +128,6 @@ public partial class Parser(CompilationData data)
         {
             case TokenType.OpenParenthesis:
 
-            // TODO: parse more values
             Eat(TokenType.OpenParenthesis);
             while (Peek() != TokenType.CloseParenthesis)
             {
