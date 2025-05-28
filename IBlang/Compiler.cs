@@ -48,24 +48,17 @@ public class Compiler
         AstTarget astTarget = new();
         QbeTarget qbeTarget = new();
 
-        HandleFlags();
-
         file ??= PickFile();
 
         StreamReader fileStream = File.OpenText(file);
         IEnumerator<Token> tokens = lexer.Lex(fileStream, file);
-        CompilationUnit unit = parser.Parse(tokens);
+        CompilationUnit unit = parser.Parse(tokens, file);
 
-        unit.File = file;
-
-        if (parser.Errors.Count > 0)
+        foreach (string error in parser.Errors)
         {
-            foreach (string error in parser.Errors)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(error);
-                Console.ResetColor();
-            }
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(error);
+            Console.ResetColor();
         }
 
         if (Flags.Ast)
@@ -98,45 +91,6 @@ public class Compiler
         output += qbe?.StandardError.ReadToEnd();
 
         return output;
-    }
-
-    static void HandleFlags()
-    {
-        if (Flags.Help)
-        {
-            string[] message = [
-                "Description:",
-                "  b compiler",
-                "",
-                "Usage:",
-                "  bc <source-file> [options]",
-                "",
-                "Options:",
-                "  -t, --target <TARGET>                The target to compile for.",
-                "",
-                "  --run                                Executes the compiled output.",
-                "  --ast                                Outputs the ast view of the parsed file.",
-                "  --debug                              Print debug info like stack traces.",
-                "  --list-targets                       List all supported targets.",
-                "  -h, --help                           Show this help message.",
-            ];
-
-            Console.WriteLine(string.Join("\n", message));
-
-            Environment.Exit(0);
-        }
-
-        if (Flags.ListTargets)
-        {
-            string[] message = [
-                "Supported targets:",
-                "  * qbe (Default)",
-            ];
-
-            Console.WriteLine(string.Join("\n", message));
-
-            Environment.Exit(0);
-        }
     }
 
     static string PickFile()

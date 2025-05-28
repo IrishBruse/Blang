@@ -1,6 +1,5 @@
 namespace IBlang.AstParser;
 
-using System;
 using System.Collections.Generic;
 using IBlang.Exceptions;
 using IBlang.Tokenizer;
@@ -10,11 +9,13 @@ public partial class Parser(CompilationData data)
 {
     IEnumerator<Token> tokens = null!;
 
-    public CompilationUnit Parse(IEnumerator<Token> tokens)
+    public CompilationUnit Parse(IEnumerator<Token> tokens, string file)
     {
         this.tokens = tokens;
         tokens.MoveNext();
-        return ParseTopLevel();
+        CompilationUnit topLevel = ParseTopLevel();
+        topLevel.File = file;
+        return topLevel;
     }
 
     CompilationUnit ParseTopLevel()

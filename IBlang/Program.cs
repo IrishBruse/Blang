@@ -10,6 +10,7 @@ public class Program
     public static void Main(string[] args)
     {
         Globals.ParseArgs(args, out string? file);
+        HandleFlags();
 
         if (Flags.Test)
         {
@@ -97,5 +98,44 @@ public class Program
 
         Console.WriteLine($"Test {status}: {testFile}");
         Console.Write("\x1b[0m");
+    }
+
+    static void HandleFlags()
+    {
+        if (Flags.Help)
+        {
+            string[] message = [
+                "Description:",
+                "  b compiler",
+                "",
+                "Usage:",
+                "  bc <source-file> [options]",
+                "",
+                "Options:",
+                "  -t, --target <TARGET>                The target to compile for.",
+                "",
+                "  --run                                Executes the compiled output.",
+                "  --ast                                Outputs the ast view of the parsed file.",
+                "  --debug                              Print debug info like stack traces.",
+                "  --list-targets                       List all supported targets.",
+                "  -h, --help                           Show this help message.",
+            ];
+
+            Console.WriteLine(string.Join("\n", message));
+
+            Environment.Exit(0);
+        }
+
+        if (Flags.ListTargets)
+        {
+            string[] message = [
+                "Supported targets:",
+                "  * qbe (Default)",
+            ];
+
+            Console.WriteLine(string.Join("\n", message));
+
+            Environment.Exit(0);
+        }
     }
 }
