@@ -12,8 +12,6 @@ B is a small, recursive, and non-numeric programming language, primarily designe
     -   `*X`: Interprets an rvalue `X` as an lvalue (indirection).
     -   `&x`: Interprets an lvalue `x` as an rvalue (address-of).
 
----
-
 ## Compiler Implementation Features
 
 ### Lexical Analysis

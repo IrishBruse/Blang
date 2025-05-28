@@ -1,0 +1,4 @@
+CompilationUnit:
+    FunctionDeclaration: main()
+        AutoDeclaration: foo
+        VariableAssignment: foo = 4

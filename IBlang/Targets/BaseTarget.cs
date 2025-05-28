@@ -47,8 +47,6 @@ public class BaseTarget
 
     public (string, string) GetOutputFile(string inputFile)
     {
-        CreateOutputDirectories(inputFile);
-
         string projectDirectory = Path.GetDirectoryName(inputFile)!;
         string sourceFileName = Path.GetFileNameWithoutExtension(inputFile);
         string objFile = Path.Combine(projectDirectory, "obj", Target, sourceFileName);

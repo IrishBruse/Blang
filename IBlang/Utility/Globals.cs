@@ -51,6 +51,7 @@ public static class Globals
         Flags.Debug = flags.GetValueOrDefault("debug") == "true";
         Flags.Test = flags.GetValueOrDefault("test") == "true";
         Flags.Ast = flags.GetValueOrDefault("ast") == "true";
+        Flags.UpdateSnapshots = flags.GetValueOrDefault("update-snapshots") == "true";
 
         if (string.IsNullOrEmpty(Flags.Target))
         {

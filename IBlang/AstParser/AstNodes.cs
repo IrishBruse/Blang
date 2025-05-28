@@ -5,7 +5,7 @@ using IBlang;
 
 public interface ITargetVisitor
 {
-    void Output(CompilationUnit node, string file);
+    string Output(CompilationUnit node);
 
     void VisitCompilationUnit(CompilationUnit node);
     void VisitFunctionDeclaration(FunctionStatement node);
@@ -39,6 +39,7 @@ public record IntValue(int Value) : Expression
 
 public record CompilationUnit(List<FunctionStatement> FunctionDeclarations, List<FunctionStatement> VariableDeclarations) : AstNode
 {
+    public string File { get; set; } = "";
     public override void Accept(ITargetVisitor visitor) => visitor.VisitCompilationUnit(this);
 }
 

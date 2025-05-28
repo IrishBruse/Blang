@@ -68,4 +68,11 @@ public class Terminal
             Console.WriteLine(message);
         }
     }
+
+    public static void Error(string message)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(message);
+        Console.ResetColor();
+    }
 }

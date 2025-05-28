@@ -2,6 +2,7 @@ namespace IBlang;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using IBlang.AstParser;
 using IBlang.Targets;
@@ -10,22 +11,31 @@ using IBlang.Utility;
 
 public class Compiler
 {
-    public static void Compile(string? file)
+    public static CompileOutput Compile(string? file)
     {
+        CompileOutput output = new(false);
+
         try
         {
-            CompileFile(file);
+            output = CompileFile(file);
         }
         catch (Exception e)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Error.WriteLine(e);
-            Console.ResetColor();
+            output.Error = e.ToString();
         }
+
+        if (output.Success && Flags.Run)
+        {
+            output.RunOutput = RunExecutable(output.Executable);
+        }
+
+        return output;
     }
 
-    static void CompileFile(string? file)
+    static CompileOutput CompileFile(string? file)
     {
+        CompileOutput output = new();
+
         CompilationData data = new()
         {
             File = file
@@ -45,6 +55,8 @@ public class Compiler
         IEnumerator<Token> tokens = lexer.Lex(fileStream, file);
         CompilationUnit unit = parser.Parse(tokens);
 
+        unit.File = file;
+
         if (parser.Errors.Count > 0)
         {
             foreach (string error in parser.Errors)
@@ -53,29 +65,41 @@ public class Compiler
                 Console.WriteLine(error);
                 Console.ResetColor();
             }
-            return;
         }
 
         if (Flags.Ast)
         {
-            Console.WriteLine("==========  AST   ==========");
-            astTarget.Output(unit, file);
+            output.AstOutput = astTarget.Output(unit);
         }
 
         string? target = Flags.Target;
 
         if (target == qbeTarget.Target)
         {
-            qbeTarget.Output(unit, file);
+            output.Executable = qbeTarget.Output(unit);
         }
         else
         {
             throw new ArgumentException("Unknown target " + target);
         }
 
+        output.Success = true;
+
+        return output;
     }
 
-    private static void HandleFlags()
+    public static string RunExecutable(string? executable)
+    {
+        using Process? qbe = Process.Start(new ProcessStartInfo(executable!) { RedirectStandardOutput = true, RedirectStandardError = true });
+        qbe?.WaitForExit();
+
+        string? output = qbe?.StandardOutput.ReadToEnd();
+        output += qbe?.StandardError.ReadToEnd();
+
+        return output;
+    }
+
+    static void HandleFlags()
     {
         if (Flags.Help)
         {
@@ -106,7 +130,6 @@ public class Compiler
             string[] message = [
                 "Supported targets:",
                 "  * qbe (Default)",
-                "  * ast (Debug)",
             ];
 
             Console.WriteLine(string.Join("\n", message));

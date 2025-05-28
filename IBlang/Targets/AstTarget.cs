@@ -1,20 +1,24 @@
 namespace IBlang.Targets;
 
 using System;
+using System.IO;
+using System.Text;
 using IBlang.AstParser;
 
 public class AstTarget : BaseTarget, ITargetVisitor
 {
     public override string Target => "ast";
 
-    public void Output(CompilationUnit node, string file)
+    public string Output(CompilationUnit node)
     {
-        (_, _) = GetOutputFile(file);
-        output = new(Console.Out);
+        StringBuilder capturedOutput = new();
+        StringWriter stringWriter = new(capturedOutput);
+
+        output = new(stringWriter);
 
         VisitCompilationUnit(node);
 
-        output.Dispose();
+        return capturedOutput.ToString().Trim();
     }
 
     public void VisitCompilationUnit(CompilationUnit node)
@@ -52,7 +56,7 @@ public class AstTarget : BaseTarget, ITargetVisitor
     public void VisitExternalDeclaration(ExternalStatement node)
     {
         WriteIndentation();
-        WriteLine($"ExternalStatement: {node.Externals}");
+        WriteLine($"ExternalStatement: {string.Join(',', node.Externals)}");
     }
 
     public void VisitFunctionCall(FunctionCall node)
@@ -83,11 +87,13 @@ public class AstTarget : BaseTarget, ITargetVisitor
 
     public void VisitAutoDeclaration(AutoStatement autoDeclaration)
     {
-        throw new NotImplementedException();
+        WriteIndentation();
+        WriteLine($"AutoDeclaration: {string.Join(',', autoDeclaration.Variables)}");
     }
 
     public void VisitVariableAssignment(VariableAssignment variableAssignment)
     {
-        throw new NotImplementedException();
+        WriteIndentation();
+        WriteLine($"VariableAssignment: {variableAssignment.IdentifierName} = {variableAssignment.Value}");
     }
 }

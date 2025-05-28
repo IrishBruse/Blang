@@ -9,5 +9,6 @@ public static class Flags
     public static bool Debug { get; set; }
     public static bool ListTargets { get; set; }
     public static bool Test { get; set; }
-    public static bool Ast { get; internal set; }
+    public static bool Ast { get; set; }
+    public static bool UpdateSnapshots { get; set; }
 }

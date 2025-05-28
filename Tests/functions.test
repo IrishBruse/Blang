@@ -1,0 +1,11 @@
+CompilationUnit:
+    FunctionDeclaration: main()
+        ExternalStatement: printf
+        FunctionCall: printf("Test: functions\n")
+        FunctionCall: other()
+    FunctionDeclaration: other()
+        ExternalStatement: printf
+        FunctionCall: printf("other()\n")
+==============================
+Test: functions
+other()

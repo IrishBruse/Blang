@@ -16,9 +16,10 @@ public class QbeTarget : BaseTarget, ITargetVisitor
 
     int stringIndex = 0;
 
-    public void Output(CompilationUnit node, string file)
+    public string Output(CompilationUnit node)
     {
-        (string objFile, string binFile) = GetOutputFile(file);
+        CreateOutputDirectories(node.File);
+        (string objFile, string binFile) = GetOutputFile(node.File);
 
         File.Delete(objFile + ".s");
         File.Delete(objFile + ".ssa");
@@ -31,24 +32,17 @@ public class QbeTarget : BaseTarget, ITargetVisitor
         Terminal.Debug("==========  QBE   ==========");
         if (GenerateAssembly(objFile) != 0)
         {
-            return;
+            return "";
         }
 
         Terminal.Debug("==========  GCC   ==========");
-        if (GenerateExecutable(objFile + ".s", binFile) == 0)
+        if (GenerateExecutable(objFile + ".s", binFile) != 0)
         {
-            if (Flags.Run)
-            {
-                Terminal.Debug("==========  RUN   ==========");
-                RunExecutable(binFile);
-            }
-        }
-    }
+            return "";
 
-    private static void RunExecutable(string executable)
-    {
-        using Process? qbe = Process.Start(executable);
-        qbe?.WaitForExit();
+        }
+
+        return binFile;
     }
 
     private static int? GenerateAssembly(string output)
