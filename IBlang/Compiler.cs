@@ -24,6 +24,7 @@ public class Compiler
             output.Error = e.ToString();
         }
 
+        output.RunOutput = "";
         if (output.Success && Flags.Run)
         {
             output.RunOutput = RunExecutable(output.Executable);
@@ -152,13 +153,5 @@ public class Compiler
 
         string file = files[index];
         return file;
-    }
-
-    public static void DebugTokens(IEnumerator<Token> tokens)
-    {
-        while (tokens.MoveNext())
-        {
-            Console.WriteLine(tokens.Current);
-        }
     }
 }
