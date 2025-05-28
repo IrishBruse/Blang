@@ -78,7 +78,7 @@ public class Program
         }
         else
         {
-            string runOutput = output.Error;
+            string runOutput = output.Errors;
             if (!string.IsNullOrEmpty(runOutput))
             {
                 testOutput.AppendLine("==============================");

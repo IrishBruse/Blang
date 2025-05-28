@@ -21,7 +21,7 @@ public class Compiler
         }
         catch (Exception e)
         {
-            output.Error = e.ToString();
+            output.Errors = e.ToString();
         }
 
         output.RunOutput = "";
