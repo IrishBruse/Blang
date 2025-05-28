@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using IBlang.Exceptions;
 using IBlang.Tokenizer;
+using IBlang.Utility;
 
 public partial class Parser
 {
@@ -39,7 +40,7 @@ public partial class Parser
 
     void Error(ParserException e)
     {
-        if (Flags.GetValueOrDefault("trace", "false") == "true")
+        if (Flags.Debug)
         {
             Errors.Add(e.Error + "\n" + e.StackTrace);
         }
@@ -53,7 +54,7 @@ public partial class Parser
     {
         string msg = data.GetFileLocation(end) + ": " + error;
 
-        if (Flags.GetValueOrDefault("trace", "false") == "true")
+        if (Flags.Debug)
         {
             string trace = string.Join("\n", Environment.StackTrace.ToString().Split('\n')[2..]);
             Errors.Add(msg + "\n" + trace);

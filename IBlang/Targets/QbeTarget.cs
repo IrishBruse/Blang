@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using IBlang.AstParser;
+using IBlang.Utility;
 
 public class QbeTarget : BaseTarget, ITargetVisitor
 {
@@ -15,36 +16,42 @@ public class QbeTarget : BaseTarget, ITargetVisitor
 
     int stringIndex = 0;
 
-
     public void Output(CompilationUnit node, string file)
     {
         (string objFile, string binFile) = GetOutputFile(file);
 
-        Console.WriteLine("========== Parser ==========");
+        File.Delete(objFile + ".s");
+        File.Delete(objFile + ".ssa");
+        File.Delete(binFile);
+
         output = new(new StreamWriter(objFile + ".ssa"));
         VisitCompilationUnit(node);
         output.Dispose();
 
-        Console.WriteLine("==========  QBE   ==========");
-        GenerateAssembly(objFile);
-
-        Console.WriteLine("==========  GCC   ==========");
-        GenerateExecutable(objFile + ".s", binFile);
-
-        if (Flags.GetValueOrDefault("run", "false") == "true")
+        Terminal.Debug("==========  QBE   ==========");
+        if (GenerateAssembly(objFile) != 0)
         {
-            Console.WriteLine("==========  RUN   ==========");
-            RunExecutable(binFile);
+            return;
+        }
+
+        Terminal.Debug("==========  GCC   ==========");
+        if (GenerateExecutable(objFile + ".s", binFile) == 0)
+        {
+            if (Flags.Run)
+            {
+                Terminal.Debug("==========  RUN   ==========");
+                RunExecutable(binFile);
+            }
         }
     }
 
-    private void RunExecutable(string executable)
+    private static void RunExecutable(string executable)
     {
         using Process? qbe = Process.Start(executable);
         qbe?.WaitForExit();
     }
 
-    private static void GenerateAssembly(string output)
+    private static int? GenerateAssembly(string output)
     {
         using Process? qbe = Process.Start(new ProcessStartInfo("qbe", output + ".ssa") { RedirectStandardOutput = true, RedirectStandardError = true });
         qbe?.WaitForExit();
@@ -52,25 +59,48 @@ public class QbeTarget : BaseTarget, ITargetVisitor
         string assemblyText = qbe?.StandardOutput?.ReadToEnd() ?? "";
         string errorOutput = qbe?.StandardError?.ReadToEnd() ?? "";
 
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Error.Write(errorOutput);
+        Console.ResetColor();
+
         File.WriteAllText(output + ".s", assemblyText);
+
+        return qbe?.ExitCode;
     }
 
-    private static void GenerateExecutable(string outputAssembly, string outputFile)
+    private static int? GenerateExecutable(string outputAssembly, string outputFile)
     {
         string arguments = $"{outputAssembly} -o {outputFile}";
-        using Process? gcc = Process.Start(new ProcessStartInfo("gcc", arguments));
+        using Process? gcc = Process.Start(new ProcessStartInfo("gcc", arguments) { RedirectStandardOutput = true, RedirectStandardError = true });
         gcc?.WaitForExit();
+
+        string? standardOutput = gcc?.StandardOutput?.ReadToEnd();
+        string? errorOutput = gcc?.StandardError?.ReadToEnd();
+
+        if (!string.IsNullOrEmpty(standardOutput))
+        {
+            Console.Write(standardOutput);
+        }
+
+        if (!string.IsNullOrEmpty(errorOutput))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Error.Write(errorOutput);
+            Console.ResetColor();
+        }
+
+        return gcc?.ExitCode;
     }
 
 
     public void VisitCompilationUnit(CompilationUnit node)
     {
-        foreach (FunctionDeclaration funcDecl in node.FunctionDeclarations)
+        foreach (FunctionStatement funcDecl in node.FunctionDeclarations)
         {
             funcDecl.Accept(this);
         }
 
-        foreach (FunctionDeclaration varDecl in node.VariableDeclarations)
+        foreach (FunctionStatement varDecl in node.VariableDeclarations)
         {
             varDecl.Accept(this);
         }
@@ -99,10 +129,17 @@ public class QbeTarget : BaseTarget, ITargetVisitor
         WriteLine();
     }
 
-    public void VisitFunctionDeclaration(FunctionDeclaration node)
+    public void VisitFunctionDeclaration(FunctionStatement node)
     {
         string returnType = node.FunctionName == "main" ? "w " : "";
-        WriteLine($"export function {returnType}${node.FunctionName}()");
+        if (node.FunctionName == "main")
+        {
+            WriteLine($"export function {returnType}${node.FunctionName}()");
+        }
+        else
+        {
+            WriteLine($"function w ${node.FunctionName}()");
+        }
         BeginScope();
         {
             WriteLine("@start");
@@ -185,5 +222,19 @@ public class QbeTarget : BaseTarget, ITargetVisitor
     {
         Dedent();
         WriteLine("}");
+    }
+
+    public void VisitAutoDeclaration(AutoStatement autoDeclaration)
+    {
+        foreach (string variable in autoDeclaration.Variables)
+        {
+            WriteIndented($"%{variable} =l alloc8 8");
+        }
+        WriteLine("");
+    }
+
+    public void VisitVariableAssignment(VariableAssignment variableAssignment)
+    {
+        // throw new NotImplementedException();
     }
 }

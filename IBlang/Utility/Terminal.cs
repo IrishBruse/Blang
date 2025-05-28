@@ -60,4 +60,12 @@ public class Terminal
             }
         }
     }
+
+    public static void Debug(string message)
+    {
+        if (Flags.Debug)
+        {
+            Console.WriteLine(message);
+        }
+    }
 }

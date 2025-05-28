@@ -49,21 +49,21 @@ B is a small, recursive, and non-numeric programming language, primarily designe
 
 -   **`program`**: Zero or more definitions.
 -   **`definition`**:
-    -   `name [ {constant}01 ] {ival {, ival}0}01 ;` (External variable/vector definition)
-    -   `name ( {name {, name}0}01 ) statement` (Function definition)
+    -   `name [ {constant}* ] {ival {, ival}0}* ;` (External variable/vector definition)
+    -   `name ( {name {, name}0}* ) statement` (Function definition)
 -   **`ival`**: `constant` or `name`.
 -   **`statement`**:
-    -   `auto name {constant}01 {, name {constant}01}0 ; statement`
+    -   `auto name {constant}* {, name {constant}*}0 ; statement`
     -   `extrn name {, name}0 ; statement`
     -   `name : statement` (Label)
     -   `case constant : statement`
     -   `{ {statement}0 }` (Compound statement)
-    -   `if ( rvalue ) statement {else statement}01`
+    -   `if ( rvalue ) statement {else statement}*`
     -   `while ( rvalue ) statement`
     -   `switch rvalue statement`
     -   `goto rvalue ;`
-    -   `return {( rvalue )}01 ;`
-    -   `{rvalue}01 ;` (Expression statement, often assignment or function call)
+    -   `return {( rvalue )}* ;`
+    -   `{rvalue}* ;` (Expression statement, often assignment or function call)
 -   **`rvalue`**:
     -   `( rvalue )`
     -   `lvalue`
@@ -75,8 +75,8 @@ B is a small, recursive, and non-numeric programming language, primarily designe
     -   `& lvalue`
     -   `rvalue binary rvalue`
     -   `rvalue ? rvalue : rvalue` (Conditional expression)
-    -   `rvalue ( {rvalue {, rvalue}0 }01 )` (Function call)
--   **`assign`**: `= {binary}01` (Handles `+=`, `*=`, etc.)
+    -   `rvalue ( {rvalue {, rvalue}0 }* )` (Function call)
+-   **`assign`**: `= {binary}*` (Handles `+=`, `*=`, etc.)
 -   **`inc-dec`**: `++`, `--`
 -   **`unary`**: `-`, `!`
 -   **`binary`**: `|`, `&`, `==`, `!=`, `<`, `<=`, `>`, `>=`, `<<`, `>>`, `-`, `+`, `%`, `*`, `/`
@@ -116,7 +116,7 @@ B is a small, recursive, and non-numeric programming language, primarily designe
     -   **Internal:** Local to a function, but available to all invocations of that function. (First reference not `extrn` or `auto`).
 -   **External Definitions:**
     -   **Simple:** `name {ival , ival ...}0 ;` (initializes with zero if no `ival`, constant value, or address of `name`).
-    -   **Vector:** `name [ {constant}01 ] {ival , ival ...}0 ;` (base of vector, initial values determine size if missing).
+    -   **Vector:** `name [ {constant}* ] {ival , ival ...}0 ;` (base of vector, initial values determine size if missing).
     -   **Function:** `name ( arguments ) statement` (arguments are automatic lvalues).
 -   **Function Calls:** Recursive by design, with minimal cost. Parameters are assigned to function's automatic lvalues.
 -   **Switch Statement:** Evaluates `rvalue`, compares to `case constant`s (order undefined). Jumps to matching `case`. If no match, `statement1` (the switch body) is skipped. No fall-through behavior explicitly mentioned, but the examples suggest it (i.e., you need `goto loop;` in `printf` to prevent fall-through).
@@ -131,20 +131,3 @@ B is a small, recursive, and non-numeric programming language, primarily designe
     -   Stack Frame Structure: `prev_display_pointer`, `saved_interpreter_pc`, `automatic_variables`.
     -   Lvalues as word addresses (need to shift to byte addresses for memory access).
     -   External variables are global with names prefixed by `.` (e.g., `.external`).
-
-### Debugging Features / Considerations
-
--   `R4` can trace function calls and automatic variable values.
--   `R3` is the current program counter.
--   External variables are global (prefixed with `.`) and directly examinable by a debugger.
--   All data lvalues are word addresses, requiring special handling in a debugger.
-
-### Known Issues / "Nasties" (for potential future fixes or warnings)
-
--   **Ambiguous Expressions:** Some ambiguities like `a+++b` handled, others like `a+++++b` are not.
--   **Assembler Bugs:** `/etc/ba` may produce undefined symbols for certain intermediate language combinations.
--   **Missing Interpreter Routines:** Specific assignment operators (e.g., `&=`, `|=`) were not yet implemented in the `/etc/bilib` library.
--   **Loader Deficiency:** Cannot initialize external variables with addresses of other externals.
--   **Reserved External Names:** `byte`, `endif`, `even`, `globl` conflict with assembler pseudo-operations and should be avoided for external variable names.
-
----

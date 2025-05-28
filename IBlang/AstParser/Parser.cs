@@ -1,5 +1,6 @@
 namespace IBlang.AstParser;
 
+using System;
 using System.Collections.Generic;
 using IBlang.Exceptions;
 using IBlang.Tokenizer;
@@ -18,10 +19,14 @@ public partial class Parser(CompilationData data)
 
     CompilationUnit ParseTopLevel()
     {
-        List<FunctionDeclaration> functions = [];
+        List<FunctionStatement> functions = [];
+
+        EatComments();
 
         while (Peek() == TokenType.Identifier && Peek() != TokenType.Eof && Peek() != TokenType.Garbage)
         {
+            EatComments();
+
             Token identifier = Eat(TokenType.Identifier);
 
             if (Peek() == TokenType.OpenParenthesis)
@@ -41,6 +46,8 @@ public partial class Parser(CompilationData data)
                 Error($"Expected '(' or ';' but got {Peek()}");
                 break;
             }
+
+            EatComments();
         }
 
         return new(functions, [])
@@ -49,7 +56,15 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    FunctionDeclaration ParseFunctionDecleration(Token identifier)
+    private void EatComments()
+    {
+        while (Peek() == TokenType.Comment)
+        {
+            Eat(TokenType.Comment);
+        }
+    }
+
+    FunctionStatement ParseFunctionDecleration(Token identifier)
     {
         SourceRange begin = identifier.Range;
 
@@ -80,7 +95,7 @@ public partial class Parser(CompilationData data)
         }
         Token end = Eat(TokenType.CloseScope);
 
-        return new FunctionDeclaration(identifier, parameters.ToArray(), statements.ToArray())
+        return new FunctionStatement(identifier, parameters.ToArray(), statements.ToArray())
         {
             Range = begin.Merge(end.Range),
         };
@@ -91,6 +106,7 @@ public partial class Parser(CompilationData data)
         return Peek() switch
         {
             TokenType.ExternKeyword => ParseExternalDefinition(),
+            TokenType.AutoKeyword => ParseAutoDefinition(),
             TokenType.Identifier => ParseIdentifierStatement(),
             _ => throw new InvalidTokenException("Unexpected Token of type " + Peek())
         };
@@ -118,7 +134,29 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    FunctionCall? ParseIdentifierStatement()
+    AutoStatement ParseAutoDefinition()
+    {
+        Token start = Eat(TokenType.AutoKeyword);
+
+        Token identifier = Eat(TokenType.Identifier);
+
+        List<string> variables = [identifier];
+        if (Peek() == TokenType.Comma)
+        {
+            Eat(TokenType.Comma);
+            identifier = Eat(TokenType.Identifier);
+            variables.Add(identifier);
+        }
+
+        Token end = Eat(TokenType.Semicolon);
+
+        return new AutoStatement(variables.ToArray())
+        {
+            Range = start.Range.Merge(end.Range),
+        };
+    }
+
+    Statement? ParseIdentifierStatement()
     {
         Token identifier = Eat(TokenType.Identifier);
 
@@ -127,25 +165,39 @@ public partial class Parser(CompilationData data)
         switch (Peek())
         {
             case TokenType.OpenParenthesis:
-
-            Eat(TokenType.OpenParenthesis);
-            while (Peek() != TokenType.CloseParenthesis)
             {
-                parameters.Add(ParseExpression());
-                if (Peek() == TokenType.Comma)
+                Eat(TokenType.OpenParenthesis);
+                while (Peek() != TokenType.CloseParenthesis)
                 {
-                    Eat(TokenType.Comma);
+                    parameters.Add(ParseExpression());
+                    if (Peek() == TokenType.Comma)
+                    {
+                        Eat(TokenType.Comma);
+                    }
                 }
+                Eat(TokenType.CloseParenthesis);
+                Eat(TokenType.Semicolon);
+
+                return new FunctionCall(identifier, parameters.ToArray())
+                {
+                    Range = identifier.Range,
+                };
             }
-            Eat(TokenType.CloseParenthesis);
-            Eat(TokenType.Semicolon);
 
-            return new FunctionCall(identifier, parameters.ToArray())
+            case TokenType.Assignment:
             {
-                Range = identifier.Range,
-            };
+                // foo = 12;
+                Eat(TokenType.Assignment);
+                Token value = Eat(TokenType.IntegerLiteral);
+                Eat(TokenType.Semicolon);
 
-            default: return null;
+                return new VariableAssignment(identifier, value.Content)
+                {
+                    Range = identifier.Range,
+                };
+            }
+
+            default: throw new ParserException("Unexpected token in ParseIdentifierStatement of type " + Peek());
         }
     }
 

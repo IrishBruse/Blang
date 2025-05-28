@@ -1,5 +1,5 @@
 main() {
     extrn printf, exit;
-    printf("Exit 12\n");
+    printf("Test: externs\n");
     exit(12);
 }

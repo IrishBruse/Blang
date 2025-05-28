@@ -1,7 +1,6 @@
 namespace IBlang.Targets;
 
 using System;
-using System.IO;
 using IBlang.AstParser;
 
 public class AstTarget : BaseTarget, ITargetVisitor
@@ -10,8 +9,8 @@ public class AstTarget : BaseTarget, ITargetVisitor
 
     public void Output(CompilationUnit node, string file)
     {
-        (string objFile, _) = GetOutputFile(file);
-        output = new(Console.Out, new StreamWriter(objFile + ".ast"));
+        (_, _) = GetOutputFile(file);
+        output = new(Console.Out);
 
         VisitCompilationUnit(node);
 
@@ -24,18 +23,18 @@ public class AstTarget : BaseTarget, ITargetVisitor
         WriteLine($"CompilationUnit:");
 
         Indent();
-        foreach (FunctionDeclaration funcDecl in node.FunctionDeclarations)
+        foreach (FunctionStatement funcDecl in node.FunctionDeclarations)
         {
             funcDecl.Accept(this);
         }
-        foreach (FunctionDeclaration varDecl in node.VariableDeclarations)
+        foreach (FunctionStatement varDecl in node.VariableDeclarations)
         {
             varDecl.Accept(this);
         }
         Dedent();
     }
 
-    public void VisitFunctionDeclaration(FunctionDeclaration node)
+    public void VisitFunctionDeclaration(FunctionStatement node)
     {
         WriteIndentation();
         Write($"FunctionDeclaration: {node.FunctionName}(");
@@ -80,5 +79,15 @@ public class AstTarget : BaseTarget, ITargetVisitor
     public void VisitInt(IntValue intValue)
     {
         Write(intValue.Value.ToString());
+    }
+
+    public void VisitAutoDeclaration(AutoStatement autoDeclaration)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void VisitVariableAssignment(VariableAssignment variableAssignment)
+    {
+        throw new NotImplementedException();
     }
 }
