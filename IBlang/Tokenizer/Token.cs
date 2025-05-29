@@ -6,12 +6,7 @@ public record Token(TokenType TokenType, string Content, SourceRange Range)
 {
     public override string ToString()
     {
-        return $"{Range,-30} {TokenType,-18} {Content}";
-    }
-
-    public static implicit operator string(Token s)
-    {
-        return s.Content;
+        return $"{Range.Start,4}-{Range.End,-4} {TokenType,-18} {Content}";
     }
 }
 

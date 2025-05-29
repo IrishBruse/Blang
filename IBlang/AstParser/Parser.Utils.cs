@@ -11,7 +11,13 @@ public partial class Parser
     public readonly List<string> Errors = [];
 
     int end = 0;
-    TokenType Peek()
+
+    public bool Peek(TokenType type)
+    {
+        return tokens.Current.TokenType == type;
+    }
+
+    public TokenType Peek()
     {
         return tokens.Current.TokenType;
     }
@@ -21,6 +27,12 @@ public partial class Parser
         Token token = tokens.Current;
         end = token.Range.End;
         tokens.MoveNext();
+
+        if (Flags.Tokens)
+        {
+            Console.WriteLine(tokens.Current);
+        }
+
         return token;
     }
 
@@ -36,18 +48,6 @@ public partial class Parser
         }
 
         return token;
-    }
-
-    void Error(ParserException e)
-    {
-        if (Flags.Debug)
-        {
-            Errors.Add(e.Error + "\n" + e.StackTrace);
-        }
-        else
-        {
-            Errors.Add(e.ToString());
-        }
     }
 
     void Error(string error)

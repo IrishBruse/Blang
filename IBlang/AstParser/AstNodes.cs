@@ -15,6 +15,7 @@ public interface ITargetVisitor
     void VisitInt(IntValue intValue);
     void VisitAutoDeclaration(AutoStatement autoDeclaration);
     void VisitVariableAssignment(VariableAssignment variableAssignment);
+    void VisitIdentifier(VariableValue variableValue);
 }
 
 public abstract record AstNode
@@ -35,6 +36,11 @@ public record StringValue(string Value) : Expression
 public record IntValue(int Value) : Expression
 {
     public override void Accept(ITargetVisitor visitor) => visitor.VisitInt(this);
+}
+
+public record VariableValue(string Identifier) : Expression
+{
+    public override void Accept(ITargetVisitor visitor) => visitor.VisitIdentifier(this);
 }
 
 public record CompilationUnit(List<FunctionStatement> FunctionDeclarations, List<FunctionStatement> VariableDeclarations) : AstNode

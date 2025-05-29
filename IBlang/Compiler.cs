@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using IBlang.AstParser;
+using IBlang.Exceptions;
 using IBlang.Targets;
 using IBlang.Tokenizer;
 using IBlang.Utility;
@@ -19,9 +20,22 @@ public class Compiler
         {
             output = CompileFile(file);
         }
-        catch (Exception e)
+        catch (ParserException e)
         {
-            output.Errors = e.ToString();
+            if (Flags.Debug)
+            {
+                output.Errors += e.ToString();
+            }
+            else
+            {
+                output.Errors += e.Error;
+            }
+            output.Success = false;
+        }
+        catch (Exception)
+        {
+            output.Success = false;
+            throw;
         }
 
         output.RunOutput = "";
@@ -42,6 +56,8 @@ public class Compiler
             File = file
         };
 
+        output.Success = true;
+
         Lexer lexer = new(data);
         Parser parser = new(data);
 
@@ -50,8 +66,13 @@ public class Compiler
 
         file ??= PickFile();
 
+
         StreamReader fileStream = File.OpenText(file);
+
+        Terminal.Debug("========== Lexer  ==========");
         IEnumerator<Token> tokens = lexer.Lex(fileStream, file);
+
+        Terminal.Debug("========== Parser ==========");
         CompilationUnit unit = parser.Parse(tokens, file);
 
         foreach (string error in parser.Errors)
@@ -59,6 +80,11 @@ public class Compiler
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(error);
             Console.ResetColor();
+        }
+        if (parser.Errors.Count > 0)
+        {
+            output.Success = false;
+            return output;
         }
 
         if (Flags.Ast)
@@ -76,8 +102,6 @@ public class Compiler
         {
             throw new ArgumentException("Unknown target " + target);
         }
-
-        output.Success = true;
 
         return output;
     }

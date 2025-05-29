@@ -9,6 +9,8 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        Console.Clear();
+
         Globals.ParseArgs(args, out string? file);
         HandleFlags();
 
@@ -23,6 +25,7 @@ public class Program
         CompileOutput output = Compiler.Compile(file);
 
         Console.Write(output.RunOutput);
+        Console.Write(output.Errors);
     }
 
     public static void Test()
@@ -44,23 +47,7 @@ public class Program
             {
                 CompareSnapshot(testFile, output, previousTestOutput);
             }
-
         }
-    }
-
-    static void CompareSnapshot(string testFile, CompileOutput output, string previousTestOutput)
-    {
-        string[] parts = previousTestOutput.Split("==============================\n");
-
-        string astOutput = parts[0].Trim();
-        string runOutput = parts.Length > 1 ? parts[1].Trim() : string.Empty;
-
-        bool success = astOutput == output.AstOutput && runOutput.Trim() == output.RunOutput.Trim();
-
-        string status = success ? "Passed" : "Failed";
-        Console.Write(success ? "\x1B[32m" : "\x1B[31m");
-        Console.WriteLine($"Test {status}: {testFile}");
-        Console.Write("\x1b[0m");
     }
 
     static void UpdateSnapshot(string testFile, string testOutputFile, CompileOutput output, string previousTestOutput)
@@ -68,23 +55,11 @@ public class Program
         StringBuilder testOutput = new();
         testOutput.AppendLine(output.AstOutput);
 
-        if (output.Success)
+        string runOutput = output.Success ? Compiler.RunExecutable(output.Executable) : output.Errors;
+        if (!string.IsNullOrEmpty(runOutput))
         {
-            string runOutput = Compiler.RunExecutable(output.Executable);
-            if (!string.IsNullOrEmpty(runOutput))
-            {
-                testOutput.AppendLine("==============================");
-                testOutput.Append(runOutput);
-            }
-        }
-        else
-        {
-            string runOutput = output.Errors;
-            if (!string.IsNullOrEmpty(runOutput))
-            {
-                testOutput.AppendLine("==============================");
-                testOutput.Append(runOutput);
-            }
+            testOutput.AppendLine("==============================");
+            testOutput.Append(runOutput);
         }
 
         string newTestOutput = testOutput.ToString();
@@ -98,6 +73,23 @@ public class Program
 
         Console.WriteLine($"Test {status}: {testFile}");
         Console.Write("\x1b[0m");
+    }
+
+    static void CompareSnapshot(string testFile, CompileOutput output, string previousTestOutput)
+    {
+        string[] parts = previousTestOutput.Split("==============================\n");
+
+        string astOutput = parts[0].Trim();
+        string runOutput = parts.Length > 1 ? parts[1].Trim() : string.Empty;
+
+        bool success = output.Success && astOutput == output.AstOutput && runOutput.Trim() == output.RunOutput.Trim();
+
+        string status = success ? "Passed" : "Failed";
+        Console.Write(success ? "\x1B[32m" : "\x1B[31m");
+        Console.WriteLine($"Test {status}: {testFile}");
+        Console.Write("\x1b[0m");
+
+        Terminal.Error(output.Errors);
     }
 
     static void HandleFlags()

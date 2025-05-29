@@ -8,7 +8,9 @@ export function w $main()
     # 12
 
     %foo =l alloc4 8
+
     storew 12, %foo
+
     %val =w loadw %foo
     call $printf(l $string_0, w %val)
 

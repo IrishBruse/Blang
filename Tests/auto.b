@@ -1,4 +1,6 @@
 main() {
+    extrn printf;
     auto foo;
-    foo = 4;
+    foo = 123;
+    printf("%d", foo);
 }

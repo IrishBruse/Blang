@@ -1,5 +1,4 @@
 main()
 {
-    extrn printf;
-    printf("test");
+    extrn
 }

@@ -85,6 +85,11 @@ public class AstTarget : BaseTarget, ITargetVisitor
         Write(intValue.Value.ToString());
     }
 
+    public void VisitIdentifier(VariableValue variableValue)
+    {
+        Write(variableValue.Identifier);
+    }
+
     public void VisitAutoDeclaration(AutoStatement autoDeclaration)
     {
         WriteIndentation();
@@ -96,4 +101,5 @@ public class AstTarget : BaseTarget, ITargetVisitor
         WriteIndentation();
         WriteLine($"VariableAssignment: {variableAssignment.IdentifierName} = {variableAssignment.Value}");
     }
+
 }

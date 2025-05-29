@@ -72,7 +72,7 @@ public class Terminal
     public static void Error(string message)
     {
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(message);
+        Console.Write(message);
         Console.ResetColor();
     }
 }

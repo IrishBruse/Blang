@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using IBlang.AstParser;
+using IBlang.Exceptions;
 using IBlang.Utility;
 
 public class QbeTarget : BaseTarget, ITargetVisitor
@@ -29,13 +30,13 @@ public class QbeTarget : BaseTarget, ITargetVisitor
         VisitCompilationUnit(node);
         output.Dispose();
 
-        Terminal.Debug("==========  QBE   ==========");
+        Terminal.Debug("========== QBE    ==========");
         if (GenerateAssembly(objFile) != 0)
         {
             return "";
         }
 
-        Terminal.Debug("==========  GCC   ==========");
+        Terminal.Debug("========== GCC    ==========");
         if (GenerateExecutable(objFile + ".s", binFile) != 0)
         {
             return "";
@@ -165,6 +166,22 @@ public class QbeTarget : BaseTarget, ITargetVisitor
 
     public void VisitFunctionCall(FunctionCall node)
     {
+
+        foreach (Expression expr in node.Parameters)
+        {
+            switch (expr)
+            {
+                case IntValue v: break;
+                case StringValue v: break;
+
+                case VariableValue v:
+                WriteIndented($"%{v.Identifier}_parameter =w loadw %{v.Identifier}");
+                break;
+
+                default: throw new ParserException("Unknown parameter");
+            }
+        }
+
         WriteIndentation();
         Write($"call ${node.IdentifierName}");
         Write("(");
@@ -203,7 +220,12 @@ public class QbeTarget : BaseTarget, ITargetVisitor
 
     public void VisitInt(IntValue intValue)
     {
-        Write("w " + intValue.Value.ToString());
+        Write($"w {intValue.Value}");
+    }
+
+    public void VisitIdentifier(VariableValue variableValue)
+    {
+        Write($"w %{variableValue.Identifier}_parameter");
     }
 
     private void BeginScope()
@@ -222,13 +244,14 @@ public class QbeTarget : BaseTarget, ITargetVisitor
     {
         foreach (string variable in autoDeclaration.Variables)
         {
-            WriteIndented($"%{variable} =l alloc8 8");
+            WriteIndented($"%{variable} =l alloc4 8");
         }
         WriteLine("");
     }
 
     public void VisitVariableAssignment(VariableAssignment variableAssignment)
     {
-        // throw new NotImplementedException();
+        WriteIndented($"storew {variableAssignment.Value}, %{variableAssignment.IdentifierName}");
+        WriteLine("");
     }
 }
