@@ -24,8 +24,32 @@ public class Program
 
         CompileOutput output = Compiler.Compile(file);
 
-        Console.Write(output.RunOutput);
-        Console.Write(output.Errors);
+        if (Flags.Debug && !string.IsNullOrEmpty(output.AstOutput))
+        {
+            if (Flags.Debug)
+            {
+                Console.WriteLine("==========    Ast   ==========");
+            }
+            Console.WriteLine(output.AstOutput);
+        }
+
+        if (!string.IsNullOrEmpty(output.Errors))
+        {
+            if (Flags.Debug)
+            {
+                Console.WriteLine("==========  Errors  ==========");
+            }
+            Terminal.Error(output.Errors);
+        }
+
+        if (!string.IsNullOrEmpty(output.RunOutput))
+        {
+            if (Flags.Debug)
+            {
+                Console.WriteLine("==========  Output  ==========");
+            }
+            Console.WriteLine(output.RunOutput);
+        }
     }
 
     public static void Test()

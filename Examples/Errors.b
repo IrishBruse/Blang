@@ -1,4 +1,8 @@
 main()
 {
-    extrn
+    extrn asd;
+    asd()
+
+    asd()
+
 }

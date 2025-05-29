@@ -86,12 +86,10 @@ public class Compiler
             output.Success = false;
             return output;
         }
-
-        if (Flags.Ast)
+        if (output.Success)
         {
             output.AstOutput = astTarget.Output(unit);
         }
-
         string? target = Flags.Target;
 
         if (target == qbeTarget.Target)

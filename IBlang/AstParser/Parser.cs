@@ -57,14 +57,6 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    private void EatComments()
-    {
-        while (Peek(TokenType.Comment))
-        {
-            Eat(TokenType.Comment);
-        }
-    }
-
     FunctionStatement ParseFunctionDecleration(Token identifier)
     {
         SourceRange begin = identifier.Range;
@@ -109,7 +101,7 @@ public partial class Parser(CompilationData data)
             TokenType.ExternKeyword => ParseExternalDefinition(),
             TokenType.AutoKeyword => ParseAutoDefinition(),
             TokenType.Identifier => ParseIdentifierStatement(),
-            _ => null // throw new InvalidTokenException("Unexpected Token of type " + Peek())
+            _ => throw new InvalidTokenException($"{data.GetFileLocation(end)}Unexpected token in {nameof(ParseStatement)} of type {Peek()}")
         };
     }
 
@@ -163,43 +155,44 @@ public partial class Parser(CompilationData data)
 
         List<Expression> parameters = [];
 
-        switch (Peek())
+        return Peek() switch
         {
-            case TokenType.OpenParenthesis:
+            TokenType.OpenParenthesis => ParseFunctionCall(identifier, parameters),
+            TokenType.Assignment => ParseVariableAssignment(identifier),
+            _ => throw new ParserException($"{data.GetFileLocation(end)} Unexpected token in {nameof(ParseIdentifierStatement)} of type {Peek()}"),
+        };
+    }
+
+    FunctionCall ParseFunctionCall(Token identifier, List<Expression> parameters)
+    {
+        Eat(TokenType.OpenParenthesis);
+        while (!Peek(TokenType.CloseParenthesis))
+        {
+            parameters.Add(ParseExpression());
+            if (Peek(TokenType.Comma))
             {
-                Eat(TokenType.OpenParenthesis);
-                while (!Peek(TokenType.CloseParenthesis))
-                {
-                    parameters.Add(ParseExpression());
-                    if (Peek(TokenType.Comma))
-                    {
-                        Eat(TokenType.Comma);
-                    }
-                }
-                Eat(TokenType.CloseParenthesis);
-                Eat(TokenType.Semicolon);
-
-                return new FunctionCall(identifier.Content, parameters.ToArray())
-                {
-                    Range = identifier.Range,
-                };
+                Eat(TokenType.Comma);
             }
-
-            case TokenType.Assignment:
-            {
-                // foo = 12;
-                Eat(TokenType.Assignment);
-                Token value = Eat(TokenType.IntegerLiteral);
-                Eat(TokenType.Semicolon);
-
-                return new VariableAssignment(identifier.Content, value.Content)
-                {
-                    Range = identifier.Range,
-                };
-            }
-
-            default: throw new ParserException("Unexpected token in ParseIdentifierStatement of type " + Peek());
         }
+        Eat(TokenType.CloseParenthesis);
+        Eat(TokenType.Semicolon);
+
+        return new FunctionCall(identifier.Content, parameters.ToArray())
+        {
+            Range = identifier.Range,
+        };
+    }
+
+    VariableAssignment ParseVariableAssignment(Token identifier)
+    {
+        Eat(TokenType.Assignment);
+        Token value = Eat(TokenType.IntegerLiteral);
+        Eat(TokenType.Semicolon);
+
+        return new VariableAssignment(identifier.Content, value.Content)
+        {
+            Range = identifier.Range,
+        };
     }
 
     Expression ParseExpression()
@@ -233,7 +226,7 @@ public partial class Parser(CompilationData data)
                 };
             }
 
-            default: throw new ParserException("ParseExpression: " + Peek());
+            default: throw new ParserException(data.GetFileLocation(end) + "ParseExpression: " + Peek());
         }
     }
 }

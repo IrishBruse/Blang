@@ -44,11 +44,26 @@ public partial class Parser
 
         if (token.TokenType != type)
         {
-            throw new ParserException(data.GetFileLocation(lastEnd) + $": Expected {type} but got {token.TokenType}");
+            throw new ParserException(data.GetFileLocation(lastEnd) + $": Expected {TokenTypeToString(type)} but got {TokenTypeToString(token.TokenType)}");
         }
 
         return token;
     }
+
+    static string TokenTypeToString(TokenType type) => type switch
+    {
+        TokenType.Semicolon => ";",
+
+        TokenType.OpenScope => "{",
+        TokenType.CloseScope => "}",
+
+        TokenType.OpenParenthesis => "(",
+        TokenType.CloseParenthesis => ")",
+
+        TokenType.OpenBracket => "[",
+        TokenType.CloseBracket => "]",
+        _ => type.ToString(),
+    };
 
     void Error(string error)
     {
@@ -64,4 +79,13 @@ public partial class Parser
             Errors.Add(msg);
         }
     }
+
+    void EatComments()
+    {
+        while (Peek(TokenType.Comment))
+        {
+            Eat(TokenType.Comment);
+        }
+    }
+
 }

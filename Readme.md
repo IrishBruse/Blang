@@ -4,11 +4,11 @@ Implementing the B lang in C# with qbe backends
 
 ## Currently Implemented
 
+-   [x] function definitions
 -   [x] extrn
 -   [x] function calls
--   [x] function definitions
--   [ ] auto
--   [ ] variable assignment
+-   [x] auto
+-   [x] variable assignment
 -   [ ] if else
 -   [ ] while
 -   [ ] switch
