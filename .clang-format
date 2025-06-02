@@ -1,6 +1,0 @@
-BasedOnStyle: Chromium
-BreakBeforeBraces: Allman
-IndentWidth: 4
-ColumnLimit: 0
-IndentCaseBlocks: false
-IndentCaseLabels: true

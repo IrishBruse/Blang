@@ -4,6 +4,6 @@
 *.exe
 *.pdb
 *.log
-IBlang.Tests/lcov.info
+BLang.Tests/lcov.info
 
 HellowWorldExample.ssa

@@ -1,0 +1,8 @@
+{
+    "log": {
+        "scope": "csharp",
+        "prefix": "log",
+        "body": "snippet",
+        "description": "description"
+    }
+}

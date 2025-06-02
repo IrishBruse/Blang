@@ -1,6 +1,6 @@
-# Irish B Langauge implementation
+# B Langauge implementation
 
-Implementing the B lang in C# with qbe backends
+Implementing the B lang in C# with qbe backend
 
 ## Currently Implemented
 
@@ -17,9 +17,11 @@ Implementing the B lang in C# with qbe backends
 
 -   ast (Debug)
 -   qbe
--   gb (TODO)
--   wasm (TODO)
--   js (TODO)
+
+## Dev Setup
+
+-   Dotnet 9
+-   QBE executable in path needs to be built from source [here](https://c9x.me/compile/releases.html)
 
 ## References
 

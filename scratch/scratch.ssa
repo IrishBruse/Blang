@@ -1,0 +1,24 @@
+export function w $main()
+{
+@start
+    # auto foo;
+    # foo = 12;
+    # printf("%d",foo);
+    #
+    # 12
+
+    %foo =l alloc4 8
+
+    storew 12, %foo
+
+
+    %val =w loadw %foo
+
+    %test =w ceqw %val, 121
+
+    call $printf(l $string_0, w %test)
+
+    ret 0
+}
+
+data $string_0 = { b "%d\n", b 0 }
