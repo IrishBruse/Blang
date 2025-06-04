@@ -1,8 +1,8 @@
 namespace BLang.AstParser;
 
 using System.Collections.Generic;
-using BLang;
 using BLang.Tokenizer;
+using BLang.Utility;
 
 public abstract record AstNode
 {
@@ -77,13 +77,13 @@ public record BinaryExpression(TokenType Operation, Expression? Left, Expression
             number++;
         }
 
-        if (number > 1)
+        if (number == 1)
         {
-            return $"({ret.Trim()})";
+            return $"{ret.Trim()}";
         }
         else
         {
-            return $"{ret.Trim()}";
+            return $"({ret.Trim()})";
         }
     }
 }

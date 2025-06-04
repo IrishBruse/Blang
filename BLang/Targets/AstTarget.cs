@@ -77,7 +77,7 @@ public class AstTarget : BaseTarget
             switch (expr)
             {
                 case StringValue e:
-                Write($"\"asd\"");
+                Write($"\"{e.Value}\"");
                 break;
 
                 case Variable e:

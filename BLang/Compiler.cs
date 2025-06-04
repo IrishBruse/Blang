@@ -9,9 +9,9 @@ using BLang.Targets;
 using BLang.Tokenizer;
 using BLang.Utility;
 
-public class Compiler
+public class Compiler(Options options)
 {
-    public static CompileOutput Compile(string? file)
+    public CompileOutput Compile(string file)
     {
         CompileOutput output = new(false);
 
@@ -21,7 +21,7 @@ public class Compiler
         }
         catch (ParserException e)
         {
-            if (Flags.Instance.Debug)
+            if (options.Debug)
             {
                 output.Errors += e.ToString();
             }
@@ -38,22 +38,29 @@ public class Compiler
         }
 
         output.RunOutput = "";
-        if (output.Success && Flags.Instance.Run)
+        if (output.Success && options.Run)
         {
             try
             {
-                output.RunOutput = Executable.Run(output.Executable);
+                Executable.Run(output.Executable).Switch(success =>
+                {
+                    output.RunOutput = success;
+                },
+                error =>
+                {
+                    output.Errors = error.Value;
+                });
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // Run
+                output.Errors = e.Message;
             }
         }
 
         return output;
     }
 
-    static CompileOutput CompileFile(string? file)
+    CompileOutput CompileFile(string file)
     {
         CompileOutput output = new();
 
@@ -64,30 +71,21 @@ public class Compiler
 
         output.Success = true;
 
-        Lexer lexer = new(data);
-        Parser parser = new(data);
+        Lexer lexer = new(data, options);
+        Parser parser = new(data, options);
 
         AstTarget astTarget = new();
         QbeTarget qbeTarget = new();
 
-        file ??= PickFile();
-
         StreamReader fileStream = File.OpenText(file);
 
-        Terminal.Debug("========== Lexer  ==========");
         IEnumerator<Token> tokens = lexer.Lex(fileStream, file);
 
-        Terminal.Debug("========== Parser ==========");
         CompilationUnit unit = parser.Parse(tokens, file);
 
-        output.Errors += string.Join("\n", parser.Errors);
+        output.AstOutput = astTarget.Output(unit);
 
-        if (output.Success)
-        {
-            output.AstOutput = astTarget.Output(unit);
-        }
-
-        string target = Flags.Instance.Target;
+        string target = options.Target;
 
         CreateOutputDirectories(file, target);
         (string objFile, string binFile) = GetOutputFile(file, target);
@@ -96,37 +94,31 @@ public class Compiler
         {
             string qbeIR = qbeTarget.Output(unit);
             File.WriteAllText(objFile + ".ssa", qbeIR);
-            string? qbeAssembly = Executable.Run("qbe", objFile + ".ssa");
 
-            if (qbeAssembly != null)
+            Executable.Run("qbe", objFile + ".ssa").Switch(qbeAssembly =>
             {
-                File.WriteAllText(objFile + ".s", qbeAssembly);
-                string? gccStdOut = Executable.Run("gcc", $"{qbeAssembly} -o {binFile}");
-                Console.WriteLine(gccStdOut);
-            }
+                string assemblyFile = objFile + ".s";
+                File.WriteAllText(assemblyFile, qbeAssembly);
+
+                string? gccStdOut = Executable.Run("gcc", $"{assemblyFile} -o {binFile}").Catch(error =>
+                {
+                    Error(error.Value, "ERR");
+                });
+
+                Log(gccStdOut, "OUT");
+            }, error =>
+            {
+                Error(error.Value, "ERR");
+            });
         }
         else
         {
             throw new ArgumentException("Unknown target " + target);
         }
 
+        output.Executable = binFile;
+
         return output;
-    }
-
-    static string PickFile()
-    {
-        string[] files = Directory.GetFiles("Examples/");
-        string[] fileNames = new string[files.Length];
-
-        for (int i = 0; i < files.Length; i++)
-        {
-            fileNames[i] = Path.GetFileNameWithoutExtension(files[i]);
-        }
-
-        int index = Terminal.ShowMenu(fileNames, "Pick Example:\n");
-
-        string file = files[index];
-        return file;
     }
 
     static (string, string) GetOutputFile(string inputFile, string target)
@@ -145,5 +137,13 @@ public class Compiler
 
         Directory.CreateDirectory(Path.Combine(projectDirectory, "obj", target));
         Directory.CreateDirectory(Path.Combine(projectDirectory, "bin", target));
+    }
+
+    void Debug(string message)
+    {
+        if (options.Debug)
+        {
+            Console.WriteLine(message);
+        }
     }
 }

@@ -1,12 +1,12 @@
 namespace BLang.Tokenizer;
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using BLang;
 using BLang.Utility;
 
-public class Lexer(CompilationData data)
+public class Lexer(CompilationData data, Options options)
 {
     public StreamReader Source = null!;
     public string FilePath = "";
@@ -16,6 +16,8 @@ public class Lexer(CompilationData data)
 
     public IEnumerator<Token> Lex(string text)
     {
+        _ = options.File;
+
         MemoryStream stream = new(Encoding.UTF8.GetBytes(text));
         StreamReader reader = new(stream);
         return Lex(reader, "");
@@ -27,9 +29,9 @@ public class Lexer(CompilationData data)
         FilePath = path;
         while (!Source.EndOfStream)
         {
-            char c = Peek();
-
             StartTokenRange();
+
+            char c = Next();
 
             if (char.IsWhiteSpace(c))
             {
@@ -37,42 +39,55 @@ public class Lexer(CompilationData data)
             }
             else if (char.IsLetter(c))
             {
-                yield return LexIdentifier();
+                yield return LexIdentifier(c);
             }
             else if (char.IsNumber(c))
             {
-                yield return LexNumber();
+                yield return LexNumber(c);
             }
             else
             {
+                char p = Peek();
+
+                if (c == '/' && p == '/')
+                {
+                    LexSingleLineComment();
+                    continue;
+                }
+                else if (c == '/' && p == '*')
+                {
+                    LexMultiLineComment();
+                    continue;
+                }
+
                 yield return c switch
                 {
                     '"' => LexString(),
 
-                    '[' => LexBracket(TokenType.OpenBracket),
-                    ']' => LexBracket(TokenType.CloseBracket),
+                    '[' => LexBracket(c, TokenType.OpenBracket),
+                    ']' => LexBracket(c, TokenType.CloseBracket),
 
-                    '(' => LexBracket(TokenType.OpenParenthesis),
-                    ')' => LexBracket(TokenType.CloseParenthesis),
+                    '(' => LexBracket(c, TokenType.OpenParenthesis),
+                    ')' => LexBracket(c, TokenType.CloseParenthesis),
 
-                    '{' => LexBracket(TokenType.OpenScope),
-                    '}' => LexBracket(TokenType.CloseScope),
+                    '{' => LexBracket(c, TokenType.OpenScope),
+                    '}' => LexBracket(c, TokenType.CloseScope),
 
-                    '<' => LexOperator(TokenType.LessThan),
-                    '>' => LexOperator(TokenType.GreaterThan),
+                    '<' => LexOperator(c, TokenType.LessThan),
+                    '>' => LexOperator(c, TokenType.GreaterThan),
 
-                    '+' => LexOperator(TokenType.Addition),
-                    '-' => LexOperator(TokenType.Subtraction),
-                    '*' => LexOperator(TokenType.Multiplication),
-                    '/' => LexOperator(TokenType.Division),
-                    '&' => LexOperator(TokenType.BitwiseAnd),
-                    '|' => LexOperator(TokenType.BitwiseOr),
-                    '%' => LexOperator(TokenType.Modulo),
-                    '!' => LexOperator(TokenType.LogicalNot),
-                    '=' => LexOperator(TokenType.Assignment),
+                    '+' => LexOperator(c, TokenType.Addition),
+                    '-' => LexOperator(c, TokenType.Subtraction),
+                    '*' => LexOperator(c, TokenType.Multiplication),
+                    '/' => LexOperator(c, TokenType.Division),
+                    '&' => LexOperator(c, TokenType.BitwiseAnd),
+                    '|' => LexOperator(c, TokenType.BitwiseOr),
+                    '%' => LexOperator(c, TokenType.Modulo),
+                    '!' => LexOperator(c, TokenType.LogicalNot),
+                    '=' => LexOperator(c, TokenType.Assignment),
 
-                    ';' => LexOperator(TokenType.Semicolon),
-                    ',' => LexOperator(TokenType.Comma),
+                    ';' => LexOperator(c, TokenType.Semicolon),
+                    ',' => LexOperator(c, TokenType.Comma),
 
                     _ => new Token(TokenType.Garbage, c.ToString(), EndTokenRange())
                 };
@@ -86,31 +101,25 @@ public class Lexer(CompilationData data)
 
     void EatWhitespace(char c)
     {
-        if (c == '\r')
+        while (char.IsWhiteSpace(Peek()))
         {
-            _ = Next();
-        }
-        else if (c == '\n')
-        {
-            data.Lines.Add(startIndex);
-            _ = Next();
-        }
-        else if (c == '\t')
-        {
-            _ = Next();
-        }
-        else
-        {
-            // Eat all other whitespace
-            _ = Next();
+            if (c == '\n')
+            {
+                data.Lines.Add(startIndex);
+                _ = Next();
+            }
+            else
+            {
+                // Eat all other whitespace
+                _ = Next();
+            }
         }
 
         EndTokenRange();
     }
 
-    Token LexOperator(TokenType type)
+    Token LexOperator(char c, TokenType type)
     {
-        char c = Next();
         char p = Peek();
 
         string op = c.ToString();
@@ -180,14 +189,6 @@ public class Lexer(CompilationData data)
             type = TokenType.BitwiseShiftRight;
             op += Next();
         }
-        else if (c == '/' && p == '/') // Single line comment
-        {
-            return LexSingleLineComment();
-        }
-        else if (c == '/' && p == '*') // Multiline line comment
-        {
-            return LexMultiLineComment();
-        }
 
         return new Token(type, op, EndTokenRange());
     }
@@ -232,10 +233,8 @@ public class Lexer(CompilationData data)
         return new Token(TokenType.Comment, comment.ToString(), EndTokenRange());
     }
 
-    Token LexBracket(TokenType type)
+    Token LexBracket(char c, TokenType type)
     {
-        char c = Next();
-
         return new Token(type, c.ToString(), EndTokenRange());
     }
 
@@ -243,37 +242,29 @@ public class Lexer(CompilationData data)
     {
         StringBuilder literal = new();
 
-        // Eat first "
-        _ = Next();
-
         char c;
 
-        do
+        while (Peek() != '"' && !IsLineBreak(Peek()))
         {
             c = Next();
             _ = literal.Append(c);
         }
-        while (Peek() != '"' && !IsLineBreak(Peek()));
 
         _ = Next();
 
         return new Token(TokenType.StringLiteral, literal.ToString(), EndTokenRange());
     }
 
-    Token LexIdentifier()
+    Token LexIdentifier(char c)
     {
-        StringBuilder identifierBuilder = new();
-        char c;
+        StringBuilder identifierBuilder = new(c.ToString());
 
-        do
+        while (char.IsLetterOrDigit(Peek()) && !IsLineBreak(Peek()))
         {
-            c = Next();
-            _ = identifierBuilder.Append(c);
+            identifierBuilder.Append(Next());
         }
-        while (char.IsLetterOrDigit(Peek()) && !IsLineBreak(c));
 
         string identifier = identifierBuilder.ToString();
-
         return identifier switch
         {
             "extrn" => new Token(TokenType.ExternKeyword, identifier, EndTokenRange()),
@@ -289,23 +280,21 @@ public class Lexer(CompilationData data)
         return (char)Source.Peek();
     }
 
-    Token LexNumber()
+    Token LexNumber(char c)
     {
-        StringBuilder number = new();
+        StringBuilder number = new(c.ToString());
 
-        char c;
 
-        do
+        while (char.IsDigit(Peek()))
         {
             c = Next();
-            _ = number.Append(c);
+            number.Append(c);
         }
-        while (char.IsDigit(Peek()));
 
         return new Token(TokenType.IntegerLiteral, number.ToString(), EndTokenRange());
     }
 
-    static bool IsLineBreak(char c) => c is '\n' or '\r';
+    static bool IsLineBreak(char c) => c == '\n' || c == '\r';
 
     char Next()
     {

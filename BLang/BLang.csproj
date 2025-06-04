@@ -8,7 +8,6 @@
 
     <ItemGroup>
       <PackageReference Include="CommandLineParser" Version="2.9.1" />
-      <PackageReference Include="OneOf" Version="3.0.271" />
     </ItemGroup>
 
 </Project>

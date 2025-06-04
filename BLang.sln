@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BLang.Tests", "BLang.Tests", "{A9AA52C3-164B-C3E3-968B-90C955008631}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLang.Tests", "BLang.Tests\BLang.Tests.csproj", "{C50B05C5-C541-4DC1-84C2-16B21DC504C8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLang", "BLang\BLang.csproj", "{447BDA23-CF7E-4701-AA39-8021BD3AA303}"
 EndProject
 Global
@@ -46,8 +42,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{C50B05C5-C541-4DC1-84C2-16B21DC504C8} = {A9AA52C3-164B-C3E3-968B-90C955008631}
 	EndGlobalSection
 EndGlobal

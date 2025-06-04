@@ -1,6 +1,6 @@
 namespace BLang.Tokenizer;
 
-using BLang;
+using BLang.Utility;
 
 public record Token(TokenType TokenType, string Content, SourceRange Range)
 {

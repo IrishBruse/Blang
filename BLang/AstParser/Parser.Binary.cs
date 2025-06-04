@@ -1,5 +1,6 @@
 namespace BLang.AstParser;
 
+using System;
 using System.Collections.Generic;
 using BLang.Exceptions;
 using BLang.Tokenizer;

@@ -9,41 +9,46 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        Flags.Parse(args);
+        Options? options = Options.Parse(args);
 
-        Flags flags = Flags.Instance;
-
-        if (flags.Test)
+        if (options == null)
         {
-            flags.Debug = true;
-            flags.Run = true;
-            Test();
             return;
         }
 
-        CompileOutput output = Compiler.Compile(flags.File);
-
-        if (flags.Debug && !string.IsNullOrEmpty(output.AstOutput))
+        if (options.Test)
         {
-            if (flags.Debug)
+            options.Debug = true;
+            options.Run = true;
+            Test(options);
+            return;
+        }
+
+        Compiler compiler = new(options);
+
+        CompileOutput output = compiler.Compile(options.File);
+
+        if (options.Debug && !string.IsNullOrEmpty(output.AstOutput))
+        {
+            if (options.Debug)
             {
-                Console.WriteLine("==========    Ast   ==========");
+                Console.WriteLine("=========== Ast ============");
             }
-            Console.WriteLine(output.AstOutput);
+            Log(output.AstOutput, null);
         }
 
         if (!string.IsNullOrEmpty(output.Errors))
         {
-            if (flags.Debug)
+            if (options.Debug)
             {
                 Console.WriteLine("==========  Errors  ==========");
             }
-            Terminal.Error(output.Errors);
+            Error(output.Errors, null);
         }
 
         if (!string.IsNullOrEmpty(output.RunOutput))
         {
-            if (flags.Debug)
+            if (options.Debug)
             {
                 Console.WriteLine("==========  Output  ==========");
             }
@@ -51,18 +56,20 @@ public class Program
         }
     }
 
-    public static void Test()
+    public static void Test(Options options)
     {
         string[] files = Directory.GetFiles("../Tests/", "*.b");
 
+        Compiler compiler = new(options);
+
         foreach (string testFile in files)
         {
-            CompileOutput output = Compiler.Compile(testFile);
+            CompileOutput output = compiler.Compile(testFile);
 
             string testOutputFile = Path.ChangeExtension(testFile, ".test");
             string previousTestOutput = File.Exists(testOutputFile) ? File.ReadAllText(testOutputFile) : "";
 
-            if (Flags.Instance.UpdateSnapshots)
+            if (options.UpdateSnapshots)
             {
                 UpdateSnapshot(testFile, testOutputFile, output, previousTestOutput);
             }
@@ -78,7 +85,7 @@ public class Program
         StringBuilder testOutput = new();
         testOutput.AppendLine(output.AstOutput);
 
-        string? runOutput = output.Success ? Executable.Run(output.Executable) : output.Errors;
+        string? runOutput = Executable.Run(output.Executable).Match(sucess => sucess, error => error.Value);
         if (!string.IsNullOrEmpty(runOutput))
         {
             testOutput.AppendLine("==============================");
@@ -91,11 +98,12 @@ public class Program
         string status = previousTestOutput != newTestOutput ? "Updated" : "Skipped";
         if (previousTestOutput != newTestOutput)
         {
-            Console.Write("\x1B[34m");
+            Error($"Test {status}: {testFile}");
         }
-
-        Console.WriteLine($"Test {status}: {testFile}");
-        Console.Write("\x1b[0m");
+        else
+        {
+            Console.WriteLine($"Test {status}: {testFile}");
+        }
     }
 
     static void CompareSnapshot(string testFile, CompileOutput output, string previousTestOutput)
@@ -112,6 +120,6 @@ public class Program
         Console.WriteLine($"Test {status}: {testFile}");
         Console.Write("\x1b[0m");
 
-        Terminal.Error(output.Errors);
+        Error(output.Errors);
     }
 }

@@ -2,7 +2,7 @@ namespace BLang.Targets;
 
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using BLang.AstParser;
 using BLang.Exceptions;
 using BLang.Tokenizer;
@@ -14,7 +14,6 @@ public class QbeTarget : BaseTarget
     readonly Dictionary<string, string> strings = [];
     readonly HashSet<string> externs = [];
 
-    int stringIndex = 0;
     int tempRegistry = 0;
 
     public string Output(CompilationUnit node)
@@ -61,7 +60,7 @@ public class QbeTarget : BaseTarget
         switch (node)
         {
             case ExternalStatement s: Visit(s); break;
-            case FunctionCall s: Visit(s); break;
+            case FunctionCall s: VisitFunctionCall(s); break;
             case AutoStatement s: Visit(s); break;
             case VariableAssignment s: Visit(s); break;
             case WhileStatement s: Visit(s); break;
@@ -69,25 +68,20 @@ public class QbeTarget : BaseTarget
         }
     }
 
-    public void VisitExpressions(Expression[] expressions)
+    public string VisitParameters(Expression[] expressions)
     {
-        bool start = true;
-
-        foreach (Expression expr in expressions)
+        string[] parameters = expressions.Select(expr =>
         {
-            if (!start)
+            return expr switch
             {
-                Write(", ");
-            }
-            string expression = expr switch
-            {
-                StringValue e => e.Value,
+                StringValue e => $"\"{e.Value}\"",
                 IntValue e => e.Value.ToString(),
                 Variable e => e.Identifier,
                 _ => throw new Exception(expr.GetType().ToString())
             };
-            start = false;
-        }
+        }).ToArray();
+
+        return string.Join(", ", parameters);
     }
 
     private void BeginScope()
@@ -101,9 +95,6 @@ public class QbeTarget : BaseTarget
         Dedent();
         WriteLine("}");
     }
-
-
-    public string TempRegistry() => $"%_{tempRegistry++}";
 
     // Statements
 
@@ -161,28 +152,37 @@ public class QbeTarget : BaseTarget
         WriteLine("");
     }
 
-    public void Visit(FunctionCall node)
+    public void VisitFunctionCall(FunctionCall node)
     {
-        foreach (AstNode expr in node.Parameters)
+        string parameters = LoadParameterValue(node.Parameters);
+        WriteIndented($"call ${node.IdentifierName}({parameters})");
+    }
+
+    string LoadParameterValue(Expression[] parameters)
+    {
+        List<string> registers = [];
+        foreach (AstNode expr in parameters)
         {
+            string tmpReg;
             switch (expr)
             {
-                case IntValue v: break;
-                case StringValue v: break;
-
-                case Variable v:
-                WriteIndented($"%{v.Identifier}_parameter =w loadw %{v.Identifier}");
+                case StringValue v:
+                tmpReg = TempRegister();
+                string reg = VisitStringValue(v);
+                registers.Add($"l ${reg}");
                 break;
 
-                default: throw new ParserException("Unknown parameter");
+                case Variable v:
+                tmpReg = TempRegister(v.Identifier);
+                WriteIndented($"{tmpReg} =w loadw %{v.Identifier}");
+                registers.Add($"w {tmpReg}");
+                break;
+
+                default: throw new ParserException($"Unknown parameter {expr.GetType()}({expr})");
             }
         }
 
-        WriteIndentation();
-        Write($"call ${node.IdentifierName}");
-        Write("(");
-        VisitExpressions(node.Parameters);
-        WriteLine(")");
+        return string.Join(", ", registers);
     }
 
     public void Visit(VariableAssignment variableAssignment)
@@ -193,17 +193,17 @@ public class QbeTarget : BaseTarget
 
     // Expression
 
-    public void VisitStringValue(StringValue stringValue)
+    public string VisitStringValue(StringValue stringValue)
     {
         if (strings.TryGetValue(stringValue.Value, out string? dataVarName))
         {
-            Write($"l ${dataVarName}");
+            return dataVarName;
         }
         else
         {
-            dataVarName = $"string_{stringIndex++}";
+            dataVarName = $"string_{strings.Count}";
             strings.Add(stringValue.Value, dataVarName);
-            Write($"l ${dataVarName}");
+            return dataVarName;
         }
     }
 
@@ -230,4 +230,14 @@ public class QbeTarget : BaseTarget
             break;
         }
     }
+
+    // Utility
+
+    public string TempRegister(string friendlyName = "")
+    {
+        string reg = $"%{friendlyName}_{tempRegistry}";
+        tempRegistry++;
+        return reg;
+    }
+    public string GlobalRegister() => $"$string_{strings.Count}";
 }

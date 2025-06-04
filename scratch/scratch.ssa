@@ -7,7 +7,7 @@ export function w $main()
     #
     # 12
 
-    %foo =l alloc4 8
+    %foo =l alloc4 4
 
     storew 12, %foo
 

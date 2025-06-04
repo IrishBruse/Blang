@@ -1,21 +1,24 @@
 namespace BLang.Utility;
 
-using System;
 using System.Diagnostics;
 
 public class Executable
 {
-    public static string? Run(string executable, string arguments = "")
+    public static Result<string, Error<string>> Run(string executable, string arguments = "")
     {
-        Console.WriteLine($"[CMD] {executable} {arguments}");
+        Debug($"{executable} {arguments}", "CMD");
+
         using Process? process = Process.Start(new ProcessStartInfo(executable, arguments) { RedirectStandardOutput = true, RedirectStandardError = true });
         process?.WaitForExit();
 
         string? output = process?.StandardOutput?.ReadToEnd();
         string? errorOutput = process?.StandardError?.ReadToEnd();
 
-        Terminal.Error(errorOutput);
+        if (!string.IsNullOrEmpty(errorOutput))
+        {
+            return Result<string, Error<string>>.Fail(new(errorOutput!));
+        }
 
-        return output;
+        return Result<string, Error<string>>.Ok(output);
     }
 }

@@ -6,16 +6,17 @@ using BLang.Exceptions;
 using BLang.Tokenizer;
 using BLang.Utility;
 
-public partial class Parser(CompilationData data)
+public partial class Parser(CompilationData data, Options options)
 {
     IEnumerator<Token> tokens = null!;
+    SourceRange previousTokenRange = SourceRange.Zero;
 
     public CompilationUnit Parse(IEnumerator<Token> tokens, string file)
     {
         this.tokens = tokens;
 
         tokens.MoveNext();
-        if (Flags.Instance.Tokens)
+        if (options.Tokens)
         {
             Console.WriteLine(tokens.Current);
         }
@@ -48,7 +49,7 @@ public partial class Parser(CompilationData data)
             else
             {
                 Next();
-                Error($"Expected '(' or ';' but got {Peek()}");
+                // Error($"Expected '(' or ';' but got {Peek()}");
                 break;
             }
 
@@ -130,7 +131,6 @@ public partial class Parser(CompilationData data)
             Range = start.Range.Merge(previousTokenRange),
         };
     }
-
 
     ExternalStatement ParseExternalDefinition()
     {

@@ -1,17 +1,11 @@
 namespace BLang.AstParser;
 
 using System;
-using System.Collections.Generic;
 using BLang.Exceptions;
 using BLang.Tokenizer;
-using BLang.Utility;
 
 public partial class Parser
 {
-    public readonly List<string> Errors = [];
-
-    SourceRange previousTokenRange;
-
     public bool Peek(TokenType type)
     {
         return tokens.Current.TokenType == type;
@@ -28,7 +22,7 @@ public partial class Parser
         previousTokenRange = token.Range;
         tokens.MoveNext();
 
-        if (Flags.Instance.Tokens)
+        if (options.Tokens)
         {
             Console.WriteLine(tokens.Current);
         }
@@ -47,21 +41,6 @@ public partial class Parser
         }
 
         return token;
-    }
-
-    void Error(string error)
-    {
-        string msg = data.GetFileLocation(previousTokenRange.End) + ": " + error;
-
-        if (Flags.Instance.Debug)
-        {
-            string trace = string.Join("\n", Environment.StackTrace.ToString().Split('\n')[2..]);
-            Errors.Add(msg + "\n" + trace);
-        }
-        else
-        {
-            Errors.Add(msg);
-        }
     }
 
     void EatComments()
