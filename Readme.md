@@ -9,13 +9,13 @@ Implementing the B lang in C# with qbe backend
 -   [x] function calls
 -   [x] auto
 -   [x] variable assignment
+-   [ ] Global variables
 -   [ ] if else
 -   [ ] while
 -   [ ] switch
 
 ## Targets
 
--   ast (Debug)
 -   qbe
 
 ## Dev Setup

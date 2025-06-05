@@ -1,24 +1,21 @@
 export function w $main()
 {
 @start
-    # auto foo;
-    # foo = 12;
-    # printf("%d",foo);
-    #
-    # 12
+    %val =l alloc4 4
 
-    %foo =l alloc4 4
+    storew 1, %val
 
-    storew 12, %foo
+    %val_1 =w loadw %val
+    %val_2 =w add %val_1, 2
+    %val_3 =w mul %val_2, 5
 
-
-    %val =w loadw %foo
-
-    %test =w ceqw %val, 121
-
-    call $printf(l $string_0, w %test)
+    call $printf(l $string_0, w %val_3)
 
     ret 0
 }
 
-data $string_0 = { b "%d\n", b 0 }
+# Data
+data $string_0 = { b "%d", b 0 }
+
+# Externs
+# * printf

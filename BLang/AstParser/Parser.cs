@@ -6,7 +6,7 @@ using BLang.Exceptions;
 using BLang.Tokenizer;
 using BLang.Utility;
 
-public partial class Parser(CompilationData data, Options options)
+public partial class Parser(CompilationData data)
 {
     IEnumerator<Token> tokens = null!;
     SourceRange previousTokenRange = SourceRange.Zero;
@@ -22,7 +22,6 @@ public partial class Parser(CompilationData data, Options options)
         }
 
         CompilationUnit topLevel = ParseTopLevel();
-        topLevel.File = file;
         return topLevel;
     }
 
@@ -123,10 +122,14 @@ public partial class Parser(CompilationData data, Options options)
     {
         Token start = Eat(TokenType.WhileKeyword);
 
-        BinaryExpression condition = ParseBinaryExpression();
+        Expression condition = ParseBinaryExpression();
+        if (condition is not BinaryExpression)
+        {
+            throw new ParserException("ParseWhileDefinition condition: " + condition);
+        }
         Statement[] body = ParseBlock();
 
-        return new(condition, body)
+        return new((BinaryExpression)condition, body)
         {
             Range = start.Range.Merge(previousTokenRange),
         };

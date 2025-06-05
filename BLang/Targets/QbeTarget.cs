@@ -2,17 +2,20 @@ namespace BLang.Targets;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using BLang.AstParser;
 using BLang.Exceptions;
 using BLang.Tokenizer;
+using BLang.Utility;
 
-public class QbeTarget : BaseTarget
+public class QbeTarget(CompilationData data) : BaseTarget
 {
-    public override string Target => "qbe";
+    public const string Target = "qbe";
+    public override int Indention => 4;
 
     readonly Dictionary<string, string> strings = [];
     readonly HashSet<string> externs = [];
+
+    readonly SymbolTable symbols = data.Symbols;
 
     int tempRegistry = 0;
 
@@ -26,7 +29,7 @@ public class QbeTarget : BaseTarget
     {
         foreach (FunctionStatement funcDecl in node.FunctionDeclarations)
         {
-            Visit(funcDecl);
+            VisitFunctionStatement(funcDecl);
         }
 
         // TODO: global variables
@@ -55,50 +58,36 @@ public class QbeTarget : BaseTarget
         WriteLine();
     }
 
-    public void Visit(Statement node)
+    public void VisitStatement(Statement node)
     {
         switch (node)
         {
-            case ExternalStatement s: Visit(s); break;
+            case ExternalStatement s: VisitExternalStatement(s); break;
             case FunctionCall s: VisitFunctionCall(s); break;
-            case AutoStatement s: Visit(s); break;
-            case VariableAssignment s: Visit(s); break;
-            case WhileStatement s: Visit(s); break;
+            case AutoStatement s: VisitAutoStatement(s); break;
+            case VariableAssignment s: VisitVariableAssignment(s); break;
+            case WhileStatement s: VisitWhileStatement(s); break;
             default: throw new Exception(node.ToString());
         }
-    }
-
-    public string VisitParameters(Expression[] expressions)
-    {
-        string[] parameters = expressions.Select(expr =>
-        {
-            return expr switch
-            {
-                StringValue e => $"\"{e.Value}\"",
-                IntValue e => e.Value.ToString(),
-                Variable e => e.Identifier,
-                _ => throw new Exception(expr.GetType().ToString())
-            };
-        }).ToArray();
-
-        return string.Join(", ", parameters);
     }
 
     private void BeginScope()
     {
         WriteLine("{");
         Indent();
+        symbols.EnterScope();
     }
 
     private void EndScope()
     {
+        symbols.ExitScope();
         Dedent();
         WriteLine("}");
     }
 
     // Statements
 
-    public void Visit(FunctionStatement node)
+    public void VisitFunctionStatement(FunctionStatement node)
     {
         string returnType = node.FunctionName == "main" ? "w " : "";
         if (node.FunctionName == "main")
@@ -114,23 +103,23 @@ public class QbeTarget : BaseTarget
             WriteLine("@start");
             foreach (Statement stmt in node.Body)
             {
-                Visit(stmt);
+                VisitStatement(stmt);
             }
 
             if (node.FunctionName == "main")
             {
-                WriteIndented($"ret 0");
+                Write($"ret 0");
             }
             else
             {
-                WriteIndented($"ret");
+                Write($"ret");
             }
         }
         EndScope();
         WriteLine();
     }
 
-    public void Visit(ExternalStatement node)
+    public void VisitExternalStatement(ExternalStatement node)
     {
         foreach (string extrn in node.Externals)
         {
@@ -138,24 +127,25 @@ public class QbeTarget : BaseTarget
         }
     }
 
-    public void Visit(WhileStatement whileStatement)
+    public void VisitWhileStatement(WhileStatement whileStatement)
     {
-        WriteIndented($"VisitWhileDeclaration");
+        Write($"VisitWhileDeclaration {whileStatement}");
     }
 
-    public void Visit(AutoStatement autoDeclaration)
+    public void VisitAutoStatement(AutoStatement autoDeclaration)
     {
         foreach (string variable in autoDeclaration.Variables)
         {
-            WriteIndented($"%{variable} =l alloc4 4");
+            Write($"%{variable} =l alloc4 4");
         }
-        WriteLine("");
+        WriteLine();
     }
 
     public void VisitFunctionCall(FunctionCall node)
     {
         string parameters = LoadParameterValue(node.Parameters);
-        WriteIndented($"call ${node.IdentifierName}({parameters})");
+        Write($"call ${node.IdentifierName}({parameters})");
+        WriteLine();
     }
 
     string LoadParameterValue(Expression[] parameters)
@@ -174,7 +164,7 @@ public class QbeTarget : BaseTarget
 
                 case Variable v:
                 tmpReg = TempRegister(v.Identifier);
-                WriteIndented($"{tmpReg} =w loadw %{v.Identifier}");
+                Write($"{tmpReg} =w loadw %{v.Identifier}");
                 registers.Add($"w {tmpReg}");
                 break;
 
@@ -185,7 +175,7 @@ public class QbeTarget : BaseTarget
         return string.Join(", ", registers);
     }
 
-    public void Visit(VariableAssignment variableAssignment)
+    public void VisitVariableAssignment(VariableAssignment variableAssignment)
     {
         BinaryExpression value = variableAssignment.Value;
         VisitBinaryExpression(value, $"%{variableAssignment.IdentifierName}");
@@ -207,28 +197,20 @@ public class QbeTarget : BaseTarget
         }
     }
 
-    public void VisitIntValue(IntValue intValue)
-    {
-        Write($"w {intValue.Value}");
-    }
-
-    public void VisitVariable(Variable variableValue)
-    {
-        Write($"w %{variableValue.Identifier}_parameter");
-    }
-
     public void VisitBinaryExpression(BinaryExpression binary, string regName)
     {
         switch (binary.Operation)
         {
             case TokenType.None:
-            WriteIndented($"storew {binary?.Left}, {regName}");
+            Write($"storew {binary?.Left}, {regName}");
             break;
 
             case TokenType.Addition:
-            WriteIndented($"storew {binary?.Left}, {regName}");
+            Write($"storew {binary?.Left}, {regName}");
             break;
         }
+
+        WriteLine();
     }
 
     // Utility

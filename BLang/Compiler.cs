@@ -4,52 +4,23 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using BLang.AstParser;
-using BLang.Exceptions;
 using BLang.Targets;
 using BLang.Tokenizer;
 using BLang.Utility;
 
-public class Compiler(Options options)
+public static class Compiler
 {
-    public CompileOutput Compile(string file)
+    static AstTarget AstPrinter = new();
+
+    public static CompileOutput Compile(string file)
     {
-        CompileOutput output = new(false);
+        CompileOutput output = CompileFile(file);
 
-        try
-        {
-            output = CompileFile(file);
-        }
-        catch (ParserException e)
-        {
-            if (options.Debug)
-            {
-                output.Errors += e.ToString();
-            }
-            else
-            {
-                output.Errors += e.Error;
-            }
-            output.Success = false;
-        }
-        catch (Exception)
-        {
-            output.Success = false;
-            throw;
-        }
-
-        output.RunOutput = "";
         if (output.Success && options.Run)
         {
             try
             {
-                Executable.Run(output.Executable).Switch(success =>
-                {
-                    output.RunOutput = success;
-                },
-                error =>
-                {
-                    output.Errors = error.Value;
-                });
+                Executable.Run(output.Executable);
             }
             catch (Exception e)
             {
@@ -60,56 +31,42 @@ public class Compiler(Options options)
         return output;
     }
 
-    CompileOutput CompileFile(string file)
+    static CompileOutput CompileFile(string file)
     {
         CompileOutput output = new();
 
-        CompilationData data = new()
-        {
-            File = file
-        };
+        CompilationData data = new(file);
+        Lexer lexer = new(data);
+        Parser parser = new(data);
 
-        output.Success = true;
-
-        Lexer lexer = new(data, options);
-        Parser parser = new(data, options);
-
-        AstTarget astTarget = new();
-        QbeTarget qbeTarget = new();
-
-        StreamReader fileStream = File.OpenText(file);
-
-        IEnumerator<Token> tokens = lexer.Lex(fileStream, file);
-
+        IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
         CompilationUnit unit = parser.Parse(tokens, file);
 
-        output.AstOutput = astTarget.Output(unit);
+        output.AstOutput = AstPrinter.Output(unit);
 
         string target = options.Target;
 
         CreateOutputDirectories(file, target);
         (string objFile, string binFile) = GetOutputFile(file, target);
 
-        if (target == qbeTarget.Target)
+        if (target == QbeTarget.Target)
         {
+            QbeTarget qbeTarget = new(data);
+
             string qbeIR = qbeTarget.Output(unit);
             File.WriteAllText(objFile + ".ssa", qbeIR);
 
-            Executable.Run("qbe", objFile + ".ssa").Switch(qbeAssembly =>
+            if (output.Success)
             {
+                Executable exe = Executable.Capture("qbe", objFile + ".ssa");
+                Error(exe.StdError, "ERR");
+
                 string assemblyFile = objFile + ".s";
-                File.WriteAllText(assemblyFile, qbeAssembly);
+                File.WriteAllText(assemblyFile, exe.StdOut);
 
-                string? gccStdOut = Executable.Run("gcc", $"{assemblyFile} -o {binFile}").Catch(error =>
-                {
-                    Error(error.Value, "ERR");
-                });
-
-                Log(gccStdOut, "OUT");
-            }, error =>
-            {
-                Error(error.Value, "ERR");
-            });
+                exe = Executable.Capture("gcc", $"{assemblyFile} -o {binFile}");
+                Error(exe.StdError, "ERR");
+            }
         }
         else
         {
@@ -137,13 +94,5 @@ public class Compiler(Options options)
 
         Directory.CreateDirectory(Path.Combine(projectDirectory, "obj", target));
         Directory.CreateDirectory(Path.Combine(projectDirectory, "bin", target));
-    }
-
-    void Debug(string message)
-    {
-        if (options.Debug)
-        {
-            Console.WriteLine(message);
-        }
     }
 }

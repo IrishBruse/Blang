@@ -1,24 +1,44 @@
 namespace BLang.Utility;
 
+using System;
 using System.Diagnostics;
 
-public class Executable
+public record Executable(string? StdOut, string? StdError)
 {
-    public static Result<string, Error<string>> Run(string executable, string arguments = "")
+    public static bool Run(string executable, string arguments = "")
     {
-        Debug($"{executable} {arguments}", "CMD");
+        Executable exe = Capture(executable, arguments);
+
+        if (!string.IsNullOrEmpty(exe.StdError))
+        {
+            Error(exe.StdError, "ERR");
+            return false;
+        }
+
+        Log(exe.StdOut, "OUT");
+        return true;
+    }
+
+    public static Executable Capture(string executable, string arguments = "")
+    {
+        if (options.Debug) Info($"{executable} {arguments}", "CMD");
 
         using Process? process = Process.Start(new ProcessStartInfo(executable, arguments) { RedirectStandardOutput = true, RedirectStandardError = true });
         process?.WaitForExit();
 
-        string? output = process?.StandardOutput?.ReadToEnd();
-        string? errorOutput = process?.StandardError?.ReadToEnd();
+        string? stdOut = process?.StandardOutput?.ReadToEnd();
+        string? stdErr = process?.StandardError?.ReadToEnd();
 
-        if (!string.IsNullOrEmpty(errorOutput))
-        {
-            return Result<string, Error<string>>.Fail(new(errorOutput!));
-        }
+        return new(stdOut, stdErr);
+    }
 
-        return Result<string, Error<string>>.Ok(output);
+    public bool HasError()
+    {
+        return !string.IsNullOrEmpty(StdError);
+    }
+
+    public bool HasOutput()
+    {
+        return !string.IsNullOrEmpty(StdOut);
     }
 }

@@ -8,54 +8,54 @@ using System;
 
 public class Globals
 {
-    private static string prefix = "";
+    public static Options options = null!;
+    private static string logPrefix = "";
 
-    static void Print(string? message)
+    static void Print(string? message, string? prefix, ConsoleColor? color = null)
     {
+        SetPrefix(prefix);
         message = message?.Trim();
         if (!string.IsNullOrEmpty(message))
         {
+            if (color != null) Console.ForegroundColor = (ConsoleColor)color;
             foreach (string line in message.Split("\n"))
             {
-                Console.WriteLine(prefix + line);
+                Console.WriteLine(logPrefix + line);
             }
+            if (color != null) Console.ResetColor();
         }
-    }
-
-    public static void Log(string? message, string? prefix = "")
-    {
-        SetPrefix(prefix);
-        Print(message);
         SetPrefix();
     }
 
-    public static void Error(string? message, string? prefix = "")
+    public static void Log(string? message, string? prefix = null)
     {
-        SetPrefix(prefix);
-        Console.ForegroundColor = ConsoleColor.Red;
-        Print(message);
-        Console.ResetColor();
-        SetPrefix();
+        Print(message, prefix, ConsoleColor.Gray);
     }
 
-    public static void Debug(string? message, string prefix = "")
+    public static void Error(string? message, string? prefix = null)
     {
-        SetPrefix(prefix);
-        Console.ForegroundColor = ConsoleColor.Blue;
-        Print(message);
-        Console.ResetColor();
-        SetPrefix();
+        Print(message, prefix, ConsoleColor.Red);
     }
 
-    public static void SetPrefix(string? prefix = "")
+    public static void Debug(string? message, string? prefix = null)
+    {
+        Print(message, prefix, ConsoleColor.DarkGray);
+    }
+
+    public static void Info(string? message, string? prefix = null)
+    {
+        Print(message, prefix, ConsoleColor.Blue);
+    }
+
+    public static void SetPrefix(string? prefix = null)
     {
         if (prefix != null)
         {
-            Globals.prefix = $"[{prefix}] ";
+            logPrefix = $"[{prefix}] ";
         }
         else
         {
-            Globals.prefix = "";
+            logPrefix = "";
         }
     }
 }

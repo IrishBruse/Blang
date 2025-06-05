@@ -1,14 +1,11 @@
 namespace BLang.Targets;
 
 using System;
-using System.IO;
 using System.Text;
-using BLang.AstParser;
-using BLang.Utility;
 
 public class BaseTarget
 {
-    public virtual string Target { get; } = "unknown";
+    public virtual int Indention { get; } = 2;
 
     public StringBuilder output { internal get; set; } = new();
     int depth { get; set; }
@@ -16,23 +13,27 @@ public class BaseTarget
     public void Indent() => depth++;
     public void Dedent() => depth--;
 
-    public void WriteIndentation()
-    {
-        output.Append(new string(' ', depth * 4));
-    }
-
-    public void WriteIndented(string? value)
-    {
-        output.AppendLine(new string(' ', depth * 4) + value);
-    }
+    public string Space => new(' ', depth * Indention);
 
     public void Write(string? value)
+    {
+        output.AppendLine(Space + value);
+    }
+
+    public void WriteRaw(string? value)
     {
         output.Append(value);
     }
 
     public void WriteLine(string? value = "")
     {
-        output.AppendLine(value);
+        if (string.IsNullOrEmpty(value))
+        {
+            output.AppendLine();
+        }
+        else
+        {
+            output.AppendLine(Space + value);
+        }
     }
 }

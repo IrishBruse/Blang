@@ -25,7 +25,7 @@ public class Options
     public string File { get; set; } = "";
 
 
-    public static Options? Parse(string[] args)
+    public static void Parse(string[] args)
     {
         Parser parser = new((options) =>
         {
@@ -35,8 +35,6 @@ public class Options
         });
 
         ParserResult<Options> parserResult = parser.ParseArguments<Options>(args);
-
-        Options? options = null;
 
         parserResult.WithParsed((o) => { options = o; }).WithNotParsed(errors =>
         {
@@ -56,6 +54,6 @@ public class Options
             }
         });
 
-        return options;
+
     }
 }

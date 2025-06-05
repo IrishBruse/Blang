@@ -30,7 +30,7 @@ public partial class Parser
 
             Token conditionalOperator = Next();
 
-            BinaryExpression right = ParseBinaryExpression(precedence);
+            Expression right = ParseBinaryExpression(precedence);
 
             left = new BinaryExpression(conditionalOperator.TokenType, left, right)
             {
@@ -43,27 +43,13 @@ public partial class Parser
 
     BinaryExpression ParsePrimary()
     {
-        switch (Peek())
+        return Peek() switch
         {
-            case TokenType.OpenParenthesis: return ParseGroupExpression();
-
-            case TokenType.IntegerLiteral:
-            IntValue integer = ParseInteger();
-            return new BinaryExpression(TokenType.None, integer, null)
-            {
-                Range = integer.Range
-            };
-
-            case TokenType.Identifier:
-            Variable variable = ParseVariable();
-            return new BinaryExpression(TokenType.None, variable, null)
-            {
-                Range = variable.Range
-            };
-
-            default:
-            throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParsePrimary)} of type {Peek()}");
-        }
+            TokenType.OpenParenthesis => ParseGroupExpression(),
+            TokenType.IntegerLiteral => new BinaryExpression(TokenType.None, ParseInteger(), null),
+            TokenType.Identifier => new BinaryExpression(TokenType.None, ParseVariable(), null),
+            _ => throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParsePrimary)} of type {Peek()}"),
+        };
     }
 
     BinaryExpression ParseGroupExpression()

@@ -1,22 +1,21 @@
 namespace BLang.Targets;
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using BLang.AstParser;
 
 public class AstTarget : BaseTarget
 {
-    public override string Target => "ast";
-
     public string Output(CompilationUnit node)
     {
+        output.Clear();
         VisitCompilationUnit(node);
-
         return output.ToString();
     }
 
     public void VisitCompilationUnit(CompilationUnit node)
     {
-        WriteIndentation();
         WriteLine($"CompilationUnit:");
 
         Indent();
@@ -30,10 +29,8 @@ public class AstTarget : BaseTarget
 
     public void VisitFunctionStatement(FunctionStatement node)
     {
-        WriteIndentation();
-        Write($"FunctionDeclaration: {node.FunctionName}(");
-        VisitExpressions(node.Parameters);
-        WriteLine(")");
+        string parameters = VisitExpressions(node.Parameters);
+        WriteLine($"FunctionDeclaration: {node.FunctionName}({parameters})");
 
         Indent();
         foreach (Statement stmt in node.Body)
@@ -53,62 +50,75 @@ public class AstTarget : BaseTarget
 
     public void VisitExternalStatement(ExternalStatement node)
     {
-        WriteIndentation();
         WriteLine($"ExternalStatement: {string.Join(',', node.Externals)}");
     }
 
     public void VisitFunctionCall(FunctionCall node)
     {
-        WriteIndentation();
-        Write($"FunctionCall: {node.IdentifierName}(");
-        VisitExpressions(node.Parameters);
-        WriteLine(")");
+        string parameters = VisitExpressions(node.Parameters);
+        WriteLine($"FunctionCall: {node.IdentifierName}({parameters})");
     }
 
-    public void VisitExpressions(Expression[] expressions)
+    static string VisitExpressions(Expression[] expressions)
     {
-        bool start = true;
+        List<string> expression = [];
         foreach (Expression expr in expressions)
         {
-            if (!start)
-            {
-                Write(", ");
-            }
             switch (expr)
             {
                 case StringValue e:
-                Write($"\"{e.Value}\"");
+                expression.Add($"\"{e.Value}\"");
                 break;
 
                 case Variable e:
-                Write(e.Identifier);
+                expression.Add(e.Identifier);
                 break;
 
                 case IntValue e:
-                Write(e.Value.ToString());
+                expression.Add(e.Value.ToString());
                 break;
 
                 default: throw new Exception("" + expr.GetType());
             }
-            start = false;
         }
+
+        return string.Join(", ", expression);
     }
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
     {
-        WriteIndentation();
         WriteLine($"AutoDeclaration: {string.Join(',', autoDeclaration.Variables)}");
     }
 
     public void VisitVariableAssignment(VariableAssignment variableAssignment)
     {
-        WriteIndentation();
-        WriteLine($"VariableAssignment: {variableAssignment.IdentifierName} = {variableAssignment.Value}");
+        WriteLine($"VariableAssignment: {variableAssignment.IdentifierName} =");
+        VisitBinaryExpression(variableAssignment.Value);
+    }
+
+    public void VisitBinaryExpression(Expression? expression)
+    {
+        Indent();
+        if (expression is BinaryExpression e)
+        {
+            if (e.Operation != Tokenizer.TokenType.None)
+            {
+                WriteLine($"{GetTypeName(e)}: {e.Operation}");
+                if (e.Left != null) VisitBinaryExpression(e.Left);
+                if (e.Right != null) VisitBinaryExpression(e.Right);
+            }
+            else
+            {
+                WriteLine($"{GetTypeName(e.Left)}: {e.Left}");
+            }
+        }
+        Dedent();
     }
 
     public void VisitWhileStatement(WhileStatement whileStatement)
     {
-        WriteIndentation();
         WriteLine($"WhileDeclaration: {whileStatement}");
     }
+
+    public static string GetTypeName(object? obj) => obj?.GetType().ToString().Split(".").Last() ?? "";
 }

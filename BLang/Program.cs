@@ -9,7 +9,14 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        Options? options = Options.Parse(args);
+        bool watching = Environment.GetEnvironmentVariable("DOTNET_WATCH") == "1";
+
+        if (watching)
+        {
+            Console.Write(new string('\n', 25));
+        }
+
+        Options.Parse(args);
 
         if (options == null)
         {
@@ -20,51 +27,38 @@ public class Program
         {
             options.Debug = true;
             options.Run = true;
-            Test(options);
+            Test();
             return;
         }
 
-        Compiler compiler = new(options);
-
-        CompileOutput output = compiler.Compile(options.File);
+        CompileOutput output = Compiler.Compile(options.File);
 
         if (options.Debug && !string.IsNullOrEmpty(output.AstOutput))
         {
-            if (options.Debug)
-            {
-                Console.WriteLine("=========== Ast ============");
-            }
+            Console.WriteLine("===========  Ast  ============");
             Log(output.AstOutput, null);
         }
 
         if (!string.IsNullOrEmpty(output.Errors))
         {
-            if (options.Debug)
-            {
-                Console.WriteLine("==========  Errors  ==========");
-            }
+            Console.WriteLine("==========  Errors  ==========");
             Error(output.Errors, null);
         }
 
         if (!string.IsNullOrEmpty(output.RunOutput))
         {
-            if (options.Debug)
-            {
-                Console.WriteLine("==========  Output  ==========");
-            }
+            Console.WriteLine("==========  Output  ==========");
             Console.WriteLine(output.RunOutput);
         }
     }
 
-    public static void Test(Options options)
+    public static void Test()
     {
         string[] files = Directory.GetFiles("../Tests/", "*.b");
 
-        Compiler compiler = new(options);
-
         foreach (string testFile in files)
         {
-            CompileOutput output = compiler.Compile(testFile);
+            CompileOutput output = Compiler.Compile(testFile);
 
             string testOutputFile = Path.ChangeExtension(testFile, ".test");
             string previousTestOutput = File.Exists(testOutputFile) ? File.ReadAllText(testOutputFile) : "";
@@ -85,11 +79,17 @@ public class Program
         StringBuilder testOutput = new();
         testOutput.AppendLine(output.AstOutput);
 
-        string? runOutput = Executable.Run(output.Executable).Match(sucess => sucess, error => error.Value);
-        if (!string.IsNullOrEmpty(runOutput))
+        Executable runOutput = Executable.Capture(output.Executable);
+        testOutput.AppendLine("==============================");
+
+        if (!string.IsNullOrEmpty(runOutput.StdOut))
         {
-            testOutput.AppendLine("==============================");
-            testOutput.Append(runOutput);
+            testOutput.Append(runOutput.StdOut);
+        }
+
+        if (!string.IsNullOrEmpty(runOutput.StdError))
+        {
+            testOutput.Append(runOutput.StdError);
         }
 
         string newTestOutput = testOutput.ToString();

@@ -2,11 +2,12 @@ namespace BLang.Utility;
 
 using System.Collections.Generic;
 
-public class CompilationData
+public class CompilationData(string file)
 {
+    public readonly SymbolTable Symbols = new();
     public readonly List<int> Lines = [0];
 
-    public string? File { get; internal set; }
+    public string? File { get; set; } = file;
 
     public (int Line, int Column) GetLineColumnFromIndex(int index)
     {

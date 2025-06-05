@@ -6,13 +6,10 @@ using BLang.Utility;
 
 public abstract record AstNode
 {
-    public required SourceRange Range { get; init; }
+    public SourceRange Range { get; set; } = SourceRange.Zero;
 }
 
-public record CompilationUnit(List<FunctionStatement> FunctionDeclarations, List<FunctionStatement> VariableDeclarations) : AstNode
-{
-    public string File { get; set; } = "";
-}
+public record CompilationUnit(List<FunctionStatement> FunctionDeclarations, List<FunctionStatement> VariableDeclarations) : AstNode;
 
 // Statements
 
