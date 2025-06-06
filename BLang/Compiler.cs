@@ -40,7 +40,7 @@ public static class Compiler
         Parser parser = new(data);
 
         IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
-        CompilationUnit unit = parser.Parse(tokens, file);
+        CompilationUnit unit = parser.Parse(tokens);
 
         output.AstOutput = AstPrinter.Output(unit);
 

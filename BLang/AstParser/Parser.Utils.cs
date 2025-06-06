@@ -3,6 +3,7 @@ namespace BLang.AstParser;
 using System;
 using BLang.Exceptions;
 using BLang.Tokenizer;
+using BLang.Utility;
 
 public partial class Parser
 {
@@ -54,7 +55,12 @@ public partial class Parser
     Variable ParseVariable()
     {
         Token variable = Eat(TokenType.Identifier);
-        return new Variable(variable.Content)
+        Symbol? symbol = symbols.Get(variable.Content);
+        if (symbol == null)
+        {
+            throw new Exception(variable.ToString());
+        }
+        return new Variable(symbol)
         {
             Range = variable.Range
         };

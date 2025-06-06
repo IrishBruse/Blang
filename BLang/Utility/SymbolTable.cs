@@ -1,131 +1,127 @@
 namespace BLang.Utility;
 
+using System;
 using System.Collections.Generic;
+using BLang.Tokenizer;
 
+public record Symbol(string Name, SymbolKind Kind)
+{
+    public override string ToString()
+    {
+        return $"{Name}({Kind})";
+    }
+}
+
+public enum SymbolKind
+{
+    Variable,
+    Function,
+    Parameter,
+    Global,
+    External
+}
+
+// Represents the symbol table structure (managing scopes)
 public class SymbolTable
 {
+    // A stack of dictionaries, where each dictionary represents a scope
+    private readonly Stack<Dictionary<string, Symbol>> scopes;
+
     public SymbolTable()
     {
-        EnterScope();
+        scopes = new Stack<Dictionary<string, Symbol>>();
+        EnterScope("global"); // Start with the global scope
     }
 
-    readonly Stack<Scope> scopeStack = new();
-    int nextScopeId = 0;
+    public int CurrentScopeDepth { get; private set; } = -1;
 
-
-    public void EnterScope()
+    public void EnterScope(string name)
     {
-        Debug($"Entered Scope {nextScopeId}", "SYM");
-
-        var newScope = new Scope(nextScopeId);
-        scopeStack.Push(newScope);
-        nextScopeId++;
+        scopes.Push([]);
+        CurrentScopeDepth++;
+        Debug($"Entered scope {name} at depth {CurrentScopeDepth}", "SYM");
     }
 
     public void ExitScope()
     {
-        if (options.Debug)
+        if (scopes.Count > 1)
         {
-            PrintAllScopes();
-        }
-
-        Debug($"Exiting Scope {scopeStack.Peek().ScopeId}", "SYM");
-        scopeStack.Pop();
-    }
-
-    public bool AddSymbol(string name, string type, object? value = null)
-    {
-        if (scopeStack.Count == 0)
-        {
-            Debug("No active scope to add symbol to.", "ERROR");
-            return false;
-        }
-
-        Scope currentScope = scopeStack.Peek();
-        SymbolInfo symbol = new(name, type, value);
-
-        if (currentScope.TryAddSymbol(symbol))
-        {
-            Debug($"Added symbol '{name}' to Scope {currentScope.ScopeId}", "SYM");
-            return true;
+            scopes.Pop();
+            CurrentScopeDepth--;
+            Debug($"Exited scope to depth: {CurrentScopeDepth}", "SYM");
         }
         else
         {
-            Debug($"Symbol '{name}' already declared in current Scope {currentScope.ScopeId}.", "ERROR");
-            return false;
+            throw new InvalidOperationException("Cannot exit global scope.");
         }
     }
 
-
-    public SymbolInfo? LookupSymbol(string name)
+    public Symbol Add(Token token, SymbolKind kind)
     {
-        Debug($"Looking up symbol '{name}'...", "SYM");
-        foreach (Scope scope in scopeStack)
+        if (token.TokenType != TokenType.Identifier && !token.TokenType.IsKeyword())
         {
-            SymbolInfo? symbol = scope.GetSymbol(name);
-            if (symbol != null)
-            {
-                Debug($"Found '{name}' in Scope {scope.ScopeId}.", "SYM");
-                return symbol;
-            }
+            throw new Exception(token.Content);
         }
-        Debug($"Symbol '{name}' not found in any active scope.", "ERROR");
-        return null;
+        return Add(token.Content, kind);
     }
 
-    public void PrintAllScopes()
+    public Symbol Add(string name, SymbolKind kind)
     {
-        Debug("\n=== Current Symbol Table State ===");
-        if (scopeStack.Count == 0)
+        Symbol symbol = new(name, kind);
+        Dictionary<string, Symbol> currentScope = scopes.Peek();
+        if (currentScope.ContainsKey(name))
         {
-            Debug("No scopes active.");
-            return;
+            throw new InvalidOperationException($"Symbol '{name}' already declared in current scope.");
         }
+        currentScope.Add(name, symbol);
+        Debug($"Added {symbol.Kind} symbol: {symbol.Name} in scope {CurrentScopeDepth}", "SYM");
 
-        Scope[] scopesArray = scopeStack.ToArray();
-        for (int i = 0; i < scopesArray.Length; i++)
-        {
-            scopesArray[i].PrintScopeContents();
-        }
-        Debug("==================================\n");
-    }
-}
-
-public record SymbolInfo(string Identifier, string type, object? value = null);
-
-public class Scope(int scopeId)
-{
-    public int ScopeId { get; } = scopeId;
-
-    private readonly Dictionary<string, SymbolInfo> symbols = [];
-
-    public bool TryAddSymbol(SymbolInfo symbol)
-    {
-        if (symbols.ContainsKey(symbol.Identifier))
-        {
-            return false;
-        }
-        symbols.Add(symbol.Identifier, symbol);
-        return true;
-    }
-
-    public SymbolInfo? GetSymbol(string name)
-    {
-        symbols.TryGetValue(name, out SymbolInfo? symbol);
         return symbol;
     }
 
-    public void PrintScopeContents()
+    public Symbol? Get(string name)
     {
-        Debug($"--- Scope ({ScopeId}) Contents ---");
-        if (symbols.Count == 0)
+        foreach (Dictionary<string, Symbol> scope in scopes)
         {
-            Debug("    (Empty)");
+            if (scope.TryGetValue(name, out Symbol? symbol))
+            {
+                return symbol;
+            }
+        }
+        return null;
+    }
+
+    public Symbol GetOrAdd(Token token, SymbolKind kind)
+    {
+        Symbol? symbol = Get(token.Content);
+
+        if (symbol != null)
+        {
+            return symbol;
         }
 
-        foreach ((_, SymbolInfo? Value) in symbols)
+        return Add(token, kind);
+    }
+
+    // Look up a symbol only in the current scope
+    public Symbol? GetInCurrentScope(string name)
+    {
+        Dictionary<string, Symbol> currentScope = scopes.Peek();
+        currentScope.TryGetValue(name, out Symbol? symbol);
+        return symbol;
+    }
+
+    public void PrintSymbolTable()
+    {
+        Debug("\n--- Symbol Table Contents ---", "SYM");
+        int depth = scopes.Count;
+        foreach (Dictionary<string, Symbol> scope in scopes)
         {
-            Debug($"    {Value}");
+            Debug($"Scope Depth: {depth--}", "SYM");
+            foreach (KeyValuePair<string, Symbol> entry in scope)
+            {
+                Debug($"  {entry.Value}", "SYM");
+            }
         }
     }
 }

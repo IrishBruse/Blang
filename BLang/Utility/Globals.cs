@@ -29,7 +29,7 @@ public class Globals
 
     public static void Log(string? message, string? prefix = null)
     {
-        Print(message, prefix, ConsoleColor.Gray);
+        Print(message, prefix);
     }
 
     public static void Error(string? message, string? prefix = null)

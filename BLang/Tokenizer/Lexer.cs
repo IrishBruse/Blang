@@ -284,7 +284,6 @@ public class Lexer(CompilationData data)
     {
         StringBuilder number = new(c.ToString());
 
-
         while (char.IsDigit(Peek()))
         {
             c = Next();

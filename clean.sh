@@ -5,3 +5,8 @@ rm -rf Examples/obj
 
 rm -rf Tests/bin
 rm -rf Tests/obj
+
+rm -rf scratch/bin
+rm -rf scratch/obj
+
+dotnet clean

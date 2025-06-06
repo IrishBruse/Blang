@@ -30,7 +30,7 @@ public class AstTarget : BaseTarget
     public void VisitFunctionStatement(FunctionStatement node)
     {
         string parameters = VisitExpressions(node.Parameters);
-        WriteLine($"FunctionDeclaration: {node.FunctionName}({parameters})");
+        WriteLine($"FunctionDeclaration: {node.Symbol}: {parameters}");
 
         Indent();
         foreach (Statement stmt in node.Body)
@@ -50,13 +50,13 @@ public class AstTarget : BaseTarget
 
     public void VisitExternalStatement(ExternalStatement node)
     {
-        WriteLine($"ExternalStatement: {string.Join(',', node.Externals)}");
+        WriteLine($"ExternalStatement: {string.Join(',', node.Externals.Select(e => e))}");
     }
 
     public void VisitFunctionCall(FunctionCall node)
     {
         string parameters = VisitExpressions(node.Parameters);
-        WriteLine($"FunctionCall: {node.IdentifierName}({parameters})");
+        WriteLine($"FunctionCall: {node.Symbol}: {parameters}");
     }
 
     static string VisitExpressions(Expression[] expressions)
@@ -71,7 +71,7 @@ public class AstTarget : BaseTarget
                 break;
 
                 case Variable e:
-                expression.Add(e.Identifier);
+                expression.Add(e.Symbol.ToString());
                 break;
 
                 case IntValue e:
@@ -87,12 +87,12 @@ public class AstTarget : BaseTarget
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
     {
-        WriteLine($"AutoDeclaration: {string.Join(',', autoDeclaration.Variables)}");
+        WriteLine($"AutoDeclaration: {string.Join(',', autoDeclaration.Variables.Select(v => v))}");
     }
 
     public void VisitVariableAssignment(VariableAssignment variableAssignment)
     {
-        WriteLine($"VariableAssignment: {variableAssignment.IdentifierName} =");
+        WriteLine($"VariableAssignment: {variableAssignment.Symbol} =");
         VisitBinaryExpression(variableAssignment.Value);
     }
 

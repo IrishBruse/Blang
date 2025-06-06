@@ -13,9 +13,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
     public override int Indention => 4;
 
     readonly Dictionary<string, string> strings = [];
-    readonly HashSet<string> externs = [];
-
-    readonly SymbolTable symbols = data.Symbols;
+    readonly HashSet<Symbol> externs = [];
 
     int tempRegistry = 0;
 
@@ -51,9 +49,9 @@ public class QbeTarget(CompilationData data) : BaseTarget
     private void GenerateExternsSection()
     {
         WriteLine("# Externs");
-        foreach (string external in externs)
+        foreach (Symbol external in externs)
         {
-            WriteLine($"# * {external}");
+            WriteLine($"# * {external.Name}");
         }
         WriteLine();
     }
@@ -75,12 +73,10 @@ public class QbeTarget(CompilationData data) : BaseTarget
     {
         WriteLine("{");
         Indent();
-        symbols.EnterScope();
     }
 
     private void EndScope()
     {
-        symbols.ExitScope();
         Dedent();
         WriteLine("}");
     }
@@ -89,15 +85,18 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public void VisitFunctionStatement(FunctionStatement node)
     {
-        string returnType = node.FunctionName == "main" ? "w " : "";
-        if (node.FunctionName == "main")
+        string name = node.Symbol.Name;
+
+        string returnType = name == "main" ? "w " : "";
+        if (name == "main")
         {
-            WriteLine($"export function {returnType}${node.FunctionName}()");
+            WriteLine($"export function {returnType}${name}()");
         }
         else
         {
-            WriteLine($"function w ${node.FunctionName}()");
+            WriteLine($"function w ${name}()");
         }
+
         BeginScope();
         {
             WriteLine("@start");
@@ -106,7 +105,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
                 VisitStatement(stmt);
             }
 
-            if (node.FunctionName == "main")
+            if (name == "main")
             {
                 Write($"ret 0");
             }
@@ -121,7 +120,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public void VisitExternalStatement(ExternalStatement node)
     {
-        foreach (string extrn in node.Externals)
+        foreach (Symbol extrn in node.Externals)
         {
             externs.Add(extrn);
         }
@@ -134,9 +133,9 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
     {
-        foreach (string variable in autoDeclaration.Variables)
+        foreach (Symbol variable in autoDeclaration.Variables)
         {
-            Write($"%{variable} =l alloc4 4");
+            Write($"%{variable}Stack =l alloc4 4");
         }
         WriteLine();
     }
@@ -144,7 +143,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
     public void VisitFunctionCall(FunctionCall node)
     {
         string parameters = LoadParameterValue(node.Parameters);
-        Write($"call ${node.IdentifierName}({parameters})");
+        Write($"call ${node.Symbol}({parameters})");
         WriteLine();
     }
 
@@ -163,8 +162,8 @@ public class QbeTarget(CompilationData data) : BaseTarget
                 break;
 
                 case Variable v:
-                tmpReg = TempRegister(v.Identifier);
-                Write($"{tmpReg} =w loadw %{v.Identifier}");
+                tmpReg = TempRegister(v.Symbol.Name);
+                Write($"{tmpReg} =w loadw %{v.Symbol}");
                 registers.Add($"w {tmpReg}");
                 break;
 
@@ -178,7 +177,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
     public void VisitVariableAssignment(VariableAssignment variableAssignment)
     {
         BinaryExpression value = variableAssignment.Value;
-        VisitBinaryExpression(value, $"%{variableAssignment.IdentifierName}");
+        VisitBinaryExpression(value, $"%{variableAssignment.Symbol}");
     }
 
     // Expression

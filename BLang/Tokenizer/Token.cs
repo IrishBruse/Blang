@@ -91,34 +91,19 @@ public enum TokenType
     AutoKeyword
 }
 
-public enum BinaryOperators
-{
-    // Arithmetic
-    Addition,
-    Subtraction,
-    Multiplication,
-    Division,
-    Modulo,
-
-    // Relational
-    LessThan,
-    GreaterThan,
-    LessThanEqual,
-    GreaterThanEqual,
-    EqualEqual,
-    NotEqual,
-
-    // Logical
-    LogicalAnd,
-    LogicalOr,
-    LogicalNot,
-}
-
 public static class Extensions
 {
     public static bool IsEnd(this TokenType t)
     {
         return t == TokenType.Garbage || t == TokenType.Eof;
+    }
+
+    public static bool IsKeyword(this TokenType t)
+    {
+        return t == TokenType.ExternKeyword ||
+            t == TokenType.IfKeyword ||
+            t == TokenType.WhileKeyword ||
+            t == TokenType.AutoKeyword;
     }
 
     public static string ToCharString(this TokenType t)
@@ -145,6 +130,5 @@ public static class Extensions
             _ => t.ToString(),
         };
     }
-
 
 }

@@ -15,17 +15,17 @@ public record CompilationUnit(List<FunctionStatement> FunctionDeclarations, List
 
 public abstract record Statement() : AstNode;
 
-public record FunctionStatement(string FunctionName, Expression[] Parameters, Statement[] Body) : Statement;
+public record FunctionStatement(Symbol Symbol, Expression[] Parameters, Statement[] Body) : Statement;
 
-public record ExternalStatement(string[] Externals) : Statement;
+public record ExternalStatement(Symbol[] Externals) : Statement;
 
 public record WhileStatement(BinaryExpression Condition, Statement[] Body) : Statement;
 
-public record AutoStatement(string[] Variables) : Statement;
+public record AutoStatement(Symbol[] Variables) : Statement;
 
-public record FunctionCall(string IdentifierName, Expression[] Parameters) : Statement;
+public record FunctionCall(Symbol Symbol, Expression[] Parameters) : Statement;
 
-public record VariableAssignment(string IdentifierName, BinaryExpression Value) : Statement;
+public record VariableAssignment(Symbol Symbol, BinaryExpression Value) : Statement;
 
 // Statements
 
@@ -43,9 +43,11 @@ public record IntValue(int Value) : Expression
     public override string ToString() => Value.ToString();
 }
 
-public record Variable(string Identifier) : Expression
+public record Variable(Symbol Symbol) : Expression
 {
-    public override string ToString() => Identifier.ToString();
+    public override string ToString() => Symbol.ToString();
+    public static implicit operator Variable(Symbol d) => new(d);
+
 }
 
 public record BinaryExpression(TokenType Operation, Expression? Left, Expression? Right) : Expression

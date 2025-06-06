@@ -10,8 +10,9 @@ public partial class Parser(CompilationData data)
 {
     IEnumerator<Token> tokens = null!;
     SourceRange previousTokenRange = SourceRange.Zero;
+    readonly SymbolTable symbols = data.Symbols;
 
-    public CompilationUnit Parse(IEnumerator<Token> tokens, string file)
+    public CompilationUnit Parse(IEnumerator<Token> tokens)
     {
         this.tokens = tokens;
 
@@ -63,6 +64,10 @@ public partial class Parser(CompilationData data)
 
     FunctionStatement ParseFunctionDecleration(Token identifier)
     {
+        symbols.EnterScope(identifier.Content);
+
+        Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Function);
+
         SourceRange begin = identifier.Range;
 
         List<Variable> parameters = [];
@@ -71,13 +76,15 @@ public partial class Parser(CompilationData data)
         while (!Peek(TokenType.CloseParenthesis) && !Peek(TokenType.Eof))
         {
             Token variable = Eat(TokenType.Identifier);
-            parameters.Add(new Variable(variable.Content) { Range = variable.Range });
+            symbol = symbols.Add(variable.Content, SymbolKind.Parameter);
+            parameters.Add(symbol);
         }
         Eat(TokenType.CloseParenthesis);
 
         Statement[] body = ParseBlock();
 
-        return new FunctionStatement(identifier.Content, parameters.ToArray(), body)
+        symbols.ExitScope();
+        return new FunctionStatement(symbol, parameters.ToArray(), body)
         {
             Range = begin.Merge(previousTokenRange),
         };
@@ -138,15 +145,14 @@ public partial class Parser(CompilationData data)
     ExternalStatement ParseExternalDefinition()
     {
         Token start = Eat(TokenType.ExternKeyword);
-
         Token identifier = Eat(TokenType.Identifier);
 
-        List<string> externs = [identifier.Content];
-        if (Peek(TokenType.Comma))
+        List<Symbol> externs = [symbols.Add(identifier, SymbolKind.External)];
+        while (Peek(TokenType.Comma))
         {
             Eat(TokenType.Comma);
             identifier = Eat(TokenType.Identifier);
-            externs.Add(identifier.Content);
+            externs.Add(symbols.Add(identifier, SymbolKind.External));
         }
 
         Token end = Eat(TokenType.Semicolon);
@@ -160,15 +166,14 @@ public partial class Parser(CompilationData data)
     AutoStatement ParseAutoDefinition()
     {
         Token start = Eat(TokenType.AutoKeyword);
-
         Token identifier = Eat(TokenType.Identifier);
 
-        List<string> variables = [identifier.Content];
+        List<Symbol> variables = [symbols.Add(identifier, SymbolKind.Variable)];
         while (Peek(TokenType.Comma))
         {
             Eat(TokenType.Comma);
             identifier = Eat(TokenType.Identifier);
-            variables.Add(identifier.Content);
+            variables.Add(symbols.Add(identifier, SymbolKind.Variable));
         }
         Eat(TokenType.Semicolon);
 
@@ -206,7 +211,12 @@ public partial class Parser(CompilationData data)
         Eat(TokenType.CloseParenthesis);
         Eat(TokenType.Semicolon);
 
-        return new FunctionCall(identifier.Content, parameters.ToArray())
+        Symbol? symbol = symbols.Get(identifier.Content);
+        if (symbol == null)
+        {
+            throw new Exception("");
+        }
+        return new FunctionCall(symbol, parameters.ToArray())
         {
             Range = identifier.Range,
         };
@@ -229,7 +239,9 @@ public partial class Parser(CompilationData data)
         BinaryExpression value = ParseBinaryExpression();
         Eat(TokenType.Semicolon);
 
-        return new VariableAssignment(identifier.Content, value)
+        Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Variable);
+
+        return new VariableAssignment(symbol, value)
         {
             Range = identifier.Range,
         };

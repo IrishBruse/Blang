@@ -24,7 +24,6 @@ public class Options
     [Value(0, MetaName = "file", HelpText = "The b file to compile.")]
     public string File { get; set; } = "";
 
-
     public static void Parse(string[] args)
     {
         Parser parser = new((options) =>
@@ -53,7 +52,6 @@ public class Options
                 Console.WriteLine(helpText);
             }
         });
-
 
     }
 }
