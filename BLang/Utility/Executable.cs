@@ -1,9 +1,8 @@
 namespace BLang.Utility;
 
-using System;
 using System.Diagnostics;
 
-public record Executable(string? StdOut, string? StdError)
+public record Executable(string? StdOut, string? StdError, int ExitCode)
 {
     public static bool Run(string executable, string arguments = "")
     {
@@ -29,7 +28,7 @@ public record Executable(string? StdOut, string? StdError)
         string? stdOut = process?.StandardOutput?.ReadToEnd();
         string? stdErr = process?.StandardError?.ReadToEnd();
 
-        return new(stdOut, stdErr);
+        return new(stdOut, stdErr, process?.ExitCode ?? -1);
     }
 
     public bool HasError()
@@ -40,5 +39,10 @@ public record Executable(string? StdOut, string? StdError)
     public bool HasOutput()
     {
         return !string.IsNullOrEmpty(StdOut);
+    }
+
+    public bool Success()
+    {
+        return ExitCode == 0;
     }
 }

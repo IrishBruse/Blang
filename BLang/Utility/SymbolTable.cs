@@ -6,10 +6,7 @@ using BLang.Tokenizer;
 
 public record Symbol(string Name, SymbolKind Kind)
 {
-    public override string ToString()
-    {
-        return $"{Name}({Kind})";
-    }
+    public override string ToString() => Name;
 }
 
 public enum SymbolKind

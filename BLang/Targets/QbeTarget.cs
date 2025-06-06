@@ -135,7 +135,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
     {
         foreach (Symbol variable in autoDeclaration.Variables)
         {
-            Write($"%{variable}Stack =l alloc4 4");
+            Write($"%{variable.Name} =l alloc4 4");
         }
         WriteLine();
     }
@@ -162,7 +162,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
                 break;
 
                 case Variable v:
-                tmpReg = TempRegister(v.Symbol.Name);
+                tmpReg = TempRegister(v.Symbol.ToString());
                 Write($"{tmpReg} =w loadw %{v.Symbol}");
                 registers.Add($"w {tmpReg}");
                 break;

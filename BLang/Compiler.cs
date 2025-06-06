@@ -10,7 +10,7 @@ using BLang.Utility;
 
 public static class Compiler
 {
-    static AstTarget AstPrinter = new();
+    static readonly AstTarget astPrinter = new();
 
     public static CompileOutput Compile(string file)
     {
@@ -34,7 +34,6 @@ public static class Compiler
     static CompileOutput CompileFile(string file)
     {
         CompileOutput output = new();
-
         CompilationData data = new(file);
         Lexer lexer = new(data);
         Parser parser = new(data);
@@ -42,7 +41,9 @@ public static class Compiler
         IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
         CompilationUnit unit = parser.Parse(tokens);
 
-        output.AstOutput = AstPrinter.Output(unit);
+        string ast = astPrinter.Output(unit);
+        Header("AST");
+        Log(ast);
 
         string target = options.Target;
 
@@ -56,15 +57,23 @@ public static class Compiler
             string qbeIR = qbeTarget.Output(unit);
             File.WriteAllText(objFile + ".ssa", qbeIR);
 
-            if (output.Success)
+            Executable exe = Executable.Capture("qbe", objFile + ".ssa");
+            if (!exe.Success())
             {
-                Executable exe = Executable.Capture("qbe", objFile + ".ssa");
-                Error(exe.StdError, "ERR");
+                output.Success = false;
+            }
+            Error(exe.StdError, "ERR");
 
+            if (exe.Success())
+            {
                 string assemblyFile = objFile + ".s";
                 File.WriteAllText(assemblyFile, exe.StdOut);
 
                 exe = Executable.Capture("gcc", $"{assemblyFile} -o {binFile}");
+                if (!exe.Success())
+                {
+                    output.Success = false;
+                }
                 Error(exe.StdError, "ERR");
             }
         }

@@ -92,7 +92,7 @@ public class AstTarget : BaseTarget
 
     public void VisitVariableAssignment(VariableAssignment variableAssignment)
     {
-        WriteLine($"VariableAssignment: {variableAssignment.Symbol} =");
+        WriteLine($"VariableAssignment: {variableAssignment.Symbol}");
         VisitBinaryExpression(variableAssignment.Value);
     }
 

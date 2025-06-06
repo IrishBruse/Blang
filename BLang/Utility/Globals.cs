@@ -27,6 +27,12 @@ public class Globals
         SetPrefix();
     }
 
+    public static void Header(string message)
+    {
+        string test = new('=', 10);
+        Console.WriteLine($"{test} {message} {test}");
+    }
+
     public static void Log(string? message, string? prefix = null)
     {
         Print(message, prefix);

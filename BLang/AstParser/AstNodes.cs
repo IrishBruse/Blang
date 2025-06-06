@@ -45,7 +45,7 @@ public record IntValue(int Value) : Expression
 
 public record Variable(Symbol Symbol) : Expression
 {
-    public override string ToString() => Symbol.ToString();
+    public override string ToString() => Symbol.Name;
     public static implicit operator Variable(Symbol d) => new(d);
 
 }
