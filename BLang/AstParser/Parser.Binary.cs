@@ -8,18 +8,17 @@ using BLang.Tokenizer;
 public partial class Parser
 {
     static readonly Dictionary<TokenType, int> operatorPrecedence = new(){
-        { TokenType.BitwiseOr, 0 },
-        { TokenType.BitwiseAnd, 1 },
-        { TokenType.BitwiseShiftLeft, 2 }, { TokenType.BitwiseShiftRight, 2 },
-        { TokenType.EqualEqual, 2 }, { TokenType.NotEqual, 2 },
-        { TokenType.LessThan, 3 }, { TokenType.GreaterThan, 3 }, { TokenType.GreaterThanEqual, 3 }, { TokenType.LessThanEqual, 3 },
-        { TokenType.Addition, 4 }, { TokenType.Subtraction, 4 },
-        { TokenType.Multiplication, 5 }, { TokenType.Modulo, 5 }, { TokenType.Division, 5 },
+        { TokenType.BitwiseOr, 5 },
+        { TokenType.BitwiseAnd, 4 },
+        { TokenType.BitwiseShiftLeft, 3 }, { TokenType.BitwiseShiftRight, 3 }, { TokenType.EqualEqual, 3 }, { TokenType.NotEqual, 3 },
+        { TokenType.LessThan, 2 }, { TokenType.GreaterThan, 2 }, { TokenType.GreaterThanEqual, 2 }, { TokenType.LessThanEqual, 2 },
+        { TokenType.Addition, 1 }, { TokenType.Subtraction, 1 },
+        { TokenType.Multiplication, 0 }, { TokenType.Modulo, 0 }, { TokenType.Division, 0 },
     };
 
-    BinaryExpression ParseBinaryExpression(int minPrecedence = 0)
+    Expression ParseBinaryExpression(int minPrecedence = 0)
     {
-        BinaryExpression left = ParsePrimary();
+        Expression left = ParsePrimary();
 
         while (!Peek(TokenType.Eof) && operatorPrecedence.GetValueOrDefault(Peek(), -1) >= minPrecedence)
         {
@@ -41,21 +40,21 @@ public partial class Parser
         return left;
     }
 
-    BinaryExpression ParsePrimary()
+    Expression ParsePrimary()
     {
         return Peek() switch
         {
             TokenType.OpenParenthesis => ParseGroupExpression(),
-            TokenType.IntegerLiteral => new BinaryExpression(TokenType.None, ParseInteger(), null),
-            TokenType.Identifier => new BinaryExpression(TokenType.None, ParseVariable(), null),
+            TokenType.IntegerLiteral => ParseInteger(),
+            TokenType.Identifier => ParseVariable(),
             _ => throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParsePrimary)} of type {Peek()}"),
         };
     }
 
-    BinaryExpression ParseGroupExpression()
+    Expression ParseGroupExpression()
     {
         Eat(TokenType.OpenParenthesis);
-        BinaryExpression expr = ParseBinaryExpression();
+        Expression expr = ParseBinaryExpression();
         Eat(TokenType.CloseParenthesis);
         return expr;
     }

@@ -6,10 +6,10 @@ export function w $main()
     storew 1, %val
 
     %val_1 =w loadw %val
-    %val_1 =w add %val_1, 2
-    %val_1 =w mul %val_1, 5
+    %val_2 =w add %val_1, 2
+    %val_3 =w mul %val_2, 5
 
-    call $printf(l $string_0, w %val_1)
+    call $printf(l $string_0, w %val_3)
 
     ret 0
 }

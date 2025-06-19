@@ -236,7 +236,7 @@ public partial class Parser(CompilationData data)
     VariableAssignment ParseVariableAssignment(Token identifier)
     {
         Eat(TokenType.Assignment);
-        BinaryExpression value = ParseBinaryExpression();
+        Expression value = ParseBinaryExpression();
         Eat(TokenType.Semicolon);
 
         Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Variable);

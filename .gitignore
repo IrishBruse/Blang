@@ -5,5 +5,3 @@
 *.pdb
 *.log
 BLang.Tests/lcov.info
-
-HellowWorldExample.ssa

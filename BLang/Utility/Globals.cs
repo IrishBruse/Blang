@@ -9,28 +9,19 @@ using System;
 public class Globals
 {
     public static Options options = null!;
-    private static string logPrefix = "";
 
     static void Print(string? message, string? prefix, ConsoleColor? color = null)
     {
-        SetPrefix(prefix);
         message = message?.Trim();
         if (!string.IsNullOrEmpty(message))
         {
             if (color != null) Console.ForegroundColor = (ConsoleColor)color;
             foreach (string line in message.Split("\n"))
             {
-                Console.WriteLine(logPrefix + line);
+                Console.WriteLine($"[{prefix}] " + line);
             }
             if (color != null) Console.ResetColor();
         }
-        SetPrefix();
-    }
-
-    public static void Header(string message)
-    {
-        string test = new('=', 10);
-        Console.WriteLine($"{test} {message} {test}");
     }
 
     public static void Log(string? message, string? prefix = null)
@@ -51,17 +42,5 @@ public class Globals
     public static void Info(string? message, string? prefix = null)
     {
         Print(message, prefix, ConsoleColor.Blue);
-    }
-
-    public static void SetPrefix(string? prefix = null)
-    {
-        if (prefix != null)
-        {
-            logPrefix = $"[{prefix}] ";
-        }
-        else
-        {
-            logPrefix = "";
-        }
     }
 }

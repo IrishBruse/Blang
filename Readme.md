@@ -20,7 +20,7 @@ Implementing the B lang in C# with qbe backend
 
 ## Dev Setup
 
--   Dotnet 9
+-   Dotnet 8
 -   QBE executable in path needs to be built from source [here](https://c9x.me/compile/releases.html)
 
 ## References

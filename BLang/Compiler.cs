@@ -42,8 +42,7 @@ public static class Compiler
         CompilationUnit unit = parser.Parse(tokens);
 
         string ast = astPrinter.Output(unit);
-        Header("AST");
-        Log(ast);
+        Log(ast, "AST");
 
         string target = options.Target;
 

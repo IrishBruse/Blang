@@ -101,16 +101,17 @@ public class AstTarget : BaseTarget
         Indent();
         if (expression is BinaryExpression e)
         {
-            if (e.Operation != Tokenizer.TokenType.None)
-            {
-                WriteLine($"{GetTypeName(e)}: {e.Operation}");
-                if (e.Left != null) VisitBinaryExpression(e.Left);
-                if (e.Right != null) VisitBinaryExpression(e.Right);
-            }
-            else
-            {
-                WriteLine($"{GetTypeName(e.Left)}: {e.Left}");
-            }
+            WriteLine($"{GetTypeName(e)}: {e.Operation}");
+            if (e.Left != null) VisitBinaryExpression(e.Left);
+            if (e.Right != null) VisitBinaryExpression(e.Right);
+        }
+        else if (expression is IntValue iv)
+        {
+            WriteLine($"{GetTypeName(iv)}: {iv.Value}");
+        }
+        else if (expression is Variable v)
+        {
+            WriteLine($"{GetTypeName(v)}: {v.Symbol}");
         }
         Dedent();
     }

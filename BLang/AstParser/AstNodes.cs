@@ -25,7 +25,7 @@ public record AutoStatement(Symbol[] Variables) : Statement;
 
 public record FunctionCall(Symbol Symbol, Expression[] Parameters) : Statement;
 
-public record VariableAssignment(Symbol Symbol, BinaryExpression Value) : Statement;
+public record VariableAssignment(Symbol Symbol, Expression Value) : Statement;
 
 // Statements
 
@@ -47,7 +47,6 @@ public record Variable(Symbol Symbol) : Expression
 {
     public override string ToString() => Symbol.Name;
     public static implicit operator Variable(Symbol d) => new(d);
-
 }
 
 public record BinaryExpression(TokenType Operation, Expression? Left, Expression? Right) : Expression

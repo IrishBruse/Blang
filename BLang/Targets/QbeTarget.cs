@@ -15,10 +15,17 @@ public class QbeTarget(CompilationData data) : BaseTarget
     readonly Dictionary<string, string> strings = [];
     readonly HashSet<Symbol> externs = [];
 
-    int tempRegistry = 0;
+    readonly Dictionary<Symbol, string> memoryAllocations = [];
+    readonly Dictionary<Symbol, string> currentSsaRegisters = [];
+    readonly Dictionary<Symbol, int> ssaVersionCounters = [];
+
 
     public string Output(CompilationUnit node)
     {
+        memoryAllocations.Clear();
+        currentSsaRegisters.Clear();
+        ssaVersionCounters.Clear();
+
         VisitCompilationUnit(node);
         return output.ToString();
     }
@@ -99,7 +106,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
         BeginScope();
         {
-            WriteLine("@start");
+            WriteRaw("@start\n");
             foreach (Statement stmt in node.Body)
             {
                 VisitStatement(stmt);
@@ -135,7 +142,8 @@ public class QbeTarget(CompilationData data) : BaseTarget
     {
         foreach (Symbol variable in autoDeclaration.Variables)
         {
-            Write($"%{variable.Name} =l alloc4 4");
+            string varName = CreateTempRegister(variable);
+            Write($"{varName} =l alloc4 4");
         }
         WriteLine();
     }
@@ -156,14 +164,13 @@ public class QbeTarget(CompilationData data) : BaseTarget
             switch (expr)
             {
                 case StringValue v:
-                tmpReg = TempRegister();
                 string reg = VisitStringValue(v);
                 registers.Add($"l ${reg}");
                 break;
 
                 case Variable v:
-                tmpReg = TempRegister(v.Symbol.ToString());
-                Write($"{tmpReg} =w loadw %{v.Symbol}");
+                tmpReg = CreateTempRegister(v.Symbol);
+                Write($"{tmpReg} =w loadw {GetRegister(v.Symbol)}");
                 registers.Add($"w {tmpReg}");
                 break;
 
@@ -176,11 +183,49 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public void VisitVariableAssignment(VariableAssignment variableAssignment)
     {
-        BinaryExpression value = variableAssignment.Value;
-        VisitBinaryExpression(value, $"%{variableAssignment.Symbol}");
+        Expression value = variableAssignment.Value;
+
+        WriteLine("# " + value);
+        string? result = VisitBinaryExpression(value);
+
+        string reg = GetRegister(variableAssignment.Symbol);
+        WriteLine($"storew {result}, {reg}");
+        WriteLine();
     }
 
     // Expression
+
+    public string? VisitBinaryExpression(Expression expr)
+    {
+        if (expr is Variable variable)
+        {
+            return CreateTempRegister(variable.Symbol);
+        }
+        else if (expr is IntValue number)
+        {
+            return number.Value.ToString();
+        }
+        else if (expr is BinaryExpression binary)
+        {
+            string? leftOp = VisitBinaryExpression(binary.Left);
+            string? rightOp = VisitBinaryExpression(binary.Right);
+
+            switch (binary.Operation)
+            {
+                case TokenType.Addition:
+                Write($"add {leftOp}, {rightOp}");
+                break;
+
+                case TokenType.Multiplication:
+                Write($"mul {leftOp}, {rightOp}");
+                break;
+
+                default: throw new Exception("test");
+            }
+        }
+
+        return null;
+    }
 
     public string VisitStringValue(StringValue stringValue)
     {
@@ -196,29 +241,28 @@ public class QbeTarget(CompilationData data) : BaseTarget
         }
     }
 
-    public void VisitBinaryExpression(BinaryExpression binary, string regName)
-    {
-        switch (binary.Operation)
-        {
-            case TokenType.None:
-            Write($"storew {binary?.Left}, {regName}");
-            break;
-
-            case TokenType.Addition:
-            Write($"storew {binary?.Left}, {regName}");
-            break;
-        }
-
-        WriteLine();
-    }
-
     // Utility
 
-    public string TempRegister(string friendlyName = "")
+    public string CreateTempRegister(Symbol symbol)
     {
-        string reg = $"%{friendlyName}_{tempRegistry}";
-        tempRegistry++;
-        return reg;
+        if (!ssaVersionCounters.ContainsKey(symbol))
+        {
+            ssaVersionCounters[symbol] = 0;
+        }
+
+        ssaVersionCounters[symbol]++;
+
+        string qbeReg = $"%{symbol.Name}_{ssaVersionCounters[symbol]}";
+        currentSsaRegisters[symbol] = qbeReg;
+        return qbeReg;
     }
-    public string GlobalRegister() => $"$string_{strings.Count}";
+
+    public string GetRegister(Symbol symbol)
+    {
+        if (!currentSsaRegisters.TryGetValue(symbol, out string? value))
+        {
+            throw new InvalidOperationException($"Variable '{symbol.Name}' (Symbol: {symbol.GetHashCode()}) has no current SSA register. Was it assigned or loaded?");
+        }
+        return value;
+    }
 }
