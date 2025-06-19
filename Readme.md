@@ -9,6 +9,7 @@ Implementing the B lang in C# with qbe backend
 -   [x] function calls
 -   [x] auto
 -   [x] variable assignment
+-   [x] math `foo = (1 + 2 * 3)` foo = 7
 -   [ ] Global variables
 -   [ ] if else
 -   [ ] while

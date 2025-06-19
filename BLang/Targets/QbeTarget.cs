@@ -142,7 +142,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
     {
         foreach (Symbol variable in autoDeclaration.Variables)
         {
-            string varName = CreateTempRegister(variable);
+            string varName = CreateMemoryRegister(variable);
             Write($"{varName} =l alloc4 4");
         }
         WriteLine();
@@ -150,6 +150,8 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public void VisitFunctionCall(FunctionCall node)
     {
+        WriteLine($"# call {node.Symbol.Name}");
+
         string parameters = LoadParameterValue(node.Parameters);
         Write($"call ${node.Symbol}({parameters})");
         WriteLine();
@@ -160,18 +162,18 @@ public class QbeTarget(CompilationData data) : BaseTarget
         List<string> registers = [];
         foreach (AstNode expr in parameters)
         {
-            string tmpReg;
+            string reg;
             switch (expr)
             {
                 case StringValue v:
-                string reg = VisitStringValue(v);
+                reg = VisitStringValue(v);
                 registers.Add($"l ${reg}");
                 break;
 
                 case Variable v:
-                tmpReg = CreateTempRegister(v.Symbol);
-                Write($"{tmpReg} =w loadw {GetRegister(v.Symbol)}");
-                registers.Add($"w {tmpReg}");
+                reg = CreateTempRegister(v.Symbol);
+                Write($"{reg} =w loadw {GetMemoryRegister(v.Symbol)}");
+                registers.Add($"w {reg}");
                 break;
 
                 default: throw new ParserException($"Unknown parameter {expr.GetType()}({expr})");
@@ -185,46 +187,55 @@ public class QbeTarget(CompilationData data) : BaseTarget
     {
         Expression value = variableAssignment.Value;
 
-        WriteLine("# " + value);
-        string? result = VisitBinaryExpression(value);
-
-        string reg = GetRegister(variableAssignment.Symbol);
+        WriteLine($"# {variableAssignment.Symbol} = {value}");
+        string? result = GenerateBinaryExpressionIR(value, variableAssignment.Symbol);
+        string reg = GetMemoryRegister(variableAssignment.Symbol);
         WriteLine($"storew {result}, {reg}");
         WriteLine();
     }
 
     // Expression
 
-    public string? VisitBinaryExpression(Expression expr)
+    public string? GenerateBinaryExpressionIR(Expression expr, Symbol targetSymbol)
     {
-        if (expr is Variable variable)
+        switch (expr)
         {
-            return CreateTempRegister(variable.Symbol);
-        }
-        else if (expr is IntValue number)
-        {
-            return number.Value.ToString();
-        }
-        else if (expr is BinaryExpression binary)
-        {
-            string? leftOp = VisitBinaryExpression(binary.Left);
-            string? rightOp = VisitBinaryExpression(binary.Right);
-
-            switch (binary.Operation)
+            case Variable variable:
             {
-                case TokenType.Addition:
-                Write($"add {leftOp}, {rightOp}");
-                break;
+                string loadReg = CreateTempRegister(variable.Symbol);
+                string memReg = GetMemoryRegister(variable.Symbol);
+                Write($"{loadReg} =w loadw {memReg}");
+                return loadReg;
+            }
 
-                case TokenType.Multiplication:
-                Write($"mul {leftOp}, {rightOp}");
-                break;
+            case IntValue number:
+            {
+                return number.Value.ToString();
+            }
 
-                default: throw new Exception("test");
+            case BinaryExpression binary:
+            {
+                string? leftOp = GenerateBinaryExpressionIR(binary.Left, targetSymbol);
+                string? rightOp = GenerateBinaryExpressionIR(binary.Right, targetSymbol);
+
+                string reg = CreateTempRegister(targetSymbol);
+                switch (binary.Operation)
+                {
+                    case TokenType.Addition:
+                    Write($"{reg} =w add {leftOp}, {rightOp}");
+                    break;
+
+                    case TokenType.Multiplication:
+                    Write($"{reg} =w mul {leftOp}, {rightOp}");
+                    break;
+
+                    default: throw new Exception("test");
+                }
+                return reg;
             }
         }
 
-        return null;
+        throw new Exception("Unreachable");
     }
 
     public string VisitStringValue(StringValue stringValue)
@@ -249,8 +260,10 @@ public class QbeTarget(CompilationData data) : BaseTarget
         {
             ssaVersionCounters[symbol] = 0;
         }
-
-        ssaVersionCounters[symbol]++;
+        else
+        {
+            ssaVersionCounters[symbol]++;
+        }
 
         string qbeReg = $"%{symbol.Name}_{ssaVersionCounters[symbol]}";
         currentSsaRegisters[symbol] = qbeReg;
@@ -259,10 +272,31 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public string GetRegister(Symbol symbol)
     {
-        if (!currentSsaRegisters.TryGetValue(symbol, out string? value))
+        if (currentSsaRegisters.TryGetValue(symbol, out string? value))
         {
-            throw new InvalidOperationException($"Variable '{symbol.Name}' (Symbol: {symbol.GetHashCode()}) has no current SSA register. Was it assigned or loaded?");
+            return value;
         }
-        return value;
+        throw new InvalidOperationException($"Variable '{symbol.Name}' (Symbol: {symbol.GetHashCode()}) has no current SSA register. Was it assigned or loaded?");
+    }
+
+    public string CreateMemoryRegister(Symbol symbol)
+    {
+        if (memoryAllocations.ContainsKey(symbol))
+        {
+            throw new InvalidOperationException($"Variable '{symbol.Name}' is already a registered memory Register");
+        }
+
+        string qbeReg = $"%{symbol.Name}_ptr";
+        memoryAllocations[symbol] = qbeReg;
+        return qbeReg;
+    }
+
+    public string GetMemoryRegister(Symbol symbol)
+    {
+        if (memoryAllocations.TryGetValue(symbol, out string? value))
+        {
+            return value;
+        }
+        throw new InvalidOperationException($"Variable '{symbol.Name}' (Symbol: {symbol.GetHashCode()}) has no current SSA register. Was it assigned or loaded?");
     }
 }

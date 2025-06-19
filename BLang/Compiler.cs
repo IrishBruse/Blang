@@ -42,7 +42,8 @@ public static class Compiler
         CompilationUnit unit = parser.Parse(tokens);
 
         string ast = astPrinter.Output(unit);
-        Log(ast, "AST");
+
+        if (options.Debug) Debug(ast, "AST");
 
         string target = options.Target;
 
@@ -56,24 +57,20 @@ public static class Compiler
             string qbeIR = qbeTarget.Output(unit);
             File.WriteAllText(objFile + ".ssa", qbeIR);
 
-            Executable exe = Executable.Capture("qbe", objFile + ".ssa");
+            Executable exe = Executable.Capture("qbe", $"{objFile}.ssa -o {objFile}.s");
+            Error(exe.StdError, "ERR");
             if (!exe.Success())
             {
                 output.Success = false;
+                return output;
             }
+
+            exe = Executable.Capture("gcc", $"{objFile}.s -o {binFile}");
             Error(exe.StdError, "ERR");
-
-            if (exe.Success())
+            if (!exe.Success())
             {
-                string assemblyFile = objFile + ".s";
-                File.WriteAllText(assemblyFile, exe.StdOut);
-
-                exe = Executable.Capture("gcc", $"{assemblyFile} -o {binFile}");
-                if (!exe.Success())
-                {
-                    output.Success = false;
-                }
-                Error(exe.StdError, "ERR");
+                output.Success = false;
+                return output;
             }
         }
         else

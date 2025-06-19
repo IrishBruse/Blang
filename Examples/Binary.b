@@ -6,7 +6,6 @@ main()
 
     val = 1;
     val = val + 2 * 3;
-    /* val = val + 2 * 3; */
 
     printf("%d", val);
 }

@@ -12,8 +12,8 @@ public partial class Parser
         { TokenType.BitwiseAnd, 4 },
         { TokenType.BitwiseShiftLeft, 3 }, { TokenType.BitwiseShiftRight, 3 }, { TokenType.EqualEqual, 3 }, { TokenType.NotEqual, 3 },
         { TokenType.LessThan, 2 }, { TokenType.GreaterThan, 2 }, { TokenType.GreaterThanEqual, 2 }, { TokenType.LessThanEqual, 2 },
-        { TokenType.Addition, 1 }, { TokenType.Subtraction, 1 },
-        { TokenType.Multiplication, 0 }, { TokenType.Modulo, 0 }, { TokenType.Division, 0 },
+        { TokenType.Multiplication, 1 }, { TokenType.Modulo, 1 }, { TokenType.Division, 1 },
+        { TokenType.Addition, 0 }, { TokenType.Subtraction, 0 },
     };
 
     Expression ParseBinaryExpression(int minPrecedence = 0)

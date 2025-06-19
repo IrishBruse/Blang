@@ -13,7 +13,7 @@ public class Program
 
         if (watching)
         {
-            Console.Write(new string('\n', 25));
+            Console.Write(new string('\n', 10));
         }
 
         Options.Parse(args);

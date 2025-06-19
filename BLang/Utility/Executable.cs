@@ -14,7 +14,7 @@ public record Executable(string? StdOut, string? StdError, int ExitCode)
             return false;
         }
 
-        Log(exe.StdOut, "OUT");
+        Log(exe.StdOut);
         return true;
     }
 

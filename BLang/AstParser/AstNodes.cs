@@ -49,7 +49,7 @@ public record Variable(Symbol Symbol) : Expression
     public static implicit operator Variable(Symbol d) => new(d);
 }
 
-public record BinaryExpression(TokenType Operation, Expression? Left, Expression? Right) : Expression
+public record BinaryExpression(TokenType Operation, Expression Left, Expression Right) : Expression
 {
     public override string ToString()
     {

@@ -1,15 +1,21 @@
 export function w $main()
 {
 @start
-    %val =l alloc4 4
+    %val_0 =l alloc4 4
 
-    storew 1, %val
+    # val = 1
+    storew 1, %val_0
 
-    %val_1 =w loadw %val
-    %val_2 =w add %val_1, 2
-    %val_3 =w mul %val_2, 5
+    # val = ((val + 2) * 3)
+    %val_5 =w loadw %val_0
+    %val_1 =w add %val_5, 2
+    %val_2 =w mul %val_1, 3
+    storew %val_2, %val_0
 
+    # call printf
+    %val_3 =w loadw %val_0
     call $printf(l $string_0, w %val_3)
+
 
     ret 0
 }

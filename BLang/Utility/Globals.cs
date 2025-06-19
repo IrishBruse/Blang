@@ -18,7 +18,8 @@ public class Globals
             if (color != null) Console.ForegroundColor = (ConsoleColor)color;
             foreach (string line in message.Split("\n"))
             {
-                Console.WriteLine($"[{prefix}] " + line);
+                string pre = string.IsNullOrEmpty(prefix) ? "" : $"[{prefix}]";
+                Console.WriteLine(pre + line);
             }
             if (color != null) Console.ResetColor();
         }
@@ -34,9 +35,12 @@ public class Globals
         Print(message, prefix, ConsoleColor.Red);
     }
 
-    public static void Debug(string? message, string? prefix = null)
+    public static void Debug(string? message, string? prefix = null, ConsoleColor? color = ConsoleColor.DarkGray)
     {
-        Print(message, prefix, ConsoleColor.DarkGray);
+        if (options.Debug)
+        {
+            Print(message, prefix, color);
+        }
     }
 
     public static void Info(string? message, string? prefix = null)
