@@ -53,5 +53,10 @@ public class Options
             }
         });
 
+        if (options == null)
+        {
+            Environment.Exit(0);
+        }
+
     }
 }

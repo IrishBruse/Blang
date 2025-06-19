@@ -10,7 +10,7 @@ public class Globals
 {
     public static Options options = null!;
 
-    static void Print(string? message, string? prefix, ConsoleColor? color = null)
+    public static void Print(string? message, string? prefix, ConsoleColor? color = null)
     {
         message = message?.Trim();
         if (!string.IsNullOrEmpty(message))
@@ -18,7 +18,7 @@ public class Globals
             if (color != null) Console.ForegroundColor = (ConsoleColor)color;
             foreach (string line in message.Split("\n"))
             {
-                string pre = string.IsNullOrEmpty(prefix) ? "" : $"[{prefix}]";
+                string pre = string.IsNullOrEmpty(prefix) ? "" : $"[{prefix}] ";
                 Console.WriteLine(pre + line);
             }
             if (color != null) Console.ResetColor();

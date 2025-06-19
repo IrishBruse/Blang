@@ -20,7 +20,8 @@ public static class Compiler
         {
             try
             {
-                Executable.Run(output.Executable);
+                Executable exe = Executable.Capture(output.Executable);
+                output.RunOutput = exe.StdOut;
             }
             catch (Exception e)
             {
@@ -43,7 +44,12 @@ public static class Compiler
 
         string ast = astPrinter.Output(unit);
 
-        if (options.Debug) Debug(ast, "AST");
+        if (options.Debug)
+        {
+            Console.WriteLine();
+            Log(ast);
+            Console.WriteLine();
+        }
 
         string target = options.Target;
 

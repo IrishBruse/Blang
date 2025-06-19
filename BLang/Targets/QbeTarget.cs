@@ -19,7 +19,6 @@ public class QbeTarget(CompilationData data) : BaseTarget
     readonly Dictionary<Symbol, string> currentSsaRegisters = [];
     readonly Dictionary<Symbol, int> ssaVersionCounters = [];
 
-
     public string Output(CompilationUnit node)
     {
         memoryAllocations.Clear();
@@ -256,13 +255,13 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public string CreateTempRegister(Symbol symbol)
     {
-        if (!ssaVersionCounters.ContainsKey(symbol))
+        if (!ssaVersionCounters.TryGetValue(symbol, out int value))
         {
             ssaVersionCounters[symbol] = 0;
         }
         else
         {
-            ssaVersionCounters[symbol]++;
+            ssaVersionCounters[symbol] = ++value;
         }
 
         string qbeReg = $"%{symbol.Name}_{ssaVersionCounters[symbol]}";
@@ -276,14 +275,14 @@ public class QbeTarget(CompilationData data) : BaseTarget
         {
             return value;
         }
-        throw new InvalidOperationException($"Variable '{symbol.Name}' (Symbol: {symbol.GetHashCode()}) has no current SSA register. Was it assigned or loaded?");
+        throw new InvalidOperationException($"Variable '{symbol.Name}' has no current SSA register.");
     }
 
     public string CreateMemoryRegister(Symbol symbol)
     {
         if (memoryAllocations.ContainsKey(symbol))
         {
-            throw new InvalidOperationException($"Variable '{symbol.Name}' is already a registered memory Register");
+            throw new InvalidOperationException($"Variable '{symbol.Name}' is already registered.");
         }
 
         string qbeReg = $"%{symbol.Name}_ptr";
@@ -297,6 +296,6 @@ public class QbeTarget(CompilationData data) : BaseTarget
         {
             return value;
         }
-        throw new InvalidOperationException($"Variable '{symbol.Name}' (Symbol: {symbol.GetHashCode()}) has no current SSA register. Was it assigned or loaded?");
+        throw new InvalidOperationException($"Variable '{symbol.Name}' has no current SSA register.");
     }
 }

@@ -1,4 +1,3 @@
-CompilationUnit:
-    FunctionDeclaration: main()
-        AutoDeclaration: foo
-        VariableAssignment: foo = 4
+
+==============================
+123 456

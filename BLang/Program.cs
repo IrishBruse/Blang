@@ -3,6 +3,7 @@ namespace BLang;
 using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using BLang.Utility;
 
 public class Program
@@ -18,14 +19,20 @@ public class Program
 
         Options.Parse(args);
 
-        if (options == null)
+        try
         {
-            return;
+            Run();
         }
+        catch (Exception e)
+        {
+            Error(e.ToString());
+        }
+    }
 
+    public static void Run()
+    {
         if (options.Test)
         {
-            options.Debug = true;
             options.Run = true;
             Test();
             return;
@@ -33,22 +40,16 @@ public class Program
 
         CompileOutput output = Compiler.Compile(options.File);
 
-        if (options.Debug && !string.IsNullOrEmpty(output.AstOutput))
-        {
-            Console.WriteLine("===========  Ast  ============");
-            Log(output.AstOutput, null);
-        }
-
         if (!string.IsNullOrEmpty(output.Errors))
         {
-            Console.WriteLine("==========  Errors  ==========");
+            Debug("==========  Errors  ==========");
             Error(output.Errors, null);
         }
 
         if (!string.IsNullOrEmpty(output.RunOutput))
         {
-            Console.WriteLine("==========  Output  ==========");
-            Console.WriteLine(output.RunOutput);
+            Debug("==========  Output  ==========");
+            Log(output.RunOutput);
         }
     }
 
@@ -58,19 +59,35 @@ public class Program
 
         foreach (string testFile in files)
         {
-            CompileOutput output = Compiler.Compile(testFile);
+            RunTestFile(testFile);
+        }
+    }
 
-            string testOutputFile = Path.ChangeExtension(testFile, ".test");
-            string previousTestOutput = File.Exists(testOutputFile) ? File.ReadAllText(testOutputFile) : "";
+    private static void RunTestFile(string testFile)
+    {
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine($"Running Test {testFile}");
 
-            if (options.UpdateSnapshots)
-            {
-                UpdateSnapshot(testFile, testOutputFile, output, previousTestOutput);
-            }
-            else
-            {
-                CompareSnapshot(testFile, output, previousTestOutput);
-            }
+        CompileOutput output = new();
+        try
+        {
+            output = Compiler.Compile(testFile);
+        }
+        catch (Exception e)
+        {
+            output.Errors = e.ToString();
+        }
+
+        string testOutputFile = Path.ChangeExtension(testFile, ".test");
+        string previousTestOutput = File.Exists(testOutputFile) ? File.ReadAllText(testOutputFile) : "";
+
+        if (options.UpdateSnapshots)
+        {
+            UpdateSnapshot(testFile, testOutputFile, output, previousTestOutput);
+        }
+        else
+        {
+            CompareSnapshot(testFile, output, previousTestOutput);
         }
     }
 
@@ -113,13 +130,24 @@ public class Program
         string astOutput = parts[0].Trim();
         string runOutput = parts.Length > 1 ? parts[1].Trim() : string.Empty;
 
-        bool success = output.Success && astOutput == output.AstOutput && runOutput.Trim() == output.RunOutput?.Trim();
+        Console.CursorTop--;
+        bool success = output.Success && string.IsNullOrEmpty(output.Errors) && astOutput == output.AstOutput && runOutput.Trim() == output.RunOutput?.Trim();
+        if (success)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Test Success: {testFile}");
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Test Failed: {testFile}");
+        }
+        Console.ResetColor();
 
-        string status = success ? "Passed" : "Failed";
-        Console.Write(success ? "\x1B[32m" : "\x1B[31m");
-        Console.WriteLine($"Test {status}: {testFile}");
-        Console.Write("\x1b[0m");
-
-        Error(output.Errors);
+        if (!string.IsNullOrEmpty(output.Errors))
+        {
+            Error(output.Errors);
+            Console.WriteLine();
+        }
     }
 }

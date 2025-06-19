@@ -2,6 +2,10 @@
 
 Implementing the B lang in C# with qbe backend
 
+## Screenshot
+
+![alt text](misc/screenshot.png)
+
 ## Currently Implemented
 
 -   [x] function definitions

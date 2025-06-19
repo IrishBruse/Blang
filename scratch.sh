@@ -1,8 +1,8 @@
 cd "$(dirname "$0")" # cd to file location
 
-mkdir -p ./scratch/bin
-mkdir -p ./scratch/obj
+mkdir -p ./misc/bin
+mkdir -p ./misc/obj
 
-qbe ./scratch/scratch.ssa > ./scratch/obj/qbe-scratch.s && \
-gcc ./scratch/obj/qbe-scratch.s -o ./scratch/bin/qbe-scratch && \
-./scratch/bin/qbe-scratch
+qbe ./misc/scratch.ssa > ./misc/obj/qbe-scratch.s && \
+gcc ./misc/obj/qbe-scratch.s -o ./misc/bin/qbe-scratch && \
+./misc/bin/qbe-scratch
