@@ -2,6 +2,20 @@
 
 Implementing the B lang in C# with qbe backend
 
+## Quickstart
+
+Run an example
+
+```shell
+./bc run Examples/HelloWorld.b
+```
+
+Run the compiler tests
+
+```shell
+./bc test
+```
+
 ## Screenshot
 
 ![alt text](misc/screenshot.png)
@@ -27,6 +41,8 @@ Implementing the B lang in C# with qbe backend
 
 -   Dotnet 8
 -   QBE executable either build from source or use the linux-x86_64 one in `misc/qbe`
+-   cd into the BLang folder in the repo and run
+    -   `dotnet run -- --run -t qbe '../Examples/HelloWorld.b'`
 
 ## References
 

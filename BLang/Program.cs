@@ -3,7 +3,6 @@ namespace BLang;
 using System;
 using System.IO;
 using System.Text;
-using System.Threading;
 using BLang.Utility;
 
 public class Program
@@ -21,7 +20,7 @@ public class Program
 
         try
         {
-            Run();
+            Execute();
         }
         catch (Exception e)
         {
@@ -29,16 +28,15 @@ public class Program
         }
     }
 
-    public static void Run()
+    public static void Execute()
     {
-        if (options.Test)
+        if (options.Verb == Verb.Test)
         {
-            options.Run = true;
             Test();
             return;
         }
 
-        CompileOutput output = Compiler.Compile(options.File);
+        CompileOutput output = Compiler.Compile(options.File, options.Verb == Verb.Run);
 
         if (!string.IsNullOrEmpty(output.Errors))
         {
@@ -55,7 +53,7 @@ public class Program
 
     public static void Test()
     {
-        string[] files = Directory.GetFiles("../Tests/", "*.b");
+        string[] files = Directory.GetFiles("Tests/", "*.b");
 
         foreach (string testFile in files)
         {
@@ -71,7 +69,7 @@ public class Program
         CompileOutput output = new();
         try
         {
-            output = Compiler.Compile(testFile);
+            output = Compiler.Compile(testFile, true);
         }
         catch (Exception e)
         {

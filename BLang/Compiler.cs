@@ -12,11 +12,11 @@ public static class Compiler
 {
     static readonly AstTarget astPrinter = new();
 
-    public static CompileOutput Compile(string file)
+    public static CompileOutput Compile(string file, bool run)
     {
         CompileOutput output = CompileFile(file);
 
-        if (output.Success && options.Run)
+        if (output.Success && run)
         {
             try
             {
