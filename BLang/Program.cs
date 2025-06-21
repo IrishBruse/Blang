@@ -9,13 +9,6 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        bool watching = Environment.GetEnvironmentVariable("DOTNET_WATCH") == "1";
-
-        if (watching)
-        {
-            Console.Write(new string('\n', 10));
-        }
-
         Options.Parse(args);
 
         try

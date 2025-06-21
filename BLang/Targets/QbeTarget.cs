@@ -44,22 +44,22 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     private void GenerateDataSection()
     {
-        WriteLine("# Data");
+        Write("# Data");
         foreach ((string value, string name) in strings)
         {
-            WriteLine($"data ${name} = {{ b \"{value}\", b 0 }}");
+            Write($"data ${name} = {{ b \"{value}\", b 0 }}");
         }
-        WriteLine();
+        Write();
     }
 
     private void GenerateExternsSection()
     {
-        WriteLine("# Externs");
+        Write("# Externs");
         foreach (Symbol external in externs)
         {
-            WriteLine($"# * {external.Name}");
+            Write($"# * {external.Name}");
         }
-        WriteLine();
+        Write();
     }
 
     public void VisitStatement(Statement node)
@@ -69,22 +69,23 @@ public class QbeTarget(CompilationData data) : BaseTarget
             case ExternalStatement s: VisitExternalStatement(s); break;
             case FunctionCall s: VisitFunctionCall(s); break;
             case AutoStatement s: VisitAutoStatement(s); break;
-            case VariableAssignment s: VisitVariableAssignment(s); break;
+            case VariableDeclarator s: VisitVariableAssignment(s); break;
             case WhileStatement s: VisitWhileStatement(s); break;
+            case IfStatement s: VisitIfStatement(s); break;
             default: throw new Exception(node.ToString());
         }
     }
 
     private void BeginScope()
     {
-        WriteLine("{");
+        Write("{");
         Indent();
     }
 
     private void EndScope()
     {
         Dedent();
-        WriteLine("}");
+        Write("}");
     }
 
     // Statements
@@ -96,11 +97,11 @@ public class QbeTarget(CompilationData data) : BaseTarget
         string returnType = name == "main" ? "w " : "";
         if (name == "main")
         {
-            WriteLine($"export function {returnType}${name}()");
+            Write($"export function {returnType}${name}()");
         }
         else
         {
-            WriteLine($"function w ${name}()");
+            Write($"function w ${name}()");
         }
 
         BeginScope();
@@ -121,7 +122,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
             }
         }
         EndScope();
-        WriteLine();
+        Write();
     }
 
     public void VisitExternalStatement(ExternalStatement node)
@@ -134,7 +135,12 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public void VisitWhileStatement(WhileStatement whileStatement)
     {
-        Write($"VisitWhileDeclaration {whileStatement}");
+        Write($"# VisitWhileDeclaration {whileStatement}");
+    }
+
+    public void VisitIfStatement(IfStatement ifStatement)
+    {
+        Write($"# VisitIfDeclaration {ifStatement}");
     }
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
@@ -144,19 +150,19 @@ public class QbeTarget(CompilationData data) : BaseTarget
             string varName = CreateMemoryRegister(variable);
             Write($"{varName} =l alloc4 4");
         }
-        WriteLine();
+        Write();
     }
 
     public void VisitFunctionCall(FunctionCall node)
     {
-        WriteLine($"# call {node.Symbol.Name}");
+        Write($"# call {node.Symbol.Name}");
 
-        string parameters = LoadParameterValue(node.Parameters);
+        string parameters = PassParameterValue(node.Parameters);
         Write($"call ${node.Symbol}({parameters})");
-        WriteLine();
+        Write();
     }
 
-    string LoadParameterValue(Expression[] parameters)
+    string PassParameterValue(Expression[] parameters)
     {
         List<string> registers = [];
         foreach (AstNode expr in parameters)
@@ -167,6 +173,10 @@ public class QbeTarget(CompilationData data) : BaseTarget
                 case StringValue v:
                 reg = VisitStringValue(v);
                 registers.Add($"l ${reg}");
+                break;
+
+                case IntValue v:
+                registers.Add($"w {v.Value}");
                 break;
 
                 case Variable v:
@@ -182,15 +192,15 @@ public class QbeTarget(CompilationData data) : BaseTarget
         return string.Join(", ", registers);
     }
 
-    public void VisitVariableAssignment(VariableAssignment variableAssignment)
+    public void VisitVariableAssignment(VariableDeclarator variableAssignment)
     {
         Expression value = variableAssignment.Value;
 
-        WriteLine($"# {variableAssignment.Symbol} = {value}");
+        Write($"# {variableAssignment.Symbol} = {value}");
         string? result = GenerateBinaryExpressionIR(value, variableAssignment.Symbol);
         string reg = GetMemoryRegister(variableAssignment.Symbol);
-        WriteLine($"storew {result}, {reg}");
-        WriteLine();
+        Write($"storew {result}, {reg}");
+        Write();
     }
 
     // Expression

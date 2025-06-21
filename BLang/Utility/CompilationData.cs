@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class CompilationData(string file)
 {
     public readonly SymbolTable Symbols = new();
-    public readonly List<int> Lines = [0];
+    public readonly List<int> Lines = [];
 
     public string? File { get; set; } = file;
 
@@ -36,6 +36,6 @@ public class CompilationData(string file)
     {
         (int line, int col) = GetLineColumnFromIndex(index);
 
-        return $"{File}({line},{col})";
+        return $"{File}:{line}:{col}";
     }
 }

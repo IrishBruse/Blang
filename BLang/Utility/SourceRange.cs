@@ -15,4 +15,9 @@ public record SourceRange(int Start, int End)
 
         return new SourceRange(mergedBegin, mergedEnd);
     }
+
+    public override string ToString()
+    {
+        return $"{Start}-{End}";
+    }
 }

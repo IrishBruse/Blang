@@ -4,11 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BLang.AstParser;
+using BLang.Utility;
 
 public class AstTarget : BaseTarget
 {
-    public string Output(CompilationUnit node)
+    CompilationData data = null!;
+
+    public string Output(CompilationUnit node, CompilationData data)
     {
+        this.data = data;
+
         output.Clear();
         VisitCompilationUnit(node);
         return output.ToString();
@@ -16,32 +21,38 @@ public class AstTarget : BaseTarget
 
     public void VisitCompilationUnit(CompilationUnit node)
     {
-        WriteLine($"CompilationUnit:");
+        Print(node);
 
         Indent();
         foreach (FunctionStatement funcDecl in node.FunctionDeclarations)
         {
             VisitFunctionStatement(funcDecl);
         }
-        // TODO: globals
         Dedent();
     }
 
     public void VisitFunctionStatement(FunctionStatement node)
     {
         string parameters = VisitExpressions(node.Parameters);
-        WriteLine($"FunctionDeclaration: {node.Symbol}: {parameters}");
+        Print(node, parameters);
 
+        VisitBlock(node.Body);
+    }
+
+    private void VisitBlock(Statement[] statements)
+    {
         Indent();
-        foreach (Statement stmt in node.Body)
+        foreach (Statement stmt in statements)
         {
             switch (stmt)
             {
                 case FunctionStatement s: VisitFunctionStatement(s); break;
                 case ExternalStatement s: VisitExternalStatement(s); break;
                 case AutoStatement s: VisitAutoStatement(s); break;
-                case VariableAssignment s: VisitVariableAssignment(s); break;
+                case VariableDeclarator s: VisitVariableDeclarator(s); break;
                 case FunctionCall s: VisitFunctionCall(s); break;
+                case IfStatement s: VisitIfStatement(s); break;
+                case WhileStatement s: VisitWhileStatement(s); break;
                 default: throw new Exception(stmt.ToString());
             }
         }
@@ -50,13 +61,13 @@ public class AstTarget : BaseTarget
 
     public void VisitExternalStatement(ExternalStatement node)
     {
-        WriteLine($"ExternalStatement: {string.Join(',', node.Externals.Select(e => e))}");
+        Print(node, string.Join(',', node.Externals.Select(e => e)));
     }
 
     public void VisitFunctionCall(FunctionCall node)
     {
         string parameters = VisitExpressions(node.Parameters);
-        WriteLine($"FunctionCall: {node.Symbol}: {parameters}");
+        Print(node, parameters);
     }
 
     static string VisitExpressions(Expression[] expressions)
@@ -87,12 +98,12 @@ public class AstTarget : BaseTarget
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
     {
-        WriteLine($"AutoDeclaration: {string.Join(',', autoDeclaration.Variables.Select(v => v))}");
+        Print(autoDeclaration, string.Join(',', autoDeclaration.Variables.Select(v => v)));
     }
 
-    public void VisitVariableAssignment(VariableAssignment variableAssignment)
+    public void VisitVariableDeclarator(VariableDeclarator variableAssignment)
     {
-        WriteLine($"VariableAssignment: {variableAssignment.Symbol}");
+        Print(variableAssignment, variableAssignment.Symbol.ToString());
         VisitBinaryExpression(variableAssignment.Value);
     }
 
@@ -101,25 +112,47 @@ public class AstTarget : BaseTarget
         Indent();
         if (expression is BinaryExpression e)
         {
-            WriteLine($"{GetTypeName(e)}: {e.Operation}");
+            Print(e, e.Operation.ToString());
             if (e.Left != null) VisitBinaryExpression(e.Left);
             if (e.Right != null) VisitBinaryExpression(e.Right);
         }
         else if (expression is IntValue iv)
         {
-            WriteLine($"{GetTypeName(iv)}: {iv.Value}");
+            Print(iv, iv.Value.ToString());
         }
         else if (expression is Variable v)
         {
-            WriteLine($"{GetTypeName(v)}: {v.Symbol}");
+            Print(v, v.Symbol.ToString());
         }
         Dedent();
     }
 
-    public void VisitWhileStatement(WhileStatement whileStatement)
+    public void VisitWhileStatement(WhileStatement statement)
     {
-        WriteLine($"WhileDeclaration: {whileStatement}");
+        Print(statement);
+    }
+
+    public void VisitIfStatement(IfStatement statement)
+    {
+        Print(statement, statement.Condition.ToString());
+        VisitBlock(statement.Body);
     }
 
     public static string GetTypeName(object? obj) => obj?.GetType().ToString().Split(".").Last() ?? "";
+
+    public void Print(AstNode node, string args = "")
+    {
+        WriteRaw(Space);
+        WriteRaw(GetTypeName(node));
+        WriteRaw(": ");
+        WriteRaw(args + "  -  ");
+
+        if (true)
+        {
+            string start = data.GetFileLocation(node.Range.Start);
+            WriteRaw(start);
+        }
+
+        Write();
+    }
 }

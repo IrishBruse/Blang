@@ -15,17 +15,12 @@ public class BaseTarget
 
     public string Space => new(' ', depth * Indention);
 
-    public void Write(string? value)
-    {
-        output.AppendLine(Space + value);
-    }
-
     public void WriteRaw(string? value)
     {
         output.Append(value);
     }
 
-    public void WriteLine(string? value = "")
+    public void Write(string? value = "")
     {
         if (string.IsNullOrEmpty(value))
         {

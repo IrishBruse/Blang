@@ -42,7 +42,7 @@ public static class Compiler
         IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
         CompilationUnit unit = parser.Parse(tokens);
 
-        string ast = astPrinter.Output(unit);
+        string ast = astPrinter.Output(unit, data);
 
         if (options.Debug)
         {

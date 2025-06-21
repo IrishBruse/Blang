@@ -127,6 +127,13 @@ public static class Extensions
 
             TokenType.OpenBracket => "[",
             TokenType.CloseBracket => "]",
+
+            TokenType.LessThan => "<",
+            TokenType.LessThanEqual => "<=",
+            TokenType.GreaterThan => ">",
+            TokenType.GreaterThanEqual => ">=",
+            TokenType.EqualEqual => "==",
+            TokenType.NotEqual => "!=",
             _ => t.ToString(),
         };
     }

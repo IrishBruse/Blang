@@ -216,6 +216,7 @@ public class Lexer(CompilationData data)
             char c = Next();
             if (c == '\n')
             {
+                data.Lines.Add(startIndex);
                 _ = comment.Append("\\n");
             }
             else

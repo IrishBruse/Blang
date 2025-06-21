@@ -30,6 +30,8 @@ public partial class Parser(CompilationData data)
     {
         List<FunctionStatement> functions = [];
 
+        SourceRange start = previousTokenRange;
+
         EatComments();
 
         while (Peek(TokenType.Identifier) && !Peek(TokenType.Eof) && !Peek(TokenType.Garbage))
@@ -58,7 +60,7 @@ public partial class Parser(CompilationData data)
 
         return new(functions, [])
         {
-            Range = new()
+            Range = start.Merge(previousTokenRange)
         };
     }
 
@@ -119,6 +121,7 @@ public partial class Parser(CompilationData data)
         {
             TokenType.ExternKeyword => ParseExternalDefinition(),
             TokenType.WhileKeyword => ParseWhileDefinition(),
+            TokenType.IfKeyword => ParseIfDefinition(),
             TokenType.AutoKeyword => ParseAutoDefinition(),
             TokenType.Identifier => ParseIdentifierStatement(),
             _ => throw new InvalidTokenException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParseStatement)} of type {Peek()}")
@@ -128,6 +131,23 @@ public partial class Parser(CompilationData data)
     WhileStatement ParseWhileDefinition()
     {
         Token start = Eat(TokenType.WhileKeyword);
+
+        Expression condition = ParseBinaryExpression();
+        if (condition is not BinaryExpression)
+        {
+            throw new ParserException("ParseWhileDefinition condition: " + condition);
+        }
+        Statement[] body = ParseBlock();
+
+        return new((BinaryExpression)condition, body)
+        {
+            Range = start.Range.Merge(previousTokenRange),
+        };
+    }
+
+    IfStatement ParseIfDefinition()
+    {
+        Token start = Eat(TokenType.IfKeyword);
 
         Expression condition = ParseBinaryExpression();
         if (condition is not BinaryExpression)
@@ -233,7 +253,7 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    VariableAssignment ParseVariableAssignment(Token identifier)
+    VariableDeclarator ParseVariableAssignment(Token identifier)
     {
         Eat(TokenType.Assignment);
         Expression value = ParseBinaryExpression();
@@ -241,7 +261,7 @@ public partial class Parser(CompilationData data)
 
         Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Variable);
 
-        return new VariableAssignment(symbol, value)
+        return new VariableDeclarator(symbol, value)
         {
             Range = identifier.Range,
         };

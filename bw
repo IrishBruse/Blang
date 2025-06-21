@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+clear
+DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION=true dotnet watch --project BLang/BLang.csproj -- $@
