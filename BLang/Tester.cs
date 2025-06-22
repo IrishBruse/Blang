@@ -7,7 +7,7 @@ using BLang.Utility;
 
 public class Tester
 {
-    static TestOptions opt = (TestOptions)options;
+    static readonly TestOptions opt = (TestOptions)options;
     public static void Test()
     {
         string[] files = Directory.GetFiles("Tests/", "*.b");
@@ -20,8 +20,12 @@ public class Tester
 
     private static void RunTestFile(string testFile)
     {
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.WriteLine();
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.WriteLine($"Running {testFile}");
+        Console.ResetColor();
 
         CompileOutput output = new();
         try

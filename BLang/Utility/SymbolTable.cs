@@ -36,7 +36,7 @@ public class SymbolTable
     {
         scopes.Push([]);
         CurrentScopeDepth++;
-        Debug($"Entered scope {name} at depth {CurrentScopeDepth}", "SYM");
+        Log($"Entered scope {name} at depth {CurrentScopeDepth}");
     }
 
     public void ExitScope()
@@ -45,7 +45,7 @@ public class SymbolTable
         {
             scopes.Pop();
             CurrentScopeDepth--;
-            Debug($"Exited scope to depth: {CurrentScopeDepth}", "SYM");
+            Log($"Exited scope to depth: {CurrentScopeDepth}");
         }
         else
         {
@@ -68,10 +68,12 @@ public class SymbolTable
         Dictionary<string, Symbol> currentScope = scopes.Peek();
         if (currentScope.ContainsKey(name))
         {
+            // Is this how shadowing works would i return a new symbol here
+            // or maybe it should work like a stack
             throw new InvalidOperationException($"Symbol '{name}' already declared in current scope.");
         }
         currentScope.Add(name, symbol);
-        Debug($"Added {symbol.Kind} symbol: {symbol.Name} in scope {CurrentScopeDepth}", "SYM");
+        Log($"Added {symbol.Kind} symbol: {symbol.Name} in scope {CurrentScopeDepth}");
 
         return symbol;
     }
@@ -110,15 +112,23 @@ public class SymbolTable
 
     public void PrintSymbolTable()
     {
-        Debug("\n--- Symbol Table Contents ---", "SYM");
+        Log("\n--- Symbol Table Contents ---");
         int depth = scopes.Count;
         foreach (Dictionary<string, Symbol> scope in scopes)
         {
-            Debug($"Scope Depth: {depth--}", "SYM");
+            Log($"Scope Depth: {depth--}");
             foreach (KeyValuePair<string, Symbol> entry in scope)
             {
-                Debug($"  {entry.Value}", "SYM");
+                Log($"  {entry.Value}");
             }
+        }
+    }
+
+    public static void Log(string message)
+    {
+        if (options.DebugSymbol)
+        {
+            Debug(message, "SYM");
         }
     }
 }

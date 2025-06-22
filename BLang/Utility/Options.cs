@@ -36,7 +36,8 @@ public class Options
     [Option("list-targets", HelpText = "List the supported compilation targets.")]
     public bool ListTargets { get; set; }
 
-    [Option("debug", HelpText = "Print debug info about the compiler.")] public bool Debug { get; set; }
+    [Option("debug", HelpText = "Print debug info about current compilation.")] public bool Debug { get; set; }
+    [Option("debug-symbols", HelpText = "Print debug info about current compilation.")] public bool DebugSymbol { get; set; }
     [Option("tokens", HelpText = "Log each token as its read.")] public bool Tokens { get; set; }
 
     public static void Parse(string[] args)
@@ -49,7 +50,7 @@ public class Options
             options.HelpWriter = null;
         });
 
-        ParserResult<object> res = parser.ParseArguments<BuildOptions, RunOptions, TestOptions>(args)
+        ParserResult<object> parserResult = parser.ParseArguments<BuildOptions, RunOptions, TestOptions>(args)
               .WithParsed<BuildOptions>(opt =>
               {
                   options = opt;
@@ -63,92 +64,38 @@ public class Options
                   options = opt;
               });
 
-        res.WithNotParsed(errors =>
+        parserResult.WithNotParsed(errors => HandleErrors(errors, parserResult));
+    }
+
+    private static void HandleErrors(IEnumerable<Error> errors, ParserResult<object> parserResult)
+    {
+        if (errors.IsVersion())
         {
-            foreach (Error? error in errors)
-            {
-                Console.WriteLine($"Error: {error.Tag}");
-            }
-
-            HelpText helpText = HelpText.AutoBuild(res, h =>
-            {
-                h.Heading = $"{AppName} v{AppVersion}";
-                h.Copyright = string.Empty;
-                return HelpText.DefaultParsingErrorsHandler(res, h);
-            }, e => e);
-            Console.WriteLine(helpText);
-
-        });
-
-        // Parser parser = new((options) =>
-        // {
-        //     options.AutoHelp = true;
-        //     options.AutoVersion = true;
-        //     options.EnableDashDash = true;
-        // });
-
-        // ParserResult<object> parserResult = parser.ParseArguments<BuildOptions, RunOptions, TestOptions>(args);
-
-        // options = parserResult.MapResult<BuildOptions, RunOptions, TestOptions, Options>(
-        //         (BuildOptions opts) =>
-        //         {
-        //             opts.Verb = Verb.Build;
-        //             return opts;
-        //         },
-        //         (RunOptions opts) =>
-        //         {
-        //             opts.Verb = Verb.Run;
-        //             return opts;
-        //         },
-        //         (TestOptions opts) =>
-        //         {
-        //             opts.Verb = Verb.Test;
-        //             return opts;
-        //         },
-        //         errors =>
-        //         {
-        //             if (errors.Count() > 1)
-        //             {
-        //                 throw new Exception("Unexpected error: more than 1 error returned from options parsing");
-        //             }
-
-        //             Console.WriteLine(errors.First());
-
-        //             if (errors.IsVersion())
-        //             {
-        //                 Console.WriteLine($"{AppName} v{AppVersion}");
-        //             }
-
-        //             if (errors.IsHelp() || errors.IsError(ErrorType.NoVerbSelectedError))
-        //             {
-        //                 HelpText helpText = HelpText.AutoBuild(parserResult, h =>
-        //                 {
-        //                     h.Heading = $"{AppName} v{AppVersion}";
-        //                     h.Copyright = string.Empty;
-        //                     return HelpText.DefaultParsingErrorsHandler(parserResult, h);
-        //                 }, e => e);
-        //                 Console.WriteLine(helpText);
-        //             }
-
-        //             return null!;
-        //         }
-        //     );
-
-        if (options == null)
-        {
+            Console.Out.WriteLine($"{AppName} v{AppVersion}");
             Environment.Exit(0);
         }
-    }
-}
 
-public static class HelpTextExtensions
-{
-    public static bool IsError(this IEnumerable<Error> errs, ErrorType error)
-    {
-        if (errs.Any((Error x) => x.Tag == error))
+        var text = HelpText.AutoBuild(parserResult, help =>
         {
-            return true;
-        }
-        return false;
+            help.Heading = "";
+            help.Copyright = "";
+            help.AdditionalNewLineAfterOption = false;
+            help.AddDashesToOption = true;
+
+            help.AddPreOptionsLine($"Usage: {AppName} <command> [options]");
+            help.AddPreOptionsLine($"Usage: {AppName} <file> [options]");
+            help.AddPreOptionsLine(" ");
+            help.AddPreOptionsLine($"Options:");
+
+            return help;
+        }, example =>
+        {
+            Console.WriteLine("Example " + example);
+            return example;
+        }, true);
+
+        Console.WriteLine(text);
+
+        Environment.Exit(1);
     }
 }
