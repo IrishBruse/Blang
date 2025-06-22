@@ -11,25 +11,20 @@ public class CompilationData(string file)
 
     public (int Line, int Column) GetLineColumnFromIndex(int index)
     {
-        if (Lines.Count == 0)
-        {
-            return (1, index + 1);
-        }
-
         int line = 0;
         int lineOffset = 0;
         for (int i = 0; i < Lines.Count; i++)
         {
             if (index > Lines[i])
             {
-                lineOffset = Lines[i];
-                line = i;
+                lineOffset = Lines[i] - 1;
+                line = i + 1;
             }
         }
 
         int column = index - lineOffset;
 
-        return (line + 1, column + 1);
+        return (line + 1, column);
     }
 
     public string GetFileLocation(int index)

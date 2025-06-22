@@ -102,7 +102,6 @@ public class Lexer(CompilationData data)
         {
             if (c == '\n')
             {
-                data.Lines.Add(startIndex);
                 _ = Next();
             }
             else
@@ -199,6 +198,7 @@ public class Lexer(CompilationData data)
             _ = comment.Append(Next());
         }
 
+
         return new Token(TokenType.Comment, comment.ToString(), EndTokenRange());
     }
 
@@ -213,7 +213,6 @@ public class Lexer(CompilationData data)
             char c = Next();
             if (c == '\n')
             {
-                data.Lines.Add(startIndex);
                 _ = comment.Append("\\n");
             }
             else
@@ -298,6 +297,11 @@ public class Lexer(CompilationData data)
         char c = (char)Source.Read();
 
         endIndex++;
+
+        if (IsLineBreak(c))
+        {
+            data.Lines.Add(endIndex);
+        }
 
         return c;
     }
