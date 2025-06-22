@@ -8,7 +8,7 @@ using System;
 
 public class Globals
 {
-    public static Options options = null!;
+    public static Options options { get; set; } = null!;
 
     public static void Print(string? message, string? prefix, ConsoleColor? color = null)
     {

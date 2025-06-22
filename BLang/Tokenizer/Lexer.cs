@@ -1,6 +1,5 @@
 namespace BLang.Tokenizer;
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -16,8 +15,6 @@ public class Lexer(CompilationData data)
 
     public IEnumerator<Token> Lex(string text)
     {
-        _ = options.File;
-
         MemoryStream stream = new(Encoding.UTF8.GetBytes(text));
         StreamReader reader = new(stream);
         return Lex(reader, "");

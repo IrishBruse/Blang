@@ -25,6 +25,8 @@ public class QbeTarget(CompilationData data) : BaseTarget
         currentSsaRegisters.Clear();
         ssaVersionCounters.Clear();
 
+        _ = data;
+
         VisitCompilationUnit(node);
         return output.ToString();
     }

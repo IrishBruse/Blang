@@ -12,27 +12,7 @@ public static class Compiler
 {
     static readonly AstTarget astPrinter = new();
 
-    public static CompileOutput Compile(string file, bool run)
-    {
-        CompileOutput output = CompileFile(file);
-
-        if (output.Success && run)
-        {
-            try
-            {
-                Executable exe = Executable.Capture(output.Executable);
-                output.RunOutput = exe.StdOut;
-            }
-            catch (Exception e)
-            {
-                output.Errors = e.Message;
-            }
-        }
-
-        return output;
-    }
-
-    static CompileOutput CompileFile(string file)
+    public static CompileOutput Compile(string file)
     {
         CompileOutput output = new();
         CompilationData data = new(file);
@@ -64,17 +44,17 @@ public static class Compiler
             File.WriteAllText(objFile + ".ssa", qbeIR);
 
             Executable exe = Executable.Capture("qbe", $"{objFile}.ssa -o {objFile}.s");
-            Error(exe.StdError, "ERR");
             if (!exe.Success())
             {
+                Error(exe.StdError, "ERR");
                 output.Success = false;
                 return output;
             }
 
             exe = Executable.Capture("gcc", $"{objFile}.s -o {binFile}");
-            Error(exe.StdError, "ERR");
             if (!exe.Success())
             {
+                Error(exe.StdError, "ERR");
                 output.Success = false;
                 return output;
             }
