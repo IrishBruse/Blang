@@ -4,16 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BLang.AstParser;
-using BLang.Utility;
 
 public class AstTarget : BaseTarget
 {
-    CompilationData data = null!;
-
-    public string Output(CompilationUnit node, CompilationData data)
+    public string Output(CompilationUnit node)
     {
-        this.data = data;
-
         output.Clear();
         VisitCompilationUnit(node);
         return output.ToString();
@@ -67,7 +62,7 @@ public class AstTarget : BaseTarget
     public void VisitFunctionCall(FunctionCall node)
     {
         string parameters = VisitExpressions(node.Parameters);
-        Print(node, parameters);
+        Print(node, $"{node.Symbol} {parameters}");
     }
 
     static string VisitExpressions(Expression[] expressions)
@@ -142,17 +137,6 @@ public class AstTarget : BaseTarget
 
     public void Print(AstNode node, string args = "")
     {
-        WriteRaw(Space);
-        WriteRaw(GetTypeName(node));
-        WriteRaw(": ");
-        WriteRaw(args + "  -  ");
-
-        if (true)
-        {
-            string start = data.GetFileLocation(node.Range.Start);
-            WriteRaw(start);
-        }
-
-        Write();
+        Write($"{GetTypeName(node)}: {args}");
     }
 }

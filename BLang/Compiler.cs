@@ -10,8 +10,6 @@ using BLang.Utility;
 
 public static class Compiler
 {
-    static readonly AstTarget astPrinter = new();
-
     public static CompileOutput Compile(string file)
     {
         CompileOutput output = new();
@@ -22,10 +20,11 @@ public static class Compiler
         IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
         CompilationUnit unit = parser.Parse(tokens);
 
-        string ast = astPrinter.Output(unit, data);
-
         if (options.Debug)
         {
+            AstTarget astPrinter = new();
+            string ast = astPrinter.Output(unit);
+
             Console.WriteLine();
             Log(ast);
             Console.WriteLine();

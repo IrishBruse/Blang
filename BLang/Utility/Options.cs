@@ -51,18 +51,9 @@ public class Options
         });
 
         ParserResult<object> parserResult = parser.ParseArguments<BuildOptions, RunOptions, TestOptions>(args)
-              .WithParsed<BuildOptions>(opt =>
-              {
-                  options = opt;
-              })
-              .WithParsed<RunOptions>(opt =>
-              {
-                  options = opt;
-              })
-              .WithParsed<TestOptions>(opt =>
-              {
-                  options = opt;
-              });
+            .WithParsed<BuildOptions>(opt => options = opt)
+            .WithParsed<RunOptions>(opt => options = opt)
+            .WithParsed<TestOptions>(opt => options = opt);
 
         parserResult.WithNotParsed(errors => HandleErrors(errors, parserResult));
     }
