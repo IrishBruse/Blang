@@ -8,12 +8,14 @@ using BLang.Tokenizer;
 public partial class Parser
 {
     static readonly Dictionary<TokenType, int> operatorPrecedence = new(){
-        { TokenType.BitwiseOr, 5 },
-        { TokenType.BitwiseAnd, 4 },
-        { TokenType.BitwiseShiftLeft, 3 }, { TokenType.BitwiseShiftRight, 3 }, { TokenType.EqualEqual, 3 }, { TokenType.NotEqual, 3 },
-        { TokenType.LessThan, 2 }, { TokenType.GreaterThan, 2 }, { TokenType.GreaterThanEqual, 2 }, { TokenType.LessThanEqual, 2 },
-        { TokenType.Multiplication, 1 }, { TokenType.Modulo, 1 }, { TokenType.Division, 1 },
-        { TokenType.Addition, 0 }, { TokenType.Subtraction, 0 },
+        { TokenType.BitwiseOr, 10 },
+        { TokenType.BitwiseAnd, 20 },
+        { TokenType.EqualEqual, 30 }, { TokenType.NotEqual, 30 },
+        { TokenType.LessThan, 40 }, { TokenType.GreaterThan, 40 },
+        { TokenType.GreaterThanEqual, 40 }, { TokenType.LessThanEqual, 40 },
+        { TokenType.BitwiseShiftLeft, 50 }, { TokenType.BitwiseShiftRight, 50 },
+        { TokenType.Addition, 60 }, { TokenType.Subtraction, 60 },
+        { TokenType.Multiplication, 70 }, { TokenType.Modulo, 70 }, { TokenType.Division, 70 },
     };
 
     Expression ParseBinaryExpression(int minPrecedence = 0)
@@ -29,7 +31,7 @@ public partial class Parser
 
             Token conditionalOperator = Next();
 
-            Expression right = ParseBinaryExpression(precedence);
+            Expression right = ParseBinaryExpression(precedence + 1);
 
             left = new BinaryExpression(conditionalOperator.TokenType, left, right)
             {

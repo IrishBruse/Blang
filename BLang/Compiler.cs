@@ -50,7 +50,7 @@ public static class Compiler
                 return output;
             }
 
-            exe = Executable.Capture("gcc", $"{objFile}.s -o {binFile}");
+            exe = Executable.Capture("gcc", $"{objFile}.s -g -o {binFile}");
             if (!exe.Success())
             {
                 Error(exe.StdError, "ERR");

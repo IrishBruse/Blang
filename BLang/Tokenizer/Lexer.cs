@@ -150,27 +150,27 @@ public class Lexer(CompilationData data)
             type = TokenType.LogicalOr;
             op += Next();
         }
-        else if (c == '+' && p == '=')
+        else if ((c == '+' && p == '=') || (c == '=' && p == '+'))
         {
             type = TokenType.AdditionAssignment;
             op += Next();
         }
-        else if (c == '-' && p == '=')
+        else if ((c == '-' && p == '=') || (c == '=' && p == '-'))
         {
             type = TokenType.SubtractionAssignment;
             op += Next();
         }
-        else if (c == '*' && p == '=')
+        else if ((c == '*' && p == '=') || (c == '=' && p == '*'))
         {
             type = TokenType.MultiplicationAssignment;
             op += Next();
         }
-        else if (c == '/' && p == '=')
+        else if ((c == '/' && p == '=') || (c == '=' && p == '/'))
         {
             type = TokenType.DivisionAssignment;
             op += Next();
         }
-        else if (c == '%' && p == '=')
+        else if ((c == '%' && p == '=') || (c == '=' && p == '%'))
         {
             type = TokenType.ModuloAssignment;
             op += Next();

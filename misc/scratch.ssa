@@ -1,27 +1,24 @@
 export function w $main()
 {
 @start
-    %val_0 =l alloc4 4
+    %a_ptr =l alloc4 4
 
-    # val = 1
-    storew 1, %val_0
+    # a = 0
+    storew 0, %a_ptr
 
-    # val = ((val + 2) * 3)
-    %val_5 =w loadw %val_0
-    %val_1 =w add %val_5, 2
-    %val_2 =w mul %val_1, 3
-    storew %val_2, %val_0
-
+    %test =w loadw %a_ptr
+    jnz %test, @end, @test
+@test
+    call $printf(l $string_0, w 456)
+@end
     # call printf
-    %val_3 =w loadw %val_0
-    call $printf(l $string_0, w %val_3)
-
+    call $printf(l $string_0, w 123)
 
     ret 0
 }
 
 # Data
-data $string_0 = { b "%d", b 0 }
+data $string_0 = { b "%d\n", b 0 }
 
 # Externs
 # * printf

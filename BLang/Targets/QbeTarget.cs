@@ -76,6 +76,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
             case IfStatement s: VisitIfStatement(s); break;
             default: throw new Exception(node.ToString());
         }
+        Write();
     }
 
     private void BeginScope()
@@ -107,24 +108,20 @@ public class QbeTarget(CompilationData data) : BaseTarget
         }
 
         BeginScope();
-        {
-            WriteRaw("@start\n");
-            foreach (Statement stmt in node.Body)
-            {
-                VisitStatement(stmt);
-            }
-
-            if (name == "main")
-            {
-                Write($"ret 0");
-            }
-            else
-            {
-                Write($"ret");
-            }
-        }
+        WriteRaw("@start\n");
+        EmitBody(node.Body);
+        Write(name == "main" ? "ret 0" : "ret");
         EndScope();
+
         Write();
+    }
+
+    private void EmitBody(Statement[] body)
+    {
+        foreach (Statement stmt in body)
+        {
+            VisitStatement(stmt);
+        }
     }
 
     public void VisitExternalStatement(ExternalStatement node)
@@ -140,9 +137,15 @@ public class QbeTarget(CompilationData data) : BaseTarget
         Write($"# VisitWhileDeclaration {whileStatement}");
     }
 
-    public void VisitIfStatement(IfStatement ifStatement)
+    public void VisitIfStatement(IfStatement node)
     {
-        Write($"# VisitIfDeclaration {ifStatement}");
+        Write("# " + node.Condition);
+        string? test = GenerateBinaryExpressionIR(node.Condition, new("test", SymbolKind.Variable));
+        Console.WriteLine(test);
+        Write("jmp @test_end");
+        WriteRaw("@test_start\n");
+        EmitBody(node.Body);
+        WriteRaw("@test_end\n");
     }
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
@@ -152,7 +155,6 @@ public class QbeTarget(CompilationData data) : BaseTarget
             string varName = CreateMemoryRegister(variable);
             Write($"{varName} =l alloc4 4");
         }
-        Write();
     }
 
     public void VisitFunctionCall(FunctionCall node)
@@ -161,7 +163,6 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
         string parameters = PassParameterValue(node.Parameters);
         Write($"call ${node.Symbol}({parameters})");
-        Write();
     }
 
     string PassParameterValue(Expression[] parameters)
@@ -202,7 +203,6 @@ public class QbeTarget(CompilationData data) : BaseTarget
         string? result = GenerateBinaryExpressionIR(value, variableAssignment.Symbol);
         string reg = GetMemoryRegister(variableAssignment.Symbol);
         Write($"storew {result}, {reg}");
-        Write();
     }
 
     // Expression
@@ -238,6 +238,10 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
                     case TokenType.Multiplication:
                     Write($"{reg} =w mul {leftOp}, {rightOp}");
+                    break;
+
+                    case TokenType.LessThan:
+                    Write("# TODO: less than");
                     break;
 
                     default: throw new Exception("test");

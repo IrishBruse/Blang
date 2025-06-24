@@ -154,6 +154,7 @@ public partial class Parser(CompilationData data)
         {
             throw new ParserException("ParseWhileDefinition condition: " + condition);
         }
+
         Statement[] body = ParseBlock();
 
         return new((BinaryExpression)condition, body)
