@@ -61,7 +61,6 @@ public class QbeTarget(CompilationData data) : BaseTarget
         {
             Write($"# * {external.Name}");
         }
-        Write();
     }
 
     public void VisitStatement(Statement node)
@@ -139,11 +138,12 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public void VisitIfStatement(IfStatement node)
     {
-        Write("# " + node.Condition);
+        Write("# if " + node.Condition);
         string? test = GenerateBinaryExpressionIR(node.Condition, new("test", SymbolKind.Variable));
         Console.WriteLine(test);
-        Write("jmp @test_end");
+        Write($"jnz {test}, @test_start, @test_end");
         WriteRaw("@test_start\n");
+        Write();
         EmitBody(node.Body);
         WriteRaw("@test_end\n");
     }
@@ -241,7 +241,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
                     break;
 
                     case TokenType.LessThan:
-                    Write("# TODO: less than");
+                    Write($"{reg} =w cslew {leftOp}, {rightOp}");
                     break;
 
                     default: throw new Exception("test");
