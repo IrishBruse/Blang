@@ -1,37 +1,7 @@
-namespace BLang.AstParser;
+namespace BLang.Ast.Nodes;
 
-using System.Collections.Generic;
 using BLang.Tokenizer;
 using BLang.Utility;
-
-public abstract record AstNode
-{
-    public SourceRange Range { get; set; } = SourceRange.Zero;
-}
-
-public record CompilationUnit(List<FunctionStatement> FunctionDeclarations, List<FunctionStatement> VariableDeclarations) : AstNode;
-
-// Statements
-
-public abstract record Statement() : AstNode;
-
-public record FunctionStatement(Symbol Symbol, Expression[] Parameters, Statement[] Body) : Statement;
-
-public record ExternalStatement(Symbol[] Externals) : Statement;
-
-public record WhileStatement(BinaryExpression Condition, Statement[] Body) : Statement;
-
-public record IfStatement(BinaryExpression Condition, Statement[] Body) : Statement;
-
-public record AutoStatement(Symbol[] Variables) : Statement;
-
-public record FunctionCall(Symbol Symbol, Expression[] Parameters) : Statement;
-
-public record VariableDeclarator(Symbol Symbol, Expression Value) : Statement;
-
-// Statements
-
-// Expression
 
 public abstract record Expression() : AstNode;
 
@@ -87,5 +57,3 @@ public record BinaryExpression(TokenType Operation, Expression Left, Expression 
         }
     }
 }
-
-// Expression

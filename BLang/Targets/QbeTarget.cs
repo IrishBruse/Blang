@@ -2,7 +2,8 @@ namespace BLang.Targets;
 
 using System;
 using System.Collections.Generic;
-using BLang.AstParser;
+using System.Linq;
+using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;
 using BLang.Utility;
@@ -15,7 +16,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
     readonly Dictionary<string, string> strings = [];
     readonly HashSet<Symbol> externs = [];
 
-    readonly Dictionary<Symbol, string> memoryAllocations = [];
+    readonly Dictionary<string, string> memoryAllocations = [];
     readonly Dictionary<Symbol, string> currentSsaRegisters = [];
     readonly Dictionary<Symbol, int> ssaVersionCounters = [];
 
@@ -33,14 +34,22 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public void VisitCompilationUnit(CompilationUnit node)
     {
-        foreach (FunctionStatement funcDecl in node.FunctionDeclarations)
+        foreach (GlobalVariable variable in node.GlobalVariables)
+        {
+            Write("# " + variable.Symbol.Name);
+            CreateGlobalMemoryRegister(variable.Symbol);
+            string value = variable.Value == null ? "z 4" : "w " + variable.Value;
+            Write($"data ${variable.Symbol.Name} = {{ {value} }}");
+            Write();
+        }
+
+        foreach (FunctionDecleration funcDecl in node.FunctionDeclarations)
         {
             VisitFunctionStatement(funcDecl);
         }
 
-        // TODO: global variables
-
         GenerateDataSection();
+        Write();
         GenerateExternsSection();
     }
 
@@ -51,7 +60,6 @@ public class QbeTarget(CompilationData data) : BaseTarget
         {
             Write($"data ${name} = {{ b \"{value}\", b 0 }}");
         }
-        Write();
     }
 
     private void GenerateExternsSection()
@@ -75,7 +83,6 @@ public class QbeTarget(CompilationData data) : BaseTarget
             case IfStatement s: VisitIfStatement(s); break;
             default: throw new Exception(node.ToString());
         }
-        Write();
     }
 
     private void BeginScope()
@@ -92,7 +99,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     // Statements
 
-    public void VisitFunctionStatement(FunctionStatement node)
+    public void VisitFunctionStatement(FunctionDecleration node)
     {
         string name = node.Symbol.Name;
 
@@ -120,6 +127,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         foreach (Statement stmt in body)
         {
             VisitStatement(stmt);
+            Write();
         }
     }
 
@@ -139,11 +147,9 @@ public class QbeTarget(CompilationData data) : BaseTarget
     public void VisitIfStatement(IfStatement node)
     {
         Write("# if " + node.Condition);
-        string? test = GenerateBinaryExpressionIR(node.Condition, new("test", SymbolKind.Variable));
-        Console.WriteLine(test);
-        Write($"jnz {test}, @test_start, @test_end");
+        string reg = GenerateBinaryExpressionIR(node.Condition, new("test", SymbolKind.Load));
+        Write($"jnz {reg}, @test_start, @test_end");
         WriteRaw("@test_start\n");
-        Write();
         EmitBody(node.Body);
         WriteRaw("@test_end\n");
     }
@@ -200,14 +206,14 @@ public class QbeTarget(CompilationData data) : BaseTarget
         Expression value = variableAssignment.Value;
 
         Write($"# {variableAssignment.Symbol} = {value}");
-        string? result = GenerateBinaryExpressionIR(value, variableAssignment.Symbol);
+        string result = GenerateBinaryExpressionIR(value, variableAssignment.Symbol);
         string reg = GetMemoryRegister(variableAssignment.Symbol);
         Write($"storew {result}, {reg}");
     }
 
     // Expression
 
-    public string? GenerateBinaryExpressionIR(Expression expr, Symbol targetSymbol)
+    public string GenerateBinaryExpressionIR(Expression expr, Symbol targetSymbol)
     {
         switch (expr)
         {
@@ -226,8 +232,8 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
             case BinaryExpression binary:
             {
-                string? leftOp = GenerateBinaryExpressionIR(binary.Left, targetSymbol);
-                string? rightOp = GenerateBinaryExpressionIR(binary.Right, targetSymbol);
+                string leftOp = GenerateBinaryExpressionIR(binary.Left, targetSymbol);
+                string rightOp = GenerateBinaryExpressionIR(binary.Right, targetSymbol);
 
                 string reg = CreateTempRegister(targetSymbol);
                 switch (binary.Operation)
@@ -241,7 +247,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
                     break;
 
                     case TokenType.LessThan:
-                    Write($"{reg} =w cslew {leftOp}, {rightOp}");
+                    Write($"{reg} =w csltw {leftOp}, {rightOp}");
                     break;
 
                     default: throw new Exception("test");
@@ -285,6 +291,14 @@ public class QbeTarget(CompilationData data) : BaseTarget
         return qbeReg;
     }
 
+    int tempRegister = 0;
+    public string NewTempReg()
+    {
+        string qbeReg = $"%_{tempRegister}";
+        tempRegister++;
+        return qbeReg;
+    }
+
     public string GetRegister(Symbol symbol)
     {
         if (currentSsaRegisters.TryGetValue(symbol, out string? value))
@@ -296,22 +310,36 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public string CreateMemoryRegister(Symbol symbol)
     {
-        if (memoryAllocations.ContainsKey(symbol))
+        if (memoryAllocations.ContainsKey(symbol.Name))
         {
             throw new InvalidOperationException($"Variable '{symbol.Name}' is already registered.");
         }
 
         string qbeReg = $"%{symbol.Name}_ptr";
-        memoryAllocations[symbol] = qbeReg;
+        memoryAllocations[symbol.Name] = qbeReg;
         return qbeReg;
     }
 
+    public string CreateGlobalMemoryRegister(Symbol symbol)
+    {
+        if (memoryAllocations.ContainsKey(symbol.Name))
+        {
+            throw new InvalidOperationException($"Variable '{symbol.Name}' is already registered.");
+        }
+
+        string qbeReg = $"${symbol.Name}";
+        memoryAllocations.Add(symbol.Name, qbeReg);
+        return qbeReg;
+    }
+
+
     public string GetMemoryRegister(Symbol symbol)
     {
-        if (memoryAllocations.TryGetValue(symbol, out string? value))
+        if (!memoryAllocations.TryGetValue(symbol.Name, out string? value))
         {
-            return value;
+            throw new InvalidOperationException($"Variable '{symbol.Name}' has no current SSA register.");
         }
-        throw new InvalidOperationException($"Variable '{symbol.Name}' has no current SSA register.");
+
+        return value;
     }
 }

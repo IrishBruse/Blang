@@ -3,7 +3,7 @@ namespace BLang.Targets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BLang.AstParser;
+using BLang.Ast.Nodes;
 
 public class AstTarget : BaseTarget
 {
@@ -19,14 +19,19 @@ public class AstTarget : BaseTarget
         Print(node);
 
         Indent();
-        foreach (FunctionStatement funcDecl in node.FunctionDeclarations)
+        foreach (FunctionDecleration funcDecl in node.FunctionDeclarations)
         {
             VisitFunctionStatement(funcDecl);
+        }
+
+        foreach (GlobalVariable variable in node.GlobalVariables)
+        {
+            Write($"GlobalVariable: {variable.Symbol} {variable.Value}");
         }
         Dedent();
     }
 
-    public void VisitFunctionStatement(FunctionStatement node)
+    public void VisitFunctionStatement(FunctionDecleration node)
     {
         string parameters = VisitExpressions(node.Parameters);
         Print(node, parameters);
@@ -41,7 +46,6 @@ public class AstTarget : BaseTarget
         {
             switch (stmt)
             {
-                case FunctionStatement s: VisitFunctionStatement(s); break;
                 case ExternalStatement s: VisitExternalStatement(s); break;
                 case AutoStatement s: VisitAutoStatement(s); break;
                 case VariableDeclarator s: VisitVariableDeclarator(s); break;

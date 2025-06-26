@@ -1,7 +1,8 @@
-namespace BLang.AstParser;
+namespace BLang.Ast;
 
 using System;
 using System.Collections.Generic;
+using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;
 using BLang.Utility;
@@ -16,19 +17,19 @@ public partial class Parser(CompilationData data)
     {
         this.tokens = tokens;
 
-        tokens.MoveNext();
         if (options.Tokens)
         {
             Console.WriteLine(tokens.Current);
         }
 
-        CompilationUnit topLevel = ParseTopLevel();
-        return topLevel;
+        tokens.MoveNext();
+        return ParseTopLevel();
     }
 
     CompilationUnit ParseTopLevel()
     {
-        List<FunctionStatement> functions = [];
+        List<FunctionDecleration> functions = [];
+        List<GlobalVariable> globals = [];
 
         SourceRange start = previousTokenRange;
 
@@ -46,29 +47,37 @@ public partial class Parser(CompilationData data)
             }
             else if (Peek(TokenType.Semicolon))
             {
-                throw new ParserException("TODO: global variables");
+                Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
+                globals.Add(new(symbol, null));
+                Eat(TokenType.Semicolon);
+            }
+            else if (Peek(TokenType.IntegerLiteral))
+            {
+                Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
+                Token number = Eat(TokenType.IntegerLiteral);
+                globals.Add(new(symbol, number.ToInteger()));
+                Eat(TokenType.Semicolon);
             }
             else
             {
                 Next();
-                // Error($"Expected '(' or ';' but got {Peek()}");
                 break;
             }
 
             EatComments();
         }
 
-        return new(functions, [])
+        return new(functions, globals)
         {
             Range = start.Merge(previousTokenRange)
         };
     }
 
-    FunctionStatement ParseFunctionDecleration(Token identifier)
+    FunctionDecleration ParseFunctionDecleration(Token identifier)
     {
         symbols.EnterScope(identifier.Content);
 
-        Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Function);
+        Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
 
         SourceRange begin = identifier.Range;
 
@@ -78,7 +87,7 @@ public partial class Parser(CompilationData data)
         while (!Peek(TokenType.CloseParenthesis) && !Peek(TokenType.Eof))
         {
             Token variable = Eat(TokenType.Identifier);
-            symbol = symbols.Add(variable.Content, SymbolKind.Parameter);
+            symbol = symbols.Add(variable.Content, SymbolKind.Define);
             parameters.Add(symbol);
         }
         Eat(TokenType.CloseParenthesis);
@@ -86,7 +95,7 @@ public partial class Parser(CompilationData data)
         Statement[] body = ParseBlock();
 
         symbols.ExitScope();
-        return new FunctionStatement(symbol, parameters.ToArray(), body)
+        return new FunctionDecleration(symbol, parameters.ToArray(), body)
         {
             Range = begin.Merge(previousTokenRange),
         };
@@ -168,12 +177,12 @@ public partial class Parser(CompilationData data)
         Token start = Eat(TokenType.ExternKeyword);
         Token identifier = Eat(TokenType.Identifier);
 
-        List<Symbol> externs = [symbols.Add(identifier, SymbolKind.External)];
+        List<Symbol> externs = [symbols.Add(identifier, SymbolKind.Define)];
         while (Peek(TokenType.Comma))
         {
             Eat(TokenType.Comma);
             identifier = Eat(TokenType.Identifier);
-            externs.Add(symbols.Add(identifier, SymbolKind.External));
+            externs.Add(symbols.Add(identifier, SymbolKind.Define));
         }
 
         Token end = Eat(TokenType.Semicolon);
@@ -189,12 +198,12 @@ public partial class Parser(CompilationData data)
         Token start = Eat(TokenType.AutoKeyword);
         Token identifier = Eat(TokenType.Identifier);
 
-        List<Symbol> variables = [symbols.Add(identifier, SymbolKind.Variable)];
+        List<Symbol> variables = [symbols.Add(identifier, SymbolKind.Define)];
         while (Peek(TokenType.Comma))
         {
             Eat(TokenType.Comma);
             identifier = Eat(TokenType.Identifier);
-            variables.Add(symbols.Add(identifier, SymbolKind.Variable));
+            variables.Add(symbols.Add(identifier, SymbolKind.Define));
         }
         Eat(TokenType.Semicolon);
 
@@ -232,11 +241,8 @@ public partial class Parser(CompilationData data)
         Eat(TokenType.CloseParenthesis);
         Eat(TokenType.Semicolon);
 
-        Symbol? symbol = symbols.Get(identifier.Content);
-        if (symbol == null)
-        {
-            throw new Exception("");
-        }
+        Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Load);
+
         return new FunctionCall(symbol, parameters.ToArray())
         {
             Range = identifier.Range,
@@ -260,7 +266,7 @@ public partial class Parser(CompilationData data)
         Expression value = ParseBinaryExpression();
         Eat(TokenType.Semicolon);
 
-        Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Variable);
+        Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Assign);
 
         return new VariableDeclarator(symbol, value)
         {

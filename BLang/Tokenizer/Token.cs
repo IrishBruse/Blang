@@ -1,12 +1,22 @@
 namespace BLang.Tokenizer;
 
+using BLang.Exceptions;
 using BLang.Utility;
 
 public record Token(TokenType TokenType, string Content, SourceRange Range)
 {
     public override string ToString()
     {
-        return $"{Range.Start,4}-{Range.End,-4} {TokenType,-18} {Content}";
+        return $"{TokenType,-18} {Content}";
+    }
+
+    public int ToInteger()
+    {
+        if (!int.TryParse(Content, out int number))
+        {
+            throw new InvalidTokenException(Content);
+        }
+        return number;
     }
 }
 

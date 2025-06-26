@@ -4,18 +4,14 @@ using System;
 using System.Collections.Generic;
 using BLang.Tokenizer;
 
-public record Symbol(string Name, SymbolKind Kind)
+public record Symbol(string Name, SymbolKind Kind = SymbolKind.Load)
 {
     public override string ToString() => Name;
 }
 
 public enum SymbolKind
 {
-    Variable,
-    Function,
-    Parameter,
-    Global,
-    External
+    Define, Assign, Load
 }
 
 // Represents the symbol table structure (managing scopes)
@@ -53,7 +49,7 @@ public class SymbolTable
         }
     }
 
-    public Symbol Add(Token token, SymbolKind kind)
+    public Symbol Add(Token token, SymbolKind kind = SymbolKind.Load)
     {
         if (token.TokenType != TokenType.Identifier && !token.TokenType.IsKeyword())
         {
@@ -62,7 +58,7 @@ public class SymbolTable
         return Add(token.Content, kind);
     }
 
-    public Symbol Add(string name, SymbolKind kind)
+    public Symbol Add(string name, SymbolKind kind = SymbolKind.Load)
     {
         Symbol symbol = new(name, kind);
         Dictionary<string, Symbol> currentScope = scopes.Peek();
@@ -78,7 +74,7 @@ public class SymbolTable
         return symbol;
     }
 
-    public Symbol? Get(string name)
+    public Symbol Get(string name)
     {
         foreach (Dictionary<string, Symbol> scope in scopes)
         {
@@ -87,22 +83,24 @@ public class SymbolTable
                 return symbol;
             }
         }
-        return null;
+
+        throw new Exception($"Couldnt find symbol \"{name}\" in any scope");
     }
 
-    public Symbol GetOrAdd(Token token, SymbolKind kind)
+    public Symbol GetOrAdd(Token token, SymbolKind kind = SymbolKind.Load)
     {
-        Symbol? symbol = Get(token.Content);
-
-        if (symbol != null)
+        foreach (Dictionary<string, Symbol> scope in scopes)
         {
-            return symbol;
+            if (scope.TryGetValue(token.Content, out Symbol? symbol))
+            {
+                return symbol;
+            }
         }
 
         return Add(token, kind);
     }
 
-    // Look up a symbol only in the current scope
+    /// <summary> Look up a symbol only in the current scope </summary>
     public Symbol? GetInCurrentScope(string name)
     {
         Dictionary<string, Symbol> currentScope = scopes.Peek();

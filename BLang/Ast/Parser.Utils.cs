@@ -1,6 +1,7 @@
-namespace BLang.AstParser;
+namespace BLang.Ast;
 
 using System;
+using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;
 using BLang.Utility;
@@ -55,10 +56,11 @@ public partial class Parser
     Variable ParseVariable()
     {
         Token variable = Eat(TokenType.Identifier);
-        Symbol? symbol = symbols.Get(variable.Content);
+        Symbol? symbol = symbols.GetOrAdd(variable, SymbolKind.Load);
         if (symbol == null)
         {
-            throw new Exception(variable.ToString());
+            string loc = data.GetFileLocation(variable.Range.Start);
+            throw new Exception($"{loc}  {variable}");
         }
         return new Variable(symbol)
         {

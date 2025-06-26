@@ -20,13 +20,6 @@ public class Tester
 
     private static void RunTestFile(string testFile)
     {
-        Console.WriteLine();
-        Console.WriteLine();
-        Console.WriteLine();
-        Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine($"Running {testFile}");
-        Console.ResetColor();
-
         CompileOutput output = new();
         try
         {
@@ -42,7 +35,14 @@ public class Tester
 
         if (opt.UpdateSnapshots)
         {
-            UpdateSnapshot(testFile, testOutputFile, output, previousTestOutput);
+            if (UpdateSnapshot(testOutputFile, output, previousTestOutput))
+            {
+                Console.WriteLine("Updated");
+            }
+            else
+            {
+                Console.WriteLine("Same");
+            }
         }
         else
         {
@@ -50,7 +50,7 @@ public class Tester
         }
     }
 
-    static void UpdateSnapshot(string testFile, string testOutputFile, CompileOutput output, string previousTestOutput)
+    static bool UpdateSnapshot(string testOutputFile, CompileOutput output, string previousTestOutput)
     {
         StringBuilder testOutput = new();
         testOutput.AppendLine(output.AstOutput);
@@ -71,16 +71,11 @@ public class Tester
         string newTestOutput = testOutput.ToString();
         File.WriteAllText(testOutputFile, newTestOutput);
 
-        string status = previousTestOutput != newTestOutput ? "Updated" : "Skipped";
-        if (previousTestOutput != newTestOutput)
-        {
-            Error($"Test {status}: {testFile}");
-        }
-        else
-        {
-            Console.WriteLine($"Test {status}: {testFile}");
-        }
+        return previousTestOutput != newTestOutput;
     }
+
+    const char Pass = '✓';
+    const char Fail = (char)215;
 
     static void CompareSnapshot(string testFile, CompileOutput output, string previousTestOutput)
     {
@@ -92,19 +87,18 @@ public class Tester
         if (success)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Test Success: {testFile}");
+            Console.WriteLine($"{Pass} {testFile}");
         }
         else
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Test Failed: {testFile}");
+            Console.WriteLine($"{Fail} {testFile}");
         }
         Console.ResetColor();
 
         if (!string.IsNullOrEmpty(output.Errors))
         {
             Error(output.Errors);
-            Console.WriteLine();
         }
     }
 }

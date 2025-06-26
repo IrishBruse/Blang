@@ -2,14 +2,13 @@ namespace BLang.Utility;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using CommandLine;
 using CommandLine.Text;
 
 [Verb("test", HelpText = "Test Options.")]
 public class TestOptions : Options
 {
-    [Option("update-snapshots", HelpText = "Update the test snapshots.")] public bool UpdateSnapshots { get; set; }
+    [Option('u', "update", HelpText = "Update the test snapshots.")] public bool UpdateSnapshots { get; set; }
 }
 
 [Verb("build", isDefault: true, HelpText = "Build Options.")]

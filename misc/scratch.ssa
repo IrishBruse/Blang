@@ -6,8 +6,15 @@ export function w $main()
     # a = 0
     storew 0, %a_ptr
 
-    %test =w loadw %a_ptr
-    jnz %test, @end, @test
+    %b_ptr =l alloc4 4
+    # b = 5
+    storew 5, %b_ptr
+
+    %avalue =w loadw %a_ptr
+    %bvalue =w loadw %b_ptr
+    %test2 =w cslew %avalue, %bvalue
+
+    jnz %test2, @end, @test
 @test
     call $printf(l $string_0, w 456)
 @end
