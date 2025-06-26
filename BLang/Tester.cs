@@ -20,6 +20,8 @@ public class Tester
 
     private static void RunTestFile(string testFile)
     {
+        long start = DateTime.Now.Millisecond;
+
         CompileOutput output = new();
         try
         {
@@ -35,22 +37,20 @@ public class Tester
 
         if (opt.UpdateSnapshots)
         {
-            if (UpdateSnapshot(testOutputFile, output, previousTestOutput))
-            {
-                Console.WriteLine("Updated");
-            }
-            else
-            {
-                Console.WriteLine("Same");
-            }
+            UpdateSnapshot(testOutputFile, output, previousTestOutput, start);
         }
         else
         {
-            CompareSnapshot(testFile, output, previousTestOutput);
+            CompareSnapshot(testFile, output, previousTestOutput, start);
         }
     }
 
-    static bool UpdateSnapshot(string testOutputFile, CompileOutput output, string previousTestOutput)
+    const char IconPass = '✓';
+    const char IconFail = (char)215;
+    const char IconUpdated = '+';
+    const char IconUnchanged = '~';
+
+    static void UpdateSnapshot(string testOutputFile, CompileOutput output, string previousTestOutput, long start)
     {
         StringBuilder testOutput = new();
         testOutput.AppendLine(output.AstOutput);
@@ -71,13 +71,27 @@ public class Tester
         string newTestOutput = testOutput.ToString();
         File.WriteAllText(testOutputFile, newTestOutput);
 
-        return previousTestOutput != newTestOutput;
+
+        bool changed = previousTestOutput != newTestOutput;
+        if (changed)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write(IconUpdated);
+            Console.ResetColor();
+            long end = DateTime.Now.Millisecond;
+            Console.WriteLine($" {testOutputFile} {end - start}ms");
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write(IconUnchanged);
+            Console.ResetColor();
+            long end = DateTime.Now.Millisecond;
+            Console.WriteLine($" {testOutputFile} {end - start}ms");
+        }
     }
 
-    const char Pass = '✓';
-    const char Fail = (char)215;
-
-    static void CompareSnapshot(string testFile, CompileOutput output, string previousTestOutput)
+    static void CompareSnapshot(string testFile, CompileOutput output, string previousTestOutput, long start)
     {
         string[] parts = previousTestOutput.Split("==============================\n");
 
@@ -87,14 +101,25 @@ public class Tester
         if (success)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"{Pass} {testFile}");
+            Console.Write(IconPass);
+            Console.ResetColor();
+            Console.Write($" {testFile}");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            long end = DateTime.Now.Millisecond;
+            Console.WriteLine($" {end - start}ms");
+            Console.ResetColor();
         }
         else
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"{Fail} {testFile}");
+            Console.Write(IconFail);
+            Console.ResetColor();
+            Console.Write($" {testFile}");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            long end = DateTime.Now.Millisecond;
+            Console.WriteLine($" {end - start}ms");
+            Console.ResetColor();
         }
-        Console.ResetColor();
 
         if (!string.IsNullOrEmpty(output.Errors))
         {
