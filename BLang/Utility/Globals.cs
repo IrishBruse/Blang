@@ -10,9 +10,8 @@ public class Globals
 {
     public static Options options { get; set; } = null!;
 
-    public static void Print(string? message, string? prefix, ConsoleColor? color = null)
+    static void Print(string? message, string? prefix, ConsoleColor? color = null)
     {
-        message = message?.Trim();
         if (!string.IsNullOrEmpty(message))
         {
             if (color != null) Console.ForegroundColor = (ConsoleColor)color;

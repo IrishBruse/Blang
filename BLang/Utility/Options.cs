@@ -80,11 +80,11 @@ public class Options
             return help;
         }, example =>
         {
-            Console.WriteLine("Example " + example);
+            Error("Example " + example);
             return example;
         }, true);
 
-        Console.WriteLine(text);
+        Error(text);
 
         Environment.Exit(1);
     }

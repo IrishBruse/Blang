@@ -21,15 +21,8 @@ public static class Compiler
         IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
         CompilationUnit unit = parser.Parse(tokens);
 
-        if (options.Debug)
-        {
-            AstTarget astPrinter = new();
-            string ast = astPrinter.Output(unit);
-
-            Console.WriteLine();
-            Log(ast);
-            Console.WriteLine();
-        }
+        AstTarget astPrinter = new();
+        output.AstOutput = astPrinter.Output(unit);
 
         string target = options.Target;
 

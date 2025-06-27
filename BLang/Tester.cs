@@ -5,6 +5,8 @@ using System.IO;
 using System.Text;
 using BLang.Utility;
 
+using static BLang.Utility.Colors;
+
 public class Tester
 {
     static readonly TestOptions opt = (TestOptions)options;
@@ -20,110 +22,91 @@ public class Tester
 
     private static void RunTestFile(string testFile)
     {
-        long start = DateTime.Now.Millisecond;
+        long time = 0;
 
         CompileOutput output = new();
         try
         {
+            long start = DateTime.Now.Millisecond;
             output = Compiler.Compile(testFile);
+            time = Math.Min(DateTime.Now.Millisecond - start, 0);
         }
         catch (Exception e)
         {
             output.Errors = e.ToString();
         }
 
-        string testOutputFile = Path.ChangeExtension(testFile, ".test");
-        string previousTestOutput = File.Exists(testOutputFile) ? File.ReadAllText(testOutputFile) : "";
-
         if (opt.UpdateSnapshots)
         {
-            UpdateSnapshot(testOutputFile, output, previousTestOutput, start);
+            UpdateSnapshot(testFile, output, time);
         }
         else
         {
-            CompareSnapshot(testFile, output, previousTestOutput, start);
+            CompareSnapshot(testFile, output, time);
         }
     }
 
     const char IconPass = '✓';
-    const char IconFail = (char)215;
-    const char IconUpdated = '+';
-    const char IconUnchanged = '~';
+    const char IconFail = '×';
+    const char IconUpdated = 'u';
+    const char IconSame = '~';
 
-    static void UpdateSnapshot(string testOutputFile, CompileOutput output, string previousTestOutput, long start)
+    static void UpdateSnapshot(string testFile, CompileOutput output, long start)
     {
-        StringBuilder testOutput = new();
-        testOutput.AppendLine(output.AstOutput);
+        string astFile = Path.ChangeExtension(testFile, ".ast");
+        string stdFile = Path.ChangeExtension(testFile, ".out");
+
+        (string astPreviousOutput, string stdPreviousOutput) = LoadTestContent(testFile);
 
         Executable runOutput = Executable.Capture(output.Executable);
-        testOutput.AppendLine("==============================");
 
-        if (!string.IsNullOrEmpty(runOutput.StdOut))
+        StringBuilder astOutput = new();
+        astOutput.Append(output.AstOutput);
+        if (astOutput.Length > 0) File.WriteAllText(astFile, astOutput.ToString());
+
+        StringBuilder stdOutput = new();
+        stdOutput.Append(runOutput.StdOut);
+        stdOutput.Append(runOutput.StdError);
+        if (stdOutput.Length > 0) File.WriteAllText(stdFile, stdOutput.ToString());
+
+        bool astChanged = !astOutput.Equals(astPreviousOutput);
+        string astIcon = astChanged ? Green(IconUpdated) : Gray(IconSame);
+
+        bool stdChanged = !stdOutput.Equals(stdPreviousOutput);
+        string stdIcon = stdChanged ? Green(IconUpdated) : Gray(IconSame);
+
+        bool anyChanges = astChanged || stdChanged;
+        string testIcon = anyChanges ? Green(IconUpdated) : Gray(IconSame);
+
+        string time = Gray(DateTime.Now.Millisecond - start + "ms");
+        Log($"{testIcon} {testFile} {time}");
+        if (anyChanges)
         {
-            testOutput.Append(runOutput.StdOut);
-        }
-
-        if (!string.IsNullOrEmpty(runOutput.StdError))
-        {
-            testOutput.Append(runOutput.StdError);
-        }
-
-        string newTestOutput = testOutput.ToString();
-        File.WriteAllText(testOutputFile, newTestOutput);
-
-
-        bool changed = previousTestOutput != newTestOutput;
-        if (changed)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(IconUpdated);
-            Console.ResetColor();
-            long end = DateTime.Now.Millisecond;
-            Console.WriteLine($" {testOutputFile} {end - start}ms");
-        }
-        else
-        {
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write(IconUnchanged);
-            Console.ResetColor();
-            long end = DateTime.Now.Millisecond;
-            Console.WriteLine($" {testOutputFile} {end - start}ms");
+            Log($"  {astIcon} {astFile}");
+            Log($"  {stdIcon} {stdFile}");
         }
     }
 
-    static void CompareSnapshot(string testFile, CompileOutput output, string previousTestOutput, long start)
+    static void CompareSnapshot(string testFile, CompileOutput output, long start)
     {
-        string[] parts = previousTestOutput.Split("==============================\n");
-
-        string astOutput = parts[0].Trim();
+        (string astOutput, string stdOutput) = LoadTestContent(testFile);
 
         bool success = output.Success && string.IsNullOrEmpty(output.Errors) && astOutput == output.AstOutput;
-        if (success)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(IconPass);
-            Console.ResetColor();
-            Console.Write($" {testFile}");
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            long end = DateTime.Now.Millisecond;
-            Console.WriteLine($" {end - start}ms");
-            Console.ResetColor();
-        }
-        else
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write(IconFail);
-            Console.ResetColor();
-            Console.Write($" {testFile}");
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            long end = DateTime.Now.Millisecond;
-            Console.WriteLine($" {end - start}ms");
-            Console.ResetColor();
-        }
 
-        if (!string.IsNullOrEmpty(output.Errors))
-        {
-            Error(output.Errors);
-        }
+        string time = Gray(DateTime.Now.Millisecond - start + "ms");
+        string icon = success ? Green(IconPass) : Red(IconFail);
+
+        Log($"{icon} {testFile} {time}");
+    }
+
+    static (string astOutput, string stdOutput) LoadTestContent(string testFile)
+    {
+        string astFile = Path.ChangeExtension(testFile, ".ast");
+        string stdFile = Path.ChangeExtension(testFile, ".out");
+
+        string astOutput = File.Exists(astFile) ? File.ReadAllText(astFile) : "";
+        string stdOutput = File.Exists(stdFile) ? File.ReadAllText(stdFile) : "";
+
+        return (astOutput, stdOutput);
     }
 }

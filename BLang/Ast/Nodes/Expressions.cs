@@ -49,7 +49,7 @@ public record BinaryExpression(TokenType Operation, Expression Left, Expression 
 
         if (number == 1)
         {
-            return $"{ret.Trim()}";
+            return ret.Trim();
         }
         else
         {
