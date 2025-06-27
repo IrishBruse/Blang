@@ -1,0 +1,9 @@
+CompilationUnit: 
+  FunctionDecleration: 
+    ExternalStatement: printf
+    AutoStatement: foo,bar
+    VariableDeclarator: foo
+      IntValue: 123
+    VariableDeclarator: bar
+      IntValue: 456
+    FunctionCall: printf "%d %d", foo, bar

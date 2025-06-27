@@ -1,0 +1,4 @@
+CompilationUnit: 
+  FunctionDecleration: 
+    ExternalStatement: printf
+    FunctionCall: printf "Hello, World!"
