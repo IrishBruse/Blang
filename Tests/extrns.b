@@ -1,5 +1,6 @@
 main() {
     extrn printf, exit;
     printf("Test: externs\n");
-    exit(12);
+    exit(0);
+    printf("Failed\n");
 }

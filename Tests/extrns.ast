@@ -2,4 +2,5 @@ CompilationUnit:
   FunctionDecleration: 
     ExternalStatement: printf,exit
     FunctionCall: printf "Test: externs\n"
-    FunctionCall: exit 12
+    FunctionCall: exit 0
+    FunctionCall: printf "Failed\n"

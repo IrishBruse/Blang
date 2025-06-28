@@ -91,12 +91,35 @@ public class Tester
     {
         (string astOutput, string stdOutput) = LoadTestContent(testFile);
 
-        bool success = output.Success && string.IsNullOrEmpty(output.Errors) && astOutput == output.AstOutput;
+        Executable runOutput = Executable.Capture(output.Executable);
+
+        string runOutputStdErr = runOutput.StdOut + runOutput.StdError;
+
+        string? error = null;
+
+        bool success = true;
+        success &= output.Success;
+        if (!success && error == null) error = $"compile failed: {output.Errors}";
+        success &= runOutput.ExitCode == 0;
+        if (!success && error == null) error = $"exitCode: {runOutput.ExitCode}";
+        success &= astOutput == output.AstOutput;
+        if (!success && error == null) error = $"ast missmatch: {output.AstOutput}";
+        success &= stdOutput == runOutputStdErr;
+        if (!success && error == null)
+        {
+            error = "";
+            error += "Expected:\n";
+            error += stdOutput;
+            error += "\n";
+            error += "Recieved:\n";
+            error += runOutputStdErr;
+        }
 
         string time = Gray(DateTime.Now.Millisecond - start + "ms");
         string icon = success ? Green(IconPass) : Red(IconFail);
 
         Log($"{icon} {testFile} {time}");
+        if (error != null) Error(error);
     }
 
     static (string astOutput, string stdOutput) LoadTestContent(string testFile)
