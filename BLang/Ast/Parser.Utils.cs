@@ -71,7 +71,14 @@ public partial class Parser
     IntValue ParseInteger()
     {
         Token integer = Eat(TokenType.IntegerLiteral);
-        return new IntValue(int.Parse(integer.Content))
+
+        if (!int.TryParse(integer.Content, out int number))
+        {
+            string loc = data.GetFileLocation(integer.Range.Start);
+            throw new Exception($"{loc} {integer} larger than 32bits");
+        }
+
+        return new IntValue(number)
         {
             Range = integer.Range
         };

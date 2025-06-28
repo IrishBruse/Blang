@@ -36,13 +36,21 @@ public class Tester
             output.Errors = e.ToString();
         }
 
-        if (opt.UpdateSnapshots)
+        try
         {
-            UpdateSnapshot(testFile, output, time);
+            if (opt.UpdateSnapshots)
+            {
+                UpdateSnapshot(testFile, output, time);
+            }
+            else
+            {
+                CompareSnapshot(testFile, output, time);
+            }
         }
-        else
+        catch (Exception e)
         {
-            CompareSnapshot(testFile, output, time);
+            Log($"{Red("E")} {testFile} {Gray(time + "ms")}");
+            Error(e.ToString());
         }
     }
 
@@ -95,24 +103,34 @@ public class Tester
 
         string runOutputStdErr = runOutput.StdOut + runOutput.StdError;
 
-        string? error = null;
+        string error = "";
 
-        bool success = true;
-        success &= output.Success;
-        if (!success && error == null) error = $"compile failed: {output.Errors}";
-        success &= runOutput.ExitCode == 0;
-        if (!success && error == null) error = $"exitCode: {runOutput.ExitCode}";
-        success &= astOutput == output.AstOutput;
-        if (!success && error == null) error = $"ast missmatch: {output.AstOutput}";
-        success &= stdOutput == runOutputStdErr;
-        if (!success && error == null)
+        bool success = false;
+
+        if (!output.Success || !string.IsNullOrEmpty(output.Errors))
         {
-            error = "";
-            error += "Expected:\n";
-            error += stdOutput;
-            error += "\n";
-            error += "Recieved:\n";
-            error += runOutputStdErr;
+            error = $"compile failed: {output.Errors}";
+        }
+        else if (runOutput.ExitCode != 0)
+        {
+            error = $"exitCode: {runOutput.ExitCode}";
+        }
+        else if (astOutput != output.AstOutput)
+        {
+            error = $"ast missmatch: {output.AstOutput}";
+        }
+        else if (stdOutput != runOutputStdErr)
+        {
+            error = $"""
+            Expected:
+            {stdOutput}
+            Recieved:
+            {runOutputStdErr}
+            """;
+        }
+        else
+        {
+            success = true;
         }
 
         string time = Gray(DateTime.Now.Millisecond - start + "ms");

@@ -1,5 +1,6 @@
 namespace BLang.Tokenizer;
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -38,7 +39,7 @@ public class Lexer(CompilationData data)
             {
                 yield return LexIdentifier(c);
             }
-            else if (char.IsNumber(c))
+            else if (char.IsNumber(c) || ((c == '-' || c == '+') && char.IsNumber(Peek())))
             {
                 yield return LexNumber(c);
             }

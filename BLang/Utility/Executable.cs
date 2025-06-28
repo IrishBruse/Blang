@@ -22,13 +22,19 @@ public record Executable(string? StdOut, string? StdError, int ExitCode)
     {
         if (options.Debug) Info($"{executable} {arguments}", "CMD");
 
-        using Process? process = Process.Start(new ProcessStartInfo(executable, arguments) { RedirectStandardOutput = true, RedirectStandardError = true });
-        process?.WaitForExit();
+        try
+        {
+            using Process? process = Process.Start(new ProcessStartInfo(executable, arguments) { RedirectStandardOutput = true, RedirectStandardError = true });
+            process?.WaitForExit();
 
-        string? stdOut = process?.StandardOutput?.ReadToEnd();
-        string? stdErr = process?.StandardError?.ReadToEnd();
-
-        return new(stdOut, stdErr, process?.ExitCode ?? -1);
+            string? stdOut = process?.StandardOutput?.ReadToEnd();
+            string? stdErr = process?.StandardError?.ReadToEnd();
+            return new(stdOut, stdErr, process?.ExitCode ?? -1);
+        }
+        catch (System.Exception e)
+        {
+            return new("", e.ToString(), 1);
+        }
     }
 
     public bool HasError()

@@ -11,7 +11,7 @@ public class AstTarget : BaseTarget
     {
         output.Clear();
         VisitCompilationUnit(node);
-        return output.ToString();
+        return output.ToString().Trim();
     }
 
     public void VisitCompilationUnit(CompilationUnit node)

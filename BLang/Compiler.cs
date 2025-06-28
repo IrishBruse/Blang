@@ -24,6 +24,8 @@ public static class Compiler
         AstTarget astPrinter = new();
         output.AstOutput = astPrinter.Output(unit);
 
+        Debug(output.AstOutput);
+
         string target = options.Target;
 
         CreateOutputDirectories(file, target);
