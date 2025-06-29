@@ -5,4 +5,4 @@ CompilationUnit:
     FunctionCall: other 
   FunctionDecleration: 
     ExternalStatement: printf
-    FunctionCall: printf "other()\n"
+    FunctionCall: printf "Pass\n"

@@ -4,7 +4,7 @@ export function w $main()
     %a_ptr =l alloc4 4
 
     # a = 0
-    storew 0, %a_ptr
+    storew 12, %a_ptr
 
     %b_ptr =l alloc4 4
     # b = 5
@@ -14,12 +14,13 @@ export function w $main()
     %bvalue =w loadw %b_ptr
     %test2 =w cslew %avalue, %bvalue
 
-    jnz %test2, @end, @test
-@test
+    jnz %test2, @else, @if
+@if
     call $printf(l $string_0, w 456)
+    jmp @end
+@else
+    call $printf(l $string_0, w 789)
 @end
-    # call printf
-    call $printf(l $string_0, w 123)
 
     ret 0
 }

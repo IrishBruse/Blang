@@ -1,0 +1,8 @@
+CompilationUnit: 
+  FunctionDecleration: 
+    ExternalStatement: printf
+    FunctionCall: printf "Test: ifelse\n"
+    IfStatement: (1 < 0)
+      FunctionCall: printf "Fail\n"
+    ElseStatement:
+      FunctionCall: printf "Pass\n"

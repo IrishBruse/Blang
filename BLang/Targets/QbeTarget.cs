@@ -2,7 +2,6 @@ namespace BLang.Targets;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;
@@ -16,15 +15,17 @@ public class QbeTarget(CompilationData data) : BaseTarget
     readonly Dictionary<string, string> strings = [];
     readonly HashSet<Symbol> externs = [];
 
-    readonly Dictionary<string, string> memoryAllocations = [];
     readonly Dictionary<Symbol, string> currentSsaRegisters = [];
+    readonly Dictionary<string, string> memoryAllocations = [];
     readonly Dictionary<Symbol, int> ssaVersionCounters = [];
+
+    int ifIndex = 0;
 
     public string Output(CompilationUnit node)
     {
-        memoryAllocations.Clear();
         currentSsaRegisters.Clear();
         ssaVersionCounters.Clear();
+        memoryAllocations.Clear();
 
         _ = data;
 
@@ -36,7 +37,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
     {
         foreach (GlobalVariable variable in node.GlobalVariables)
         {
-            Write("# " + variable.Symbol.Name);
+            Comment(variable.Symbol.Name);
             CreateGlobalMemoryRegister(variable.Symbol);
             string value = variable.Value == null ? "z 4" : "w " + variable.Value;
             Write($"data ${variable.Symbol.Name} = {{ {value} }}");
@@ -55,7 +56,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     private void GenerateDataSection()
     {
-        Write("# Data");
+        Comment("Data");
         foreach ((string value, string name) in strings)
         {
             Write($"data ${name} = {{ b \"{value}\", b 0 }}");
@@ -64,10 +65,10 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     private void GenerateExternsSection()
     {
-        Write("# Externs");
+        Comment("Externs");
         foreach (Symbol external in externs)
         {
-            Write($"# * {external.Name}");
+            Comment($"* {external.Name}");
         }
     }
 
@@ -127,7 +128,6 @@ public class QbeTarget(CompilationData data) : BaseTarget
         foreach (Statement stmt in body)
         {
             VisitStatement(stmt);
-            Write();
         }
     }
 
@@ -141,17 +141,28 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public void VisitWhileStatement(WhileStatement whileStatement)
     {
-        Write($"# VisitWhileDeclaration {whileStatement}");
+        Comment($"VisitWhileDeclaration {whileStatement}");
     }
 
     public void VisitIfStatement(IfStatement node)
     {
-        Write("# if " + node.Condition);
-        string reg = GenerateBinaryExpressionIR(node.Condition, new("test", SymbolKind.Load));
-        Write($"jnz {reg}, @test_start, @test_end");
-        WriteRaw("@test_start\n");
+        Comment("if " + node.Condition);
+        string labelPrefix = $"@if_{ifIndex}_";
+        string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + ifIndex, SymbolKind.Load));
+        string labelSuffix = node.ElseBody == null ? "end" : "else";
+        Write($"jnz {reg}, {labelPrefix}start, {labelPrefix}{labelSuffix}");
+        WriteRaw($"{labelPrefix}start\n");
         EmitBody(node.Body);
-        WriteRaw("@test_end\n");
+
+        if (node.ElseBody != null)
+        {
+            Write($"jmp {labelPrefix}end");
+            WriteRaw($"{labelPrefix}else\n");
+            EmitBody(node.ElseBody);
+        }
+
+        WriteRaw($"{labelPrefix}end\n");
+        ifIndex++;
     }
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
@@ -341,5 +352,10 @@ public class QbeTarget(CompilationData data) : BaseTarget
         }
 
         return value;
+    }
+
+    public void Comment(string message)
+    {
+        Write($"# {message}");
     }
 }

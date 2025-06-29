@@ -166,7 +166,14 @@ public partial class Parser(CompilationData data)
 
         Statement[] body = ParseBlock();
 
-        return new((BinaryExpression)condition, body)
+        Statement[]? elseBody = null;
+        if (Peek(TokenType.ElseKeyword))
+        {
+            Eat(TokenType.ElseKeyword);
+            elseBody = ParseBlock();
+        }
+
+        return new((BinaryExpression)condition, body, elseBody)
         {
             Range = start.Range.Merge(previousTokenRange),
         };

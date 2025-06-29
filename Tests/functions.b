@@ -7,5 +7,5 @@ main() {
 
 other() {
     extrn printf;
-    printf("other()\n");
+    printf("Pass\n");
 }

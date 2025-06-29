@@ -24,6 +24,10 @@ public class Program
             Run();
             break;
 
+            case FormatOptions:
+            Run();
+            break;
+
             case BuildOptions:
             Build();
             break;

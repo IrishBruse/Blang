@@ -97,6 +97,7 @@ public enum TokenType
     // Keywords
     ExternKeyword,
     IfKeyword,
+    ElseKeyword,
     WhileKeyword,
     AutoKeyword
 }
@@ -112,6 +113,7 @@ public static class Extensions
     {
         return t == TokenType.ExternKeyword ||
             t == TokenType.IfKeyword ||
+            t == TokenType.ElseKeyword ||
             t == TokenType.WhileKeyword ||
             t == TokenType.AutoKeyword;
     }

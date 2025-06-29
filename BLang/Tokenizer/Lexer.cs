@@ -267,6 +267,7 @@ public class Lexer(CompilationData data)
         {
             "extrn" => new Token(TokenType.ExternKeyword, identifier, EndTokenRange()),
             "if" => new Token(TokenType.IfKeyword, identifier, EndTokenRange()),
+            "else" => new Token(TokenType.ElseKeyword, identifier, EndTokenRange()),
             "while" => new Token(TokenType.WhileKeyword, identifier, EndTokenRange()),
             "auto" => new Token(TokenType.AutoKeyword, identifier, EndTokenRange()),
             _ => new Token(TokenType.Identifier, identifier, EndTokenRange()),

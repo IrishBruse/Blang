@@ -23,8 +23,7 @@ public static class Compiler
 
         AstTarget astPrinter = new();
         output.AstOutput = astPrinter.Output(unit);
-
-        Debug(output.AstOutput);
+        Debug(output.AstOutput, null, null);
 
         string target = options.Target;
 

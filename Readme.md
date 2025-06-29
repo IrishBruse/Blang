@@ -28,8 +28,9 @@ Run the compiler tests
 -   [x] auto
 -   [x] variable assignment
 -   [x] math `foo = (1 + 2 * 3)` foo = 7
--   [ ] Global variables
--   [ ] if else
+-   [x] Global variables
+-   [x] if
+-   [x] else
 -   [ ] while
 -   [ ] switch
 

@@ -3,4 +3,4 @@ CompilationUnit:
     ExternalStatement: printf
     FunctionCall: printf "Test: if\n"
     IfStatement: (0 < 1)
-      FunctionCall: printf "True"
+      FunctionCall: printf "Pass"

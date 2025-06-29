@@ -135,6 +135,11 @@ public class AstTarget : BaseTarget
     {
         Print(statement, statement.Condition.ToString());
         VisitBlock(statement.Body);
+        if (statement.ElseBody != null)
+        {
+            Write($"ElseStatement:");
+            VisitBlock(statement.ElseBody);
+        }
     }
 
     public static string GetTypeName(object? obj) => obj?.GetType().ToString().Split(".").Last() ?? "";
