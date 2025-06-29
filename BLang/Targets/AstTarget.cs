@@ -128,7 +128,8 @@ public class AstTarget : BaseTarget
 
     public void VisitWhileStatement(WhileStatement statement)
     {
-        Print(statement);
+        Print(statement, statement.Condition.ToString());
+        VisitBlock(statement.Body);
     }
 
     public void VisitIfStatement(IfStatement statement)

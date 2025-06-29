@@ -19,7 +19,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
     readonly Dictionary<string, string> memoryAllocations = [];
     readonly Dictionary<Symbol, int> ssaVersionCounters = [];
 
-    int ifIndex = 0;
+    int conditionIndex = 0;
 
     public string Output(CompilationUnit node)
     {
@@ -139,19 +139,28 @@ public class QbeTarget(CompilationData data) : BaseTarget
         }
     }
 
-    public void VisitWhileStatement(WhileStatement whileStatement)
+    public void VisitWhileStatement(WhileStatement node)
     {
-        Comment($"VisitWhileDeclaration {whileStatement}");
+        Comment("while " + node.Condition);
+        string labelPrefix = $"@if_{conditionIndex}_";
+        WriteRaw($"{labelPrefix}start\n");
+        string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + conditionIndex, SymbolKind.Load));
+        Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}end");
+        WriteRaw($"{labelPrefix}body\n");
+        EmitBody(node.Body);
+        Write($"jmp {labelPrefix}start\n");
+        WriteRaw($"{labelPrefix}end\n");
+        conditionIndex++;
     }
 
     public void VisitIfStatement(IfStatement node)
     {
         Comment("if " + node.Condition);
-        string labelPrefix = $"@if_{ifIndex}_";
-        string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + ifIndex, SymbolKind.Load));
+        string labelPrefix = $"@while_{conditionIndex}_";
+        WriteRaw($"{labelPrefix}start\n");
+        string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + conditionIndex, SymbolKind.Load));
         string labelSuffix = node.ElseBody == null ? "end" : "else";
         Write($"jnz {reg}, {labelPrefix}start, {labelPrefix}{labelSuffix}");
-        WriteRaw($"{labelPrefix}start\n");
         EmitBody(node.Body);
 
         if (node.ElseBody != null)
@@ -162,7 +171,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         }
 
         WriteRaw($"{labelPrefix}end\n");
-        ifIndex++;
+        conditionIndex++;
     }
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)

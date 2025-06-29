@@ -84,6 +84,11 @@ public enum TokenType
     DivisionAssignment,
     ModuloAssignment,
 
+    /// <summary> ++ </summary>
+    Increment,
+    /// <summary> -- </summary>
+    Decrement,
+
     // Bitwise
     BitwiseComplement,
     BitwiseAnd,

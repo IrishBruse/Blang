@@ -156,9 +156,19 @@ public class Lexer(CompilationData data)
             type = TokenType.AdditionAssignment;
             op += Next();
         }
+        else if (c == '+' && p == '+')
+        {
+            type = TokenType.Increment;
+            op += Next();
+        }
         else if ((c == '-' && p == '=') || (c == '=' && p == '-'))
         {
             type = TokenType.SubtractionAssignment;
+            op += Next();
+        }
+        else if (c == '-' && p == '-')
+        {
+            type = TokenType.Decrement;
             op += Next();
         }
         else if ((c == '*' && p == '=') || (c == '=' && p == '*'))

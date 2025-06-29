@@ -31,7 +31,7 @@ Run the compiler tests
 -   [x] Global variables
 -   [x] if
 -   [x] else
--   [ ] while
+-   [x] while
 -   [ ] switch
 
 ## Targets

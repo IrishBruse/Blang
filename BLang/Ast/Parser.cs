@@ -230,6 +230,7 @@ public partial class Parser(CompilationData data)
         {
             TokenType.OpenParenthesis => ParseFunctionCall(identifier, parameters),
             TokenType.Assignment => ParseVariableAssignment(identifier),
+            TokenType.Increment => ParseVariableAssignmentShorthand(identifier),
             _ => throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParseIdentifierStatement)} of type {Peek()}"),
         };
     }
@@ -274,6 +275,23 @@ public partial class Parser(CompilationData data)
         Eat(TokenType.Semicolon);
 
         Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Assign);
+
+        return new VariableDeclarator(symbol, value)
+        {
+            Range = identifier.Range,
+        };
+    }
+
+    VariableDeclarator ParseVariableAssignmentShorthand(Token identifier)
+    {
+        Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Assign);
+        Expression value = Peek() switch
+        {
+            TokenType.Increment => new BinaryExpression(TokenType.Addition, new Variable(symbol), new IntValue(1)),
+            _ => throw new NotImplementedException("" + Peek())
+        };
+        Eat(TokenType.Increment);
+        Eat(TokenType.Semicolon);
 
         return new VariableDeclarator(symbol, value)
         {
