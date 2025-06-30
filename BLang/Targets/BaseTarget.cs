@@ -9,10 +9,10 @@ public class BaseTarget
     public StringBuilder output { internal get; set; } = new();
     int depth { get; set; }
 
-    public void Indent() => depth++;
-    public void Dedent() => depth--;
+    public void Indent(int? spaces = null) => depth += spaces ?? Indention;
+    public void Dedent(int? spaces = null) => depth -= spaces ?? Indention;
 
-    public string Space => new(' ', depth * Indention);
+    public string Space => new(' ', depth);
 
     public void WriteRaw(string? value)
     {

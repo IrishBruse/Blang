@@ -142,14 +142,22 @@ public class QbeTarget(CompilationData data) : BaseTarget
     public void VisitWhileStatement(WhileStatement node)
     {
         Comment("while " + node.Condition);
-        string labelPrefix = $"@if_{conditionIndex}_";
-        WriteRaw($"{labelPrefix}start\n");
-        string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + conditionIndex, SymbolKind.Load));
-        Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}end");
-        WriteRaw($"{labelPrefix}body\n");
-        EmitBody(node.Body);
-        Write($"jmp {labelPrefix}start\n");
-        WriteRaw($"{labelPrefix}end\n");
+        string labelPrefix = $"@while_{conditionIndex}_";
+        Write($"{labelPrefix}start");
+        Indent();
+        {
+            string reg = GenerateBinaryExpressionIR(node.Condition, new("while_condition", SymbolKind.Load));
+            Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}end");
+        }
+        Dedent();
+        Write($"{labelPrefix}body");
+        Indent();
+        {
+            EmitBody(node.Body);
+            Write($"jmp {labelPrefix}start");
+        }
+        Dedent();
+        Write($"{labelPrefix}end");
         conditionIndex++;
     }
 
@@ -179,7 +187,9 @@ public class QbeTarget(CompilationData data) : BaseTarget
         foreach (Symbol variable in autoDeclaration.Variables)
         {
             string varName = CreateMemoryRegister(variable);
+            Write($"# auto {variable}");
             Write($"{varName} =l alloc4 4");
+            Write($"storew 0, {varName}");
         }
     }
 
