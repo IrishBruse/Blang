@@ -124,7 +124,7 @@ public partial class Parser(CompilationData data)
         return statements.ToArray();
     }
 
-    Statement? ParseStatement()
+    Statement ParseStatement()
     {
         return Peek() switch
         {
@@ -164,7 +164,16 @@ public partial class Parser(CompilationData data)
             throw new ParserException("ParseWhileDefinition condition: " + condition);
         }
 
-        Statement[] body = ParseBlock();
+        Statement[] body;
+
+        if (!Peek(TokenType.OpenScope))
+        {
+            body = [ParseStatement()];
+        }
+        else
+        {
+            body = ParseBlock();
+        }
 
         Statement[]? elseBody = null;
         if (Peek(TokenType.ElseKeyword))
@@ -220,7 +229,7 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    Statement? ParseIdentifierStatement()
+    Statement ParseIdentifierStatement()
     {
         Token identifier = Eat(TokenType.Identifier);
 

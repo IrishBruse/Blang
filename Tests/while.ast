@@ -1,0 +1,12 @@
+CompilationUnit: 
+  FunctionDecleration: 
+    ExternalStatement: printf
+    AutoStatement: i
+    VariableDeclarator: i
+      IntValue: 0
+    WhileStatement: (i < 10)
+      FunctionCall: printf "%d", i
+      VariableDeclarator: i
+        BinaryExpression: Addition
+          Variable: i
+          IntValue: 1

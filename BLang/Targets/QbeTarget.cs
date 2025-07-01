@@ -142,14 +142,10 @@ public class QbeTarget(CompilationData data) : BaseTarget
     public void VisitWhileStatement(WhileStatement node)
     {
         Comment("while " + node.Condition);
-        string labelPrefix = $"@while_{conditionIndex}_";
+        string labelPrefix = $"@while_{++conditionIndex}_";
         Write($"{labelPrefix}start");
-        Indent();
-        {
-            string reg = GenerateBinaryExpressionIR(node.Condition, new("while_condition", SymbolKind.Load));
-            Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}end");
-        }
-        Dedent();
+        string reg = GenerateBinaryExpressionIR(node.Condition, new("while_condition", SymbolKind.Load));
+        Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}end");
         Write($"{labelPrefix}body");
         Indent();
         {
@@ -158,28 +154,29 @@ public class QbeTarget(CompilationData data) : BaseTarget
         }
         Dedent();
         Write($"{labelPrefix}end");
-        conditionIndex++;
     }
 
     public void VisitIfStatement(IfStatement node)
     {
         Comment("if " + node.Condition);
-        string labelPrefix = $"@while_{conditionIndex}_";
-        WriteRaw($"{labelPrefix}start\n");
+        string labelPrefix = $"@if_{++conditionIndex}_";
+        Write($"{labelPrefix}start");
         string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + conditionIndex, SymbolKind.Load));
         string labelSuffix = node.ElseBody == null ? "end" : "else";
-        Write($"jnz {reg}, {labelPrefix}start, {labelPrefix}{labelSuffix}");
-        EmitBody(node.Body);
-
-        if (node.ElseBody != null)
+        Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}{labelSuffix}");
+        Write($"{labelPrefix}body");
+        Indent();
         {
-            Write($"jmp {labelPrefix}end");
-            WriteRaw($"{labelPrefix}else\n");
-            EmitBody(node.ElseBody);
+            EmitBody(node.Body);
+            if (node.ElseBody != null)
+            {
+                Write($"jmp {labelPrefix}end");
+                Write($"{labelPrefix}else");
+                EmitBody(node.ElseBody);
+            }
         }
-
-        WriteRaw($"{labelPrefix}end\n");
-        conditionIndex++;
+        Dedent();
+        Write($"{labelPrefix}end");
     }
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
@@ -280,7 +277,23 @@ public class QbeTarget(CompilationData data) : BaseTarget
                     Write($"{reg} =w csltw {leftOp}, {rightOp}");
                     break;
 
-                    default: throw new Exception("test");
+                    case TokenType.LessThanEqual:
+                    Write($"{reg} =w cslew {leftOp}, {rightOp}");
+                    break;
+
+                    case TokenType.Modulo:
+                    Write($"{reg} =w rem {leftOp}, {rightOp}");
+                    break;
+
+                    case TokenType.EqualEqual:
+                    Write($"{reg} =w ceqw {leftOp}, {rightOp}");
+                    break;
+
+                    case TokenType.BitwiseOr:
+                    Write($"{reg} =w or {leftOp}, {rightOp}");
+                    break;
+
+                    default: throw new Exception("Unknown operator " + binary.Operation);
                 }
                 return reg;
             }

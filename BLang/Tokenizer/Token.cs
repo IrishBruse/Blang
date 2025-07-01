@@ -151,7 +151,9 @@ public static class Extensions
             TokenType.GreaterThanEqual => ">=",
             TokenType.EqualEqual => "==",
             TokenType.NotEqual => "!=",
-            _ => t.ToString(),
+
+            TokenType.BitwiseOr => "|",
+            _ => throw new System.Exception("Unhandled tokentype " + t),
         };
     }
 
