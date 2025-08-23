@@ -7,18 +7,18 @@ Implementing the B lang in C# with qbe backend
 Run an example
 
 ```shell
-./bc run Examples/HelloWorld.b
+./bc run Examples/HelloWorld.b --debug
 ```
+
+![bc](misc/screenshots/bc_run.png)
 
 Run the compiler tests
 
 ```shell
-./bc test
+./bt
 ```
 
-## Screenshot
-
-![alt text](misc/screenshot.png)
+![bt](misc/screenshots/bt.png)
 
 ## Currently Implemented
 
@@ -48,3 +48,4 @@ Run the compiler tests
 ## References
 
 -   [QBE Docs](https://c9x.me/compile/doc/il.html)
+-   [tsoding/b](https://github.com/tsoding/b)

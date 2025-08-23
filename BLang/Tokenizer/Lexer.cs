@@ -267,7 +267,7 @@ public class Lexer(CompilationData data)
     {
         StringBuilder identifierBuilder = new(c.ToString());
 
-        while (char.IsLetterOrDigit(Peek()) && !IsLineBreak(Peek()))
+        while (char.IsLetterOrDigit(Peek()) || Peek() == '_' && !IsLineBreak(Peek()))
         {
             identifierBuilder.Append(Next());
         }
