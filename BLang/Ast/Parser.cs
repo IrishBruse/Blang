@@ -89,6 +89,11 @@ public partial class Parser(CompilationData data)
             Token variable = Eat(TokenType.Identifier);
             symbol = symbols.Add(variable.Content, SymbolKind.Define);
             parameters.Add(symbol);
+
+            if (Peek(TokenType.Comma))
+            {
+                Eat(TokenType.Comma);
+            }
         }
         Eat(TokenType.CloseParenthesis);
 
