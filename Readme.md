@@ -32,6 +32,8 @@ Run the compiler tests
 -   [x] if
 -   [x] else
 -   [x] while
+-   [ ] pointers \* &
+-   [ ] Array index [i]
 -   [ ] switch
 
 ## Targets

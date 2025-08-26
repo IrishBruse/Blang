@@ -1,5 +1,6 @@
 namespace BLang.Ast;
 
+using System;
 using System.Collections.Generic;
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
@@ -49,8 +50,27 @@ public partial class Parser
             TokenType.OpenParenthesis => ParseGroupExpression(),
             TokenType.IntegerLiteral => ParseInteger(),
             TokenType.Identifier => ParseVariable(),
+
+            // Pointers
+            TokenType.AddressOf => ParseAddressOf(),
+            TokenType.PointerDereference => ParsePointerDereference(),
+
             _ => throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParsePrimary)} of type {Peek()}"),
         };
+    }
+
+    AddressOfExpression ParseAddressOf()
+    {
+        Eat(TokenType.AddressOf);
+        Expression expr = ParsePrimary();
+        return new AddressOfExpression(expr) { Range = expr.Range };
+    }
+
+    PointerDereferenceExpression ParsePointerDereference()
+    {
+        Eat(TokenType.PointerDereference);
+        Expression expr = ParsePrimary();
+        return new PointerDereferenceExpression(expr) { Range = expr.Range };
     }
 
     Expression ParseGroupExpression()

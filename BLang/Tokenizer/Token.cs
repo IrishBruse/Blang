@@ -104,7 +104,13 @@ public enum TokenType
     IfKeyword,
     ElseKeyword,
     WhileKeyword,
-    AutoKeyword
+    AutoKeyword,
+
+    // Alias
+
+    // Pointers
+    AddressOf = BitwiseAnd,
+    PointerDereference = Multiplication,
 }
 
 public static class Extensions

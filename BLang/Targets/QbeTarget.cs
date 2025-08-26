@@ -257,6 +257,33 @@ public class QbeTarget(CompilationData data) : BaseTarget
                 return number.Value.ToString();
             }
 
+            case AddressOfExpression address:
+            {
+                if (address.expr is not Variable var)
+                {
+                    throw new Exception("Address-of operator only supported for variables.");
+                }
+
+                return GetMemoryRegister(var.Symbol);
+            }
+
+            case PointerDereferenceExpression pointerDereference:
+            {
+                if (pointerDereference.expr is not Variable variable)
+                {
+                    throw new Exception("Pointer dereference operator only supported for variables.");
+                }
+
+                string addressReg = CreateTempRegister(variable.Symbol);
+                string memReg = GetMemoryRegister(variable.Symbol);
+                Write($"{addressReg} =l loadw {memReg}");
+
+                Write($"# test");
+                string loadReg = NewTempReg();
+                Write($"{loadReg} =w loadw {addressReg}");
+                return loadReg;
+            }
+
             case BinaryExpression binary:
             {
                 string leftOp = GenerateBinaryExpressionIR(binary.Left, targetSymbol);
@@ -337,7 +364,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
     int tempRegister = 0;
     public string NewTempReg()
     {
-        string qbeReg = $"%_{tempRegister}";
+        string qbeReg = $"%temp_{tempRegister}";
         tempRegister++;
         return qbeReg;
     }

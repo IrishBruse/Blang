@@ -57,3 +57,13 @@ public record BinaryExpression(TokenType Operation, Expression Left, Expression 
         }
     }
 }
+
+public record AddressOfExpression(Expression expr) : Expression
+{
+    public override string ToString() => "&" + expr.ToString();
+}
+
+public record PointerDereferenceExpression(Expression expr) : Expression
+{
+    public override string ToString() => "*" + expr.ToString();
+}
