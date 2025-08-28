@@ -1,0 +1,10 @@
+CompilationUnit: 
+  FunctionDecleration: 
+    ExternalStatement: printf
+    AutoStatement: a,b,c
+    VariableDeclarator: a
+      IntValue: 12
+    FunctionCall: printf "a %d\n", a
+    VariableDeclarator: b
+    VariableDeclarator: c
+    FunctionCall: printf "c %d\n", c
