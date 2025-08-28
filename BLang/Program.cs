@@ -7,11 +7,6 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        if (Environment.GetEnvironmentVariable("DOTNET_WATCH") == "1")
-        {
-            Console.WriteLine(new string('\n', Console.WindowHeight));
-        }
-
         Options.Parse(args);
 
         switch (options)
