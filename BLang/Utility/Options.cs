@@ -2,6 +2,7 @@ namespace BLang.Utility;
 
 using System;
 using System.Collections.Generic;
+
 using CommandLine;
 using CommandLine.Text;
 
@@ -57,7 +58,7 @@ public class Options
         parserResult.WithNotParsed(errors => HandleErrors(errors, parserResult));
     }
 
-    private static void HandleErrors(IEnumerable<Error> errors, ParserResult<object> parserResult)
+    static void HandleErrors(IEnumerable<Error> errors, ParserResult<object> parserResult)
     {
         if (errors.IsVersion())
         {
@@ -65,7 +66,7 @@ public class Options
             Environment.Exit(0);
         }
 
-        var text = HelpText.AutoBuild(parserResult, help =>
+        HelpText text = HelpText.AutoBuild(parserResult, help =>
         {
             help.Heading = "";
             help.Copyright = "";

@@ -1,6 +1,5 @@
 namespace BLang;
 
-using System;
 using BLang.Utility;
 
 public class Program
@@ -31,7 +30,7 @@ public class Program
 
     public static void Run()
     {
-        var opt = (RunOptions)options;
+        RunOptions opt = (RunOptions)options;
         CompileOutput output = Compiler.Compile(opt.File);
         Error(output.Errors);
 
@@ -41,7 +40,7 @@ public class Program
 
     public static void Build()
     {
-        var opt = (BuildOptions)options;
+        BuildOptions opt = (BuildOptions)options;
         CompileOutput output = Compiler.Compile(opt.File);
         Error(output.Errors);
     }

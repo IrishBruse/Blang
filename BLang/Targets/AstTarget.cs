@@ -3,6 +3,7 @@ namespace BLang.Targets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using BLang.Ast.Nodes;
 
 public class AstTarget : BaseTarget
@@ -39,7 +40,7 @@ public class AstTarget : BaseTarget
         VisitBlock(node.Body);
     }
 
-    private void VisitBlock(Statement[] statements)
+    void VisitBlock(Statement[] statements)
     {
         Indent();
         foreach (Statement stmt in statements)

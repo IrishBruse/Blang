@@ -2,6 +2,7 @@ namespace BLang.Ast;
 
 using System;
 using System.Collections.Generic;
+
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;
@@ -135,6 +136,7 @@ public partial class Parser(CompilationData data)
         {
             TokenType.ExternKeyword => ParseExternalDefinition(),
             TokenType.WhileKeyword => ParseWhileDefinition(),
+            TokenType.SwitchKeyword => ParseWhileDefinition(),
             TokenType.IfKeyword => ParseIfDefinition(),
             TokenType.AutoKeyword => ParseAutoDefinition(),
             TokenType.Identifier => ParseIdentifierStatement(),
@@ -150,6 +152,23 @@ public partial class Parser(CompilationData data)
         if (condition is not BinaryExpression)
         {
             throw new ParserException("ParseWhileDefinition condition: " + condition);
+        }
+        Statement[] body = ParseBlock();
+
+        return new((BinaryExpression)condition, body)
+        {
+            Range = start.Range.Merge(previousTokenRange),
+        };
+    }
+
+    SwitchStatement ParseSwitchDefinition()
+    {
+        Token start = Eat(TokenType.SwitchKeyword);
+
+        Expression condition = ParseBinaryExpression();
+        if (condition is not BinaryExpression)
+        {
+            throw new ParserException("ParseSwitchDefinition condition: " + condition);
         }
         Statement[] body = ParseBlock();
 

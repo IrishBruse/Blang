@@ -3,6 +3,7 @@ namespace BLang;
 using System;
 using System.IO;
 using System.Text;
+
 using BLang.Utility;
 
 using static BLang.Utility.Colors;
@@ -20,7 +21,7 @@ public class Tester
         }
     }
 
-    private static void RunTestFile(string testFile)
+    static void RunTestFile(string testFile)
     {
         long time = 0;
 

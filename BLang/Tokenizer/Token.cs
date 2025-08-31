@@ -106,6 +106,10 @@ public enum TokenType
     WhileKeyword,
     AutoKeyword,
 
+    SwitchKeyword,
+    CaseKeyword,
+    BreakKeyword,
+
     // Alias
 
     // Pointers

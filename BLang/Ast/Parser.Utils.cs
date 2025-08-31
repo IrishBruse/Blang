@@ -1,6 +1,7 @@
 namespace BLang.Ast;
 
 using System;
+
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;
@@ -43,6 +44,18 @@ public partial class Parser
         }
 
         return token;
+    }
+
+    bool TryEat(TokenType type, out Token? token)
+    {
+        token = Next();
+
+        if (token.TokenType != type)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     void EatComments()

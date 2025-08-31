@@ -2,6 +2,7 @@ namespace BLang.Targets;
 
 using System;
 using System.Collections.Generic;
+
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;
@@ -54,7 +55,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         GenerateExternsSection();
     }
 
-    private void GenerateDataSection()
+    void GenerateDataSection()
     {
         Comment("Data");
         foreach ((string value, string name) in strings)
@@ -63,7 +64,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         }
     }
 
-    private void GenerateExternsSection()
+    void GenerateExternsSection()
     {
         Comment("Externs");
         foreach (Symbol external in externs)
@@ -86,13 +87,13 @@ public class QbeTarget(CompilationData data) : BaseTarget
         }
     }
 
-    private void BeginScope()
+    void BeginScope()
     {
         Write("{");
         Indent();
     }
 
-    private void EndScope()
+    void EndScope()
     {
         Dedent();
         Write("}");
@@ -123,7 +124,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         Write();
     }
 
-    private void EmitBody(Statement[] body)
+    void EmitBody(Statement[] body)
     {
         foreach (Statement stmt in body)
         {

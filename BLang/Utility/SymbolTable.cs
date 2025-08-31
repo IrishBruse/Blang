@@ -2,6 +2,7 @@ namespace BLang.Utility;
 
 using System;
 using System.Collections.Generic;
+
 using BLang.Tokenizer;
 
 public record Symbol(string Name, SymbolKind Kind = SymbolKind.Load)
@@ -18,7 +19,7 @@ public enum SymbolKind
 public class SymbolTable
 {
     // A stack of dictionaries, where each dictionary represents a scope
-    private readonly Stack<Dictionary<string, Symbol>> scopes;
+    readonly Stack<Dictionary<string, Symbol>> scopes;
 
     public SymbolTable()
     {

@@ -1,9 +1,9 @@
 namespace BLang.Tokenizer;
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+
 using BLang.Utility;
 
 public class Lexer(CompilationData data)
@@ -267,7 +267,7 @@ public class Lexer(CompilationData data)
     {
         StringBuilder identifierBuilder = new(c.ToString());
 
-        while (char.IsLetterOrDigit(Peek()) || Peek() == '_' && !IsLineBreak(Peek()))
+        while (char.IsLetterOrDigit(Peek()) || (Peek() == '_' && !IsLineBreak(Peek())))
         {
             identifierBuilder.Append(Next());
         }
@@ -280,6 +280,9 @@ public class Lexer(CompilationData data)
             "else" => new Token(TokenType.ElseKeyword, identifier, EndTokenRange()),
             "while" => new Token(TokenType.WhileKeyword, identifier, EndTokenRange()),
             "auto" => new Token(TokenType.AutoKeyword, identifier, EndTokenRange()),
+            "switch" => new Token(TokenType.SwitchKeyword, identifier, EndTokenRange()),
+            "case" => new Token(TokenType.CaseKeyword, identifier, EndTokenRange()),
+            "break" => new Token(TokenType.BreakKeyword, identifier, EndTokenRange()),
             _ => new Token(TokenType.Identifier, identifier, EndTokenRange()),
         };
     }
@@ -302,7 +305,10 @@ public class Lexer(CompilationData data)
         return new Token(TokenType.IntegerLiteral, number.ToString(), EndTokenRange());
     }
 
-    static bool IsLineBreak(char c) => c == '\n' || c == '\r';
+    static bool IsLineBreak(char c)
+    {
+        return c == '\n' || c == '\r';
+    }
 
     char Next()
     {

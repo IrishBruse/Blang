@@ -32,7 +32,7 @@ Run the compiler tests
 -   [x] if
 -   [x] else
 -   [x] while
--   [ ] pointers \* &
+-   [x] pointers \* &
 -   [ ] Array index [i]
 -   [ ] switch
 

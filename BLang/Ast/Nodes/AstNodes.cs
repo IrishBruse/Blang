@@ -1,6 +1,7 @@
 namespace BLang.Ast.Nodes;
 
 using System.Collections.Generic;
+
 using BLang.Utility;
 
 public abstract record AstNode

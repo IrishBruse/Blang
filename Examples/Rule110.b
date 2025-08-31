@@ -6,7 +6,7 @@ display(base, n) {
 
     i  = 0;
     while (i < n) {
-        if (base[i]) printf("#"); else printf(".");
+        if (base[i]){ printf("#"); } else { printf("."); }
         i  += 1;
     }
     printf("\n");
