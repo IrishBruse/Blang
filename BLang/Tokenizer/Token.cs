@@ -20,6 +20,7 @@ public record Token(TokenType TokenType, string Content, SourceRange Range)
     }
 }
 
+
 public enum TokenType
 {
     // Misc

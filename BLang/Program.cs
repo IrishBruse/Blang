@@ -11,7 +11,7 @@ public class Program
         switch (Options)
         {
             case TestOptions:
-                Tester.Test();
+                Tester.Test("Tests/");
                 break;
 
             case RunOptions:

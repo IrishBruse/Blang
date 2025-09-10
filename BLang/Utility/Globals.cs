@@ -12,6 +12,11 @@ public class Globals
 
     private static void Print(string? message, string? prefix, ConsoleColor? color = null)
     {
+        if (Options is TestOptions)
+        {
+            return;
+        }
+
         if (!string.IsNullOrEmpty(message))
         {
             if (color != null) Console.ForegroundColor = (ConsoleColor)color;
