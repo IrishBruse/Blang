@@ -8,7 +8,7 @@ using BLang.Tokenizer;
 
 public partial class Parser
 {
-    private static readonly Dictionary<TokenType, int> operatorPrecedence = new(){
+    private static readonly Dictionary<TokenType, int> OperatorPrecedence = new(){
         { TokenType.BitwiseOr, 10 },
         { TokenType.BitwiseAnd, 20 },
         { TokenType.EqualEqual, 30 }, { TokenType.NotEqual, 30 },
@@ -23,9 +23,9 @@ public partial class Parser
     {
         Expression left = ParsePrimary();
 
-        while (!Peek(TokenType.Eof) && operatorPrecedence.GetValueOrDefault(Peek(), -1) >= minPrecedence)
+        while (!Peek(TokenType.Eof) && OperatorPrecedence.GetValueOrDefault(Peek(), -1) >= minPrecedence)
         {
-            if (!operatorPrecedence.TryGetValue(Peek(), out int precedence))
+            if (!OperatorPrecedence.TryGetValue(Peek(), out int precedence))
             {
                 throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParseBinaryExpression)} of type {Peek()}");
             }

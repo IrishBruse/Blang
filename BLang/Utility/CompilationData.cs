@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 public class CompilationData(string file)
 {
-    public readonly SymbolTable Symbols = new();
-    public readonly List<int> Lines = [];
+    public SymbolTable Symbols { get; } = new();
+    public List<int> Lines { get; } = [];
 
     public string? File { get; set; } = file;
 

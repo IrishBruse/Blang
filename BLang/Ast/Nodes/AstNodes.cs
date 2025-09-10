@@ -1,12 +1,13 @@
 namespace BLang.Ast.Nodes;
 
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 using BLang.Utility;
 
 public abstract record AstNode
 {
+#pragma warning disable CA1051
     public SourceRange Range = SourceRange.Zero;
+#pragma warning restore CA1051
 }
 
 public record CompilationUnit(List<FunctionDecleration> FunctionDeclarations, List<GlobalVariable> GlobalVariables) : AstNode;

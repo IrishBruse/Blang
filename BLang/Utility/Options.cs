@@ -7,13 +7,13 @@ using CommandLine;
 using CommandLine.Text;
 
 [Verb("test", HelpText = "Test Options.")]
-public class TestOptions : Options
+public class TestOptions : BaseOptions
 {
     [Option('u', "update", HelpText = "Update the test snapshots.")] public bool UpdateSnapshots { get; set; }
 }
 
 [Verb("build", isDefault: true, HelpText = "Build Options.")]
-public class BuildOptions : Options
+public class BuildOptions : BaseOptions
 {
     [Value(0, MetaName = "file", HelpText = "The path to the b source file.", Required = true)]
     public string File { get; set; } = "";
@@ -23,9 +23,9 @@ public class BuildOptions : Options
 public class RunOptions : BuildOptions;
 
 [Verb("format", HelpText = "Format Options.")]
-public class FormatOptions : Options;
+public class FormatOptions : BaseOptions;
 
-public class Options
+public class BaseOptions
 {
     public static string AppName => "bc";
     public static Version AppVersion => new(0, 1, 0);
@@ -51,9 +51,9 @@ public class Options
         });
 
         ParserResult<object> parserResult = parser.ParseArguments<BuildOptions, RunOptions, TestOptions>(args)
-            .WithParsed<BuildOptions>(opt => options = opt)
-            .WithParsed<RunOptions>(opt => options = opt)
-            .WithParsed<TestOptions>(opt => options = opt);
+            .WithParsed<BuildOptions>(opt => Options = opt)
+            .WithParsed<RunOptions>(opt => Options = opt)
+            .WithParsed<TestOptions>(opt => Options = opt);
 
         _ = parserResult.WithNotParsed(errors => HandleErrors(errors, parserResult));
     }

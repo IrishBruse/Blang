@@ -79,18 +79,18 @@ public record BinaryExpression(TokenType Operation, Expression Left, Expression 
     }
 }
 
-public record AddressOfExpression(Expression expr) : Expression
+public record AddressOfExpression(Expression Expr) : Expression
 {
     public override string ToString()
     {
-        return "&" + expr.ToString();
+        return "&" + Expr.ToString();
     }
 }
 
-public record PointerDereferenceExpression(Expression expr) : Expression
+public record PointerDereferenceExpression(Expression Expr) : Expression
 {
     public override string ToString()
     {
-        return "*" + expr.ToString();
+        return "*" + Expr.ToString();
     }
 }

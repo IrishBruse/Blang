@@ -10,7 +10,7 @@ using static BLang.Utility.Colors;
 
 public class Tester
 {
-    private static readonly TestOptions opt = (TestOptions)options;
+    private static readonly TestOptions Opt = (TestOptions)Options;
     public static void Test()
     {
         string[] files = Directory.GetFiles("Tests/", "*.b");
@@ -39,7 +39,7 @@ public class Tester
 
         try
         {
-            if (opt.UpdateSnapshots)
+            if (Opt.UpdateSnapshots)
             {
                 UpdateSnapshot(testFile, output, time);
             }

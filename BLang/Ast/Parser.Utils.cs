@@ -25,7 +25,7 @@ public partial class Parser
         previousTokenRange = token.Range;
         _ = tokens.MoveNext();
 
-        if (options.Tokens)
+        if (Options.Tokens)
         {
             Console.WriteLine(tokens.Current);
         }
@@ -73,7 +73,7 @@ public partial class Parser
         if (symbol == null)
         {
             string loc = data.GetFileLocation(variable.Range.Start);
-            throw new Exception($"{loc}  {variable}");
+            throw new ParserException($"{loc}  {variable}");
         }
         return new Variable(symbol)
         {
@@ -88,7 +88,7 @@ public partial class Parser
         if (!int.TryParse(integer.Content, out int number))
         {
             string loc = data.GetFileLocation(integer.Range.Start);
-            throw new Exception($"{loc} {integer} larger than 32bits");
+            throw new ParserException($"{loc} {integer} larger than 32bits");
         }
 
         return new IntValue(number)

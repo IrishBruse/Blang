@@ -197,7 +197,7 @@ public static class Extensions
             TokenType.SwitchKeyword => throw new System.NotImplementedException(),
             TokenType.CaseKeyword => throw new System.NotImplementedException(),
             TokenType.BreakKeyword => throw new System.NotImplementedException(),
-            _ => throw new System.Exception("Unhandled tokentype " + t),
+            _ => throw new ParserException("Unhandled tokentype " + t),
         };
     }
 

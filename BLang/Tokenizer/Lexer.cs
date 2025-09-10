@@ -8,8 +8,8 @@ using BLang.Utility;
 
 public class Lexer(CompilationData data)
 {
-    public StreamReader Source = null!;
-    public string FilePath = "";
+    public StreamReader Source { get; set; } = null!;
+    public string FilePath { get; set; } = "";
 
     private int endIndex;
     private int startIndex;

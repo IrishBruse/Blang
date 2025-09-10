@@ -6,28 +6,28 @@ public class BaseTarget
 {
     public virtual int Indention { get; } = 2;
 
-    public StringBuilder output { internal get; set; } = new();
-    private int depth { get; set; }
+    public StringBuilder Output { internal get; set; } = new();
+    private int Depth { get; set; }
 
     public void Indent(int? spaces = null)
     {
-        depth += spaces ?? Indention;
+        Depth += spaces ?? Indention;
     }
 
     public void Dedent(int? spaces = null)
     {
-        depth -= spaces ?? Indention;
+        Depth -= spaces ?? Indention;
     }
 
-    public string Space => new(' ', depth);
+    public string Space => new(' ', Depth);
 
     public void WriteRaw(string? value)
     {
-        _ = output.Append(value);
+        _ = Output.Append(value);
     }
 
     public void Write(string? value = "")
     {
-        _ = string.IsNullOrEmpty(value) ? output.AppendLine() : output.AppendLine(Space + value);
+        _ = string.IsNullOrEmpty(value) ? Output.AppendLine() : Output.AppendLine(Space + value);
     }
 }

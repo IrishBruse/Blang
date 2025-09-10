@@ -2,7 +2,7 @@ namespace BLang.Utility;
 
 using System;
 using System.Collections.Generic;
-
+using BLang.Exceptions;
 using BLang.Tokenizer;
 
 public record Symbol(string Name, SymbolKind Kind = SymbolKind.Load)
@@ -57,7 +57,7 @@ public class SymbolTable
     {
         if (token.TokenType != TokenType.Identifier && !token.TokenType.IsKeyword())
         {
-            throw new Exception(token.Content);
+            throw new ParserException(token.Content);
         }
         return Add(token.Content, kind);
     }
@@ -88,7 +88,7 @@ public class SymbolTable
             }
         }
 
-        throw new Exception($"Couldnt find symbol \"{name}\" in any scope");
+        throw new ParserException($"Couldnt find symbol \"{name}\" in any scope");
     }
 
     public Symbol GetOrAdd(Token token, SymbolKind kind = SymbolKind.Load)
@@ -128,7 +128,7 @@ public class SymbolTable
 
     public static void Log(string message)
     {
-        if (options.DebugSymbol)
+        if (Options.DebugSymbol)
         {
             Debug(message, "SYM");
         }

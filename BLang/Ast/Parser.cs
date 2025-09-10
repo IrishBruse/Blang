@@ -18,7 +18,7 @@ public partial class Parser(CompilationData data)
     {
         this.tokens = tokens;
 
-        if (options.Tokens)
+        if (Options.Tokens)
         {
             Console.WriteLine(tokens.Current);
         }

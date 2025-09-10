@@ -25,12 +25,12 @@ public static class Compiler
         IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
         CompilationUnit unit = parser.Parse(tokens);
 
-        string target = options.Target;
+        string target = Options.Target;
 
         CreateOutputDirectories(file, target);
         (string objFile, string binFile) = GetOutputFile(file, target);
 
-        JsonSerializerOptions jsonOptions = options is TestOptions ? TestAstJsonOptions : AstJsonOptions;
+        JsonSerializerOptions jsonOptions = Options is TestOptions ? TestAstJsonOptions : AstJsonOptions;
         string astJson = JsonSerializer.Serialize(unit, jsonOptions);
         output.AstOutput = astJson;
         Debug(output.AstOutput);
@@ -39,7 +39,7 @@ public static class Compiler
         {
             QbeTarget qbeTarget = new(data);
 
-            string qbeIR = qbeTarget.Output(unit);
+            string qbeIR = qbeTarget.ToOutput(unit);
             File.WriteAllText(objFile + ".ssa", qbeIR);
 
             Executable exe = Executable.Capture("qbe", $"{objFile}.ssa -o {objFile}.s");

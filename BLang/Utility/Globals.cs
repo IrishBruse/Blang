@@ -8,7 +8,7 @@ using System;
 
 public class Globals
 {
-    public static Options options { get; set; } = null!;
+    public static BaseOptions Options { get; set; } = null!;
 
     private static void Print(string? message, string? prefix, ConsoleColor? color = null)
     {
@@ -36,7 +36,7 @@ public class Globals
 
     public static void Debug(string? message, string? prefix = null, ConsoleColor? color = ConsoleColor.DarkGray)
     {
-        if (options.Debug)
+        if (Options.Debug)
         {
             Print(message, prefix, color);
         }

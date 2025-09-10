@@ -6,9 +6,9 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        Options.Parse(args);
+        BaseOptions.Parse(args);
 
-        switch (options)
+        switch (Options)
         {
             case TestOptions:
                 Tester.Test();
@@ -25,12 +25,14 @@ public class Program
             case BuildOptions:
                 Build();
                 break;
+            default:
+                break;
         }
     }
 
     public static void Run()
     {
-        RunOptions opt = (RunOptions)options;
+        RunOptions opt = (RunOptions)Options;
         CompileOutput output = Compiler.Compile(opt.File);
         Error(output.Errors);
 
@@ -40,7 +42,7 @@ public class Program
 
     public static void Build()
     {
-        BuildOptions opt = (BuildOptions)options;
+        BuildOptions opt = (BuildOptions)Options;
         CompileOutput output = Compiler.Compile(opt.File);
         Error(output.Errors);
     }
