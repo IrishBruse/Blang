@@ -1,12 +1,172 @@
-CompilationUnit: 
-  FunctionDecleration: 
-    ExternalStatement: printf
-    AutoStatement: i
-    VariableDeclarator: i
-      IntValue: 0
-    WhileStatement: (i < 10)
-      FunctionCall: printf "%d", i
-      VariableDeclarator: i
-        BinaryExpression: Addition
-          Variable: i
-          IntValue: 1
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Name": "i",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 38
+          }
+        },
+        {
+          "_Type": "VariableDeclarator",
+          "Symbol": {
+            "Name": "i",
+            "Kind": 0
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 0,
+            "Range": {
+              "Start": 47,
+              "End": 48
+            }
+          },
+          "Range": {
+            "Start": 43,
+            "End": 44
+          }
+        },
+        {
+          "_Type": "WhileStatement",
+          "Condition": {
+            "Operation": 20,
+            "Left": {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "i",
+                "Kind": 0
+              },
+              "Range": {
+                "Start": 61,
+                "End": 62
+              }
+            },
+            "Right": {
+              "_Type": "IntValue",
+              "Value": 10,
+              "Range": {
+                "Start": 63,
+                "End": 65
+              }
+            },
+            "Range": {
+              "Start": 61,
+              "End": 65
+            }
+          },
+          "Body": [
+            {
+              "_Type": "FunctionCall",
+              "Symbol": {
+                "Name": "printf",
+                "Kind": 0
+              },
+              "Parameters": [
+                {
+                  "_Type": "StringValue",
+                  "Value": "%d",
+                  "Range": {
+                    "Start": 88,
+                    "End": 92
+                  }
+                },
+                {
+                  "_Type": "Variable",
+                  "Symbol": {
+                    "Name": "i",
+                    "Kind": 0
+                  },
+                  "Range": {
+                    "Start": 94,
+                    "End": 95
+                  }
+                }
+              ],
+              "Range": {
+                "Start": 81,
+                "End": 87
+              }
+            },
+            {
+              "_Type": "VariableDeclarator",
+              "Symbol": {
+                "Name": "i",
+                "Kind": 0
+              },
+              "Value": {
+                "_Type": "BinaryExpression",
+                "Operation": 15,
+                "Left": {
+                  "_Type": "Variable",
+                  "Symbol": {
+                    "Name": "i",
+                    "Kind": 0
+                  },
+                  "Range": {
+                    "Start": 0,
+                    "End": 0
+                  }
+                },
+                "Right": {
+                  "_Type": "IntValue",
+                  "Value": 1,
+                  "Range": {
+                    "Start": 0,
+                    "End": 0
+                  }
+                },
+                "Range": {
+                  "Start": 0,
+                  "End": 0
+                }
+              },
+              "Range": {
+                "Start": 106,
+                "End": 107
+              }
+            }
+          ],
+          "Range": {
+            "Start": 54,
+            "End": 116
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 118
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 118
+  }
+}

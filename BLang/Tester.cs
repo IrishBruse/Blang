@@ -10,7 +10,7 @@ using static BLang.Utility.Colors;
 
 public class Tester
 {
-    static readonly TestOptions opt = (TestOptions)options;
+    private static readonly TestOptions opt = (TestOptions)options;
     public static void Test()
     {
         string[] files = Directory.GetFiles("Tests/", "*.b");
@@ -21,7 +21,7 @@ public class Tester
         }
     }
 
-    static void RunTestFile(string testFile)
+    private static void RunTestFile(string testFile)
     {
         long time = 0;
 
@@ -55,12 +55,12 @@ public class Tester
         }
     }
 
-    const char IconPass = '✓';
-    const char IconFail = '×';
-    const char IconUpdated = 'u';
-    const char IconSame = '~';
+    private const char IconPass = '✓';
+    private const char IconFail = '×';
+    private const char IconUpdated = 'u';
+    private const char IconSame = '~';
 
-    static void UpdateSnapshot(string testFile, CompileOutput output, long start)
+    private static void UpdateSnapshot(string testFile, CompileOutput output, long start)
     {
         string astFile = Path.ChangeExtension(testFile, ".ast");
         string stdFile = Path.ChangeExtension(testFile, ".out");
@@ -70,12 +70,12 @@ public class Tester
         Executable runOutput = Executable.Capture(output.Executable);
 
         StringBuilder astOutput = new();
-        astOutput.Append(output.AstOutput);
+        _ = astOutput.Append(output.AstOutput);
         if (astOutput.Length > 0) File.WriteAllText(astFile, astOutput.ToString());
 
         StringBuilder stdOutput = new();
-        stdOutput.Append(runOutput.StdOut);
-        stdOutput.Append(runOutput.StdError);
+        _ = stdOutput.Append(runOutput.StdOut);
+        _ = stdOutput.Append(runOutput.StdError);
         if (stdOutput.Length > 0) File.WriteAllText(stdFile, stdOutput.ToString());
 
         bool astChanged = !astOutput.Equals(astPreviousOutput);
@@ -96,7 +96,7 @@ public class Tester
         }
     }
 
-    static void CompareSnapshot(string testFile, CompileOutput output, long start)
+    private static void CompareSnapshot(string testFile, CompileOutput output, long start)
     {
         (string astOutput, string stdOutput) = LoadTestContent(testFile);
 
@@ -141,7 +141,7 @@ public class Tester
         if (error != null) Error(error);
     }
 
-    static (string astOutput, string stdOutput) LoadTestContent(string testFile)
+    private static (string astOutput, string stdOutput) LoadTestContent(string testFile)
     {
         string astFile = Path.ChangeExtension(testFile, ".ast");
         string stdFile = Path.ChangeExtension(testFile, ".out");

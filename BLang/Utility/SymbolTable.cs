@@ -7,7 +7,10 @@ using BLang.Tokenizer;
 
 public record Symbol(string Name, SymbolKind Kind = SymbolKind.Load)
 {
-    public override string ToString() => Name;
+    public override string ToString()
+    {
+        return Name;
+    }
 }
 
 public enum SymbolKind
@@ -19,7 +22,7 @@ public enum SymbolKind
 public class SymbolTable
 {
     // A stack of dictionaries, where each dictionary represents a scope
-    readonly Stack<Dictionary<string, Symbol>> scopes;
+    private readonly Stack<Dictionary<string, Symbol>> scopes;
 
     public SymbolTable()
     {
@@ -40,7 +43,7 @@ public class SymbolTable
     {
         if (scopes.Count > 1)
         {
-            scopes.Pop();
+            _ = scopes.Pop();
             CurrentScopeDepth--;
             Log($"Exited scope to depth: {CurrentScopeDepth}");
         }
@@ -105,7 +108,7 @@ public class SymbolTable
     public Symbol? GetInCurrentScope(string name)
     {
         Dictionary<string, Symbol> currentScope = scopes.Peek();
-        currentScope.TryGetValue(name, out Symbol? symbol);
+        _ = currentScope.TryGetValue(name, out Symbol? symbol);
         return symbol;
     }
 

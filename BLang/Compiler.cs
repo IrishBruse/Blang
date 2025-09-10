@@ -3,7 +3,7 @@ namespace BLang;
 using System;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Text.Json;
 using BLang.Ast;
 using BLang.Ast.Nodes;
 using BLang.Targets;
@@ -12,6 +12,9 @@ using BLang.Utility;
 
 public static class Compiler
 {
+    private static JsonSerializerOptions AstJsonOptions = new() { WriteIndented = true };
+    private static JsonSerializerOptions TestAstJsonOptions = new() { WriteIndented = true, IncludeFields = true };
+
     public static CompileOutput Compile(string file)
     {
         CompileOutput output = new();
@@ -22,14 +25,15 @@ public static class Compiler
         IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
         CompilationUnit unit = parser.Parse(tokens);
 
-        AstTarget astPrinter = new();
-        output.AstOutput = astPrinter.Output(unit);
-        Debug(output.AstOutput, null, null);
-
         string target = options.Target;
 
         CreateOutputDirectories(file, target);
         (string objFile, string binFile) = GetOutputFile(file, target);
+
+        JsonSerializerOptions jsonOptions = options is TestOptions ? TestAstJsonOptions : AstJsonOptions;
+        string astJson = JsonSerializer.Serialize(unit, jsonOptions);
+        output.AstOutput = astJson;
+        Debug(output.AstOutput);
 
         if (target == QbeTarget.Target)
         {
@@ -64,7 +68,7 @@ public static class Compiler
         return output;
     }
 
-    static (string, string) GetOutputFile(string inputFile, string target)
+    private static (string, string) GetOutputFile(string inputFile, string target)
     {
         string projectDirectory = Path.GetDirectoryName(inputFile)!;
         string sourceFileName = Path.GetFileNameWithoutExtension(inputFile);
@@ -74,11 +78,11 @@ public static class Compiler
         return (objFile, binFile);
     }
 
-    static void CreateOutputDirectories(string inputFile, string target)
+    private static void CreateOutputDirectories(string inputFile, string target)
     {
         string projectDirectory = Path.GetDirectoryName(inputFile)!;
 
-        Directory.CreateDirectory(Path.Combine(projectDirectory, "obj", target));
-        Directory.CreateDirectory(Path.Combine(projectDirectory, "bin", target));
+        _ = Directory.CreateDirectory(Path.Combine(projectDirectory, "obj", target));
+        _ = Directory.CreateDirectory(Path.Combine(projectDirectory, "bin", target));
     }
 }

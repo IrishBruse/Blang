@@ -10,9 +10,9 @@ using BLang.Utility;
 
 public partial class Parser(CompilationData data)
 {
-    IEnumerator<Token> tokens = null!;
-    SourceRange previousTokenRange = SourceRange.Zero;
-    readonly SymbolTable symbols = data.Symbols;
+    private IEnumerator<Token> tokens = null!;
+    private SourceRange previousTokenRange = SourceRange.Zero;
+    private readonly SymbolTable symbols = data.Symbols;
 
     public CompilationUnit Parse(IEnumerator<Token> tokens)
     {
@@ -23,11 +23,11 @@ public partial class Parser(CompilationData data)
             Console.WriteLine(tokens.Current);
         }
 
-        tokens.MoveNext();
+        _ = tokens.MoveNext();
         return ParseTopLevel();
     }
 
-    CompilationUnit ParseTopLevel()
+    private CompilationUnit ParseTopLevel()
     {
         List<FunctionDecleration> functions = [];
         List<GlobalVariable> globals = [];
@@ -50,18 +50,18 @@ public partial class Parser(CompilationData data)
             {
                 Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
                 globals.Add(new(symbol, null));
-                Eat(TokenType.Semicolon);
+                _ = Eat(TokenType.Semicolon);
             }
             else if (Peek(TokenType.IntegerLiteral))
             {
                 Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
                 Token number = Eat(TokenType.IntegerLiteral);
                 globals.Add(new(symbol, number.ToInteger()));
-                Eat(TokenType.Semicolon);
+                _ = Eat(TokenType.Semicolon);
             }
             else
             {
-                Next();
+                _ = Next();
                 break;
             }
 
@@ -74,7 +74,7 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    FunctionDecleration ParseFunctionDecleration(Token identifier)
+    private FunctionDecleration ParseFunctionDecleration(Token identifier)
     {
         symbols.EnterScope(identifier.Content);
 
@@ -84,7 +84,7 @@ public partial class Parser(CompilationData data)
 
         List<Variable> parameters = [];
 
-        Eat(TokenType.OpenParenthesis);
+        _ = Eat(TokenType.OpenParenthesis);
         while (!Peek(TokenType.CloseParenthesis) && !Peek(TokenType.Eof))
         {
             Token variable = Eat(TokenType.Identifier);
@@ -93,10 +93,10 @@ public partial class Parser(CompilationData data)
 
             if (Peek(TokenType.Comma))
             {
-                Eat(TokenType.Comma);
+                _ = Eat(TokenType.Comma);
             }
         }
-        Eat(TokenType.CloseParenthesis);
+        _ = Eat(TokenType.CloseParenthesis);
 
         Statement[] body = ParseBlock();
 
@@ -107,11 +107,11 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    Statement[] ParseBlock()
+    private Statement[] ParseBlock()
     {
         List<Statement> statements = [];
 
-        Eat(TokenType.OpenScope);
+        _ = Eat(TokenType.OpenScope);
         while (!Peek(TokenType.CloseScope))
         {
             Statement? statement = ParseStatement();
@@ -125,12 +125,12 @@ public partial class Parser(CompilationData data)
                 break;
             }
         }
-        Eat(TokenType.CloseScope);
+        _ = Eat(TokenType.CloseScope);
 
         return statements.ToArray();
     }
 
-    Statement ParseStatement()
+    private Statement ParseStatement()
     {
         return Peek() switch
         {
@@ -140,11 +140,59 @@ public partial class Parser(CompilationData data)
             TokenType.IfKeyword => ParseIfDefinition(),
             TokenType.AutoKeyword => ParseAutoDefinition(),
             TokenType.Identifier => ParseIdentifierStatement(),
+            TokenType.Eof => throw new NotImplementedException(),
+            TokenType.Garbage => throw new NotImplementedException(),
+            TokenType.None => throw new NotImplementedException(),
+            TokenType.Comment => throw new NotImplementedException(),
+            TokenType.IntegerLiteral => throw new NotImplementedException(),
+            TokenType.FloatLiteral => throw new NotImplementedException(),
+            TokenType.StringLiteral => throw new NotImplementedException(),
+            TokenType.CharLiteral => throw new NotImplementedException(),
+            TokenType.OpenParenthesis => throw new NotImplementedException(),
+            TokenType.CloseParenthesis => throw new NotImplementedException(),
+            TokenType.OpenBracket => throw new NotImplementedException(),
+            TokenType.CloseBracket => throw new NotImplementedException(),
+            TokenType.OpenScope => throw new NotImplementedException(),
+            TokenType.CloseScope => throw new NotImplementedException(),
+            TokenType.Dot => throw new NotImplementedException(),
+            TokenType.Comma => throw new NotImplementedException(),
+            TokenType.Addition => throw new NotImplementedException(),
+            TokenType.Subtraction => throw new NotImplementedException(),
+            TokenType.Multiplication => throw new NotImplementedException(),
+            TokenType.Division => throw new NotImplementedException(),
+            TokenType.Modulo => throw new NotImplementedException(),
+            TokenType.LessThan => throw new NotImplementedException(),
+            TokenType.GreaterThan => throw new NotImplementedException(),
+            TokenType.LessThanEqual => throw new NotImplementedException(),
+            TokenType.GreaterThanEqual => throw new NotImplementedException(),
+            TokenType.EqualEqual => throw new NotImplementedException(),
+            TokenType.NotEqual => throw new NotImplementedException(),
+            TokenType.LogicalAnd => throw new NotImplementedException(),
+            TokenType.LogicalOr => throw new NotImplementedException(),
+            TokenType.LogicalNot => throw new NotImplementedException(),
+            TokenType.Assignment => throw new NotImplementedException(),
+            TokenType.AdditionAssignment => throw new NotImplementedException(),
+            TokenType.SubtractionAssignment => throw new NotImplementedException(),
+            TokenType.MultiplicationAssignment => throw new NotImplementedException(),
+            TokenType.DivisionAssignment => throw new NotImplementedException(),
+            TokenType.ModuloAssignment => throw new NotImplementedException(),
+            TokenType.Increment => throw new NotImplementedException(),
+            TokenType.Decrement => throw new NotImplementedException(),
+            TokenType.BitwiseComplement => throw new NotImplementedException(),
+            TokenType.BitwiseAnd => throw new NotImplementedException(),
+            TokenType.BitwiseOr => throw new NotImplementedException(),
+            TokenType.BitwiseXOr => throw new NotImplementedException(),
+            TokenType.BitwiseShiftLeft => throw new NotImplementedException(),
+            TokenType.BitwiseShiftRight => throw new NotImplementedException(),
+            TokenType.Semicolon => throw new NotImplementedException(),
+            TokenType.ElseKeyword => throw new NotImplementedException(),
+            TokenType.CaseKeyword => throw new NotImplementedException(),
+            TokenType.BreakKeyword => throw new NotImplementedException(),
             _ => throw new InvalidTokenException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParseStatement)} of type {Peek()}")
         };
     }
 
-    WhileStatement ParseWhileDefinition()
+    private WhileStatement ParseWhileDefinition()
     {
         Token start = Eat(TokenType.WhileKeyword);
 
@@ -161,7 +209,7 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    SwitchStatement ParseSwitchDefinition()
+    private SwitchStatement ParseSwitchDefinition()
     {
         Token start = Eat(TokenType.SwitchKeyword);
 
@@ -178,7 +226,7 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    IfStatement ParseIfDefinition()
+    private IfStatement ParseIfDefinition()
     {
         Token start = Eat(TokenType.IfKeyword);
 
@@ -188,21 +236,11 @@ public partial class Parser(CompilationData data)
             throw new ParserException("ParseWhileDefinition condition: " + condition);
         }
 
-        Statement[] body;
-
-        if (!Peek(TokenType.OpenScope))
-        {
-            body = [ParseStatement()];
-        }
-        else
-        {
-            body = ParseBlock();
-        }
-
+        Statement[] body = !Peek(TokenType.OpenScope) ? [ParseStatement()] : ParseBlock();
         Statement[]? elseBody = null;
         if (Peek(TokenType.ElseKeyword))
         {
-            Eat(TokenType.ElseKeyword);
+            _ = Eat(TokenType.ElseKeyword);
             elseBody = ParseBlock();
         }
 
@@ -212,7 +250,7 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    ExternalStatement ParseExternalDefinition()
+    private ExternalStatement ParseExternalDefinition()
     {
         Token start = Eat(TokenType.ExternKeyword);
         Token identifier = Eat(TokenType.Identifier);
@@ -220,7 +258,7 @@ public partial class Parser(CompilationData data)
         List<Symbol> externs = [symbols.Add(identifier, SymbolKind.Define)];
         while (Peek(TokenType.Comma))
         {
-            Eat(TokenType.Comma);
+            _ = Eat(TokenType.Comma);
             identifier = Eat(TokenType.Identifier);
             externs.Add(symbols.Add(identifier, SymbolKind.Define));
         }
@@ -233,7 +271,7 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    AutoStatement ParseAutoDefinition()
+    private AutoStatement ParseAutoDefinition()
     {
         Token start = Eat(TokenType.AutoKeyword);
         Token identifier = Eat(TokenType.Identifier);
@@ -241,11 +279,11 @@ public partial class Parser(CompilationData data)
         List<Symbol> variables = [symbols.Add(identifier, SymbolKind.Define)];
         while (Peek(TokenType.Comma))
         {
-            Eat(TokenType.Comma);
+            _ = Eat(TokenType.Comma);
             identifier = Eat(TokenType.Identifier);
             variables.Add(symbols.Add(identifier, SymbolKind.Define));
         }
-        Eat(TokenType.Semicolon);
+        _ = Eat(TokenType.Semicolon);
 
         return new AutoStatement(variables.ToArray())
         {
@@ -253,7 +291,7 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    Statement ParseIdentifierStatement()
+    private Statement ParseIdentifierStatement()
     {
         Token identifier = Eat(TokenType.Identifier);
 
@@ -264,23 +302,74 @@ public partial class Parser(CompilationData data)
             TokenType.OpenParenthesis => ParseFunctionCall(identifier, parameters),
             TokenType.Assignment => ParseVariableAssignment(identifier),
             TokenType.Increment => ParseVariableAssignmentShorthand(identifier),
+            TokenType.Eof => throw new NotImplementedException(),
+            TokenType.Garbage => throw new NotImplementedException(),
+            TokenType.None => throw new NotImplementedException(),
+            TokenType.Comment => throw new NotImplementedException(),
+            TokenType.Identifier => throw new NotImplementedException(),
+            TokenType.IntegerLiteral => throw new NotImplementedException(),
+            TokenType.FloatLiteral => throw new NotImplementedException(),
+            TokenType.StringLiteral => throw new NotImplementedException(),
+            TokenType.CharLiteral => throw new NotImplementedException(),
+            TokenType.CloseParenthesis => throw new NotImplementedException(),
+            TokenType.OpenBracket => throw new NotImplementedException(),
+            TokenType.CloseBracket => throw new NotImplementedException(),
+            TokenType.OpenScope => throw new NotImplementedException(),
+            TokenType.CloseScope => throw new NotImplementedException(),
+            TokenType.Dot => throw new NotImplementedException(),
+            TokenType.Comma => throw new NotImplementedException(),
+            TokenType.Addition => throw new NotImplementedException(),
+            TokenType.Subtraction => throw new NotImplementedException(),
+            TokenType.Multiplication => throw new NotImplementedException(),
+            TokenType.Division => throw new NotImplementedException(),
+            TokenType.Modulo => throw new NotImplementedException(),
+            TokenType.LessThan => throw new NotImplementedException(),
+            TokenType.GreaterThan => throw new NotImplementedException(),
+            TokenType.LessThanEqual => throw new NotImplementedException(),
+            TokenType.GreaterThanEqual => throw new NotImplementedException(),
+            TokenType.EqualEqual => throw new NotImplementedException(),
+            TokenType.NotEqual => throw new NotImplementedException(),
+            TokenType.LogicalAnd => throw new NotImplementedException(),
+            TokenType.LogicalOr => throw new NotImplementedException(),
+            TokenType.LogicalNot => throw new NotImplementedException(),
+            TokenType.AdditionAssignment => throw new NotImplementedException(),
+            TokenType.SubtractionAssignment => throw new NotImplementedException(),
+            TokenType.MultiplicationAssignment => throw new NotImplementedException(),
+            TokenType.DivisionAssignment => throw new NotImplementedException(),
+            TokenType.ModuloAssignment => throw new NotImplementedException(),
+            TokenType.Decrement => throw new NotImplementedException(),
+            TokenType.BitwiseComplement => throw new NotImplementedException(),
+            TokenType.BitwiseAnd => throw new NotImplementedException(),
+            TokenType.BitwiseOr => throw new NotImplementedException(),
+            TokenType.BitwiseXOr => throw new NotImplementedException(),
+            TokenType.BitwiseShiftLeft => throw new NotImplementedException(),
+            TokenType.BitwiseShiftRight => throw new NotImplementedException(),
+            TokenType.Semicolon => throw new NotImplementedException(),
+            TokenType.ExternKeyword => throw new NotImplementedException(),
+            TokenType.IfKeyword => throw new NotImplementedException(),
+            TokenType.ElseKeyword => throw new NotImplementedException(),
+            TokenType.WhileKeyword => throw new NotImplementedException(),
+            TokenType.AutoKeyword => throw new NotImplementedException(),
+            TokenType.SwitchKeyword => throw new NotImplementedException(),
+            TokenType.CaseKeyword => throw new NotImplementedException(),
+            TokenType.BreakKeyword => throw new NotImplementedException(),
             _ => throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParseIdentifierStatement)} of type {Peek()}"),
         };
     }
 
-    FunctionCall ParseFunctionCall(Token identifier, List<Expression> parameters)
+    private FunctionCall ParseFunctionCall(Token identifier, List<Expression> parameters)
     {
-        Eat(TokenType.OpenParenthesis);
+        _ = Eat(TokenType.OpenParenthesis);
         while (!Peek(TokenType.CloseParenthesis))
         {
             parameters.Add(ParseParameter());
             if (Peek(TokenType.Comma))
             {
-                Eat(TokenType.Comma);
+                _ = Eat(TokenType.Comma);
             }
         }
-        Eat(TokenType.CloseParenthesis);
-        Eat(TokenType.Semicolon);
+        _ = Eat(TokenType.CloseParenthesis);
+        _ = Eat(TokenType.Semicolon);
 
         Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Load);
 
@@ -290,22 +379,73 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    Expression ParseParameter()
+    private Expression ParseParameter()
     {
         return Peek() switch
         {
             TokenType.StringLiteral => ParseString(),
             TokenType.IntegerLiteral => ParseInteger(),
             TokenType.Identifier => ParseVariable(),
+            TokenType.Eof => throw new NotImplementedException(),
+            TokenType.Garbage => throw new NotImplementedException(),
+            TokenType.None => throw new NotImplementedException(),
+            TokenType.Comment => throw new NotImplementedException(),
+            TokenType.FloatLiteral => throw new NotImplementedException(),
+            TokenType.CharLiteral => throw new NotImplementedException(),
+            TokenType.OpenParenthesis => throw new NotImplementedException(),
+            TokenType.CloseParenthesis => throw new NotImplementedException(),
+            TokenType.OpenBracket => throw new NotImplementedException(),
+            TokenType.CloseBracket => throw new NotImplementedException(),
+            TokenType.OpenScope => throw new NotImplementedException(),
+            TokenType.CloseScope => throw new NotImplementedException(),
+            TokenType.Dot => throw new NotImplementedException(),
+            TokenType.Comma => throw new NotImplementedException(),
+            TokenType.Addition => throw new NotImplementedException(),
+            TokenType.Subtraction => throw new NotImplementedException(),
+            TokenType.Multiplication => throw new NotImplementedException(),
+            TokenType.Division => throw new NotImplementedException(),
+            TokenType.Modulo => throw new NotImplementedException(),
+            TokenType.LessThan => throw new NotImplementedException(),
+            TokenType.GreaterThan => throw new NotImplementedException(),
+            TokenType.LessThanEqual => throw new NotImplementedException(),
+            TokenType.GreaterThanEqual => throw new NotImplementedException(),
+            TokenType.EqualEqual => throw new NotImplementedException(),
+            TokenType.NotEqual => throw new NotImplementedException(),
+            TokenType.LogicalAnd => throw new NotImplementedException(),
+            TokenType.LogicalOr => throw new NotImplementedException(),
+            TokenType.LogicalNot => throw new NotImplementedException(),
+            TokenType.Assignment => throw new NotImplementedException(),
+            TokenType.AdditionAssignment => throw new NotImplementedException(),
+            TokenType.SubtractionAssignment => throw new NotImplementedException(),
+            TokenType.MultiplicationAssignment => throw new NotImplementedException(),
+            TokenType.DivisionAssignment => throw new NotImplementedException(),
+            TokenType.ModuloAssignment => throw new NotImplementedException(),
+            TokenType.Increment => throw new NotImplementedException(),
+            TokenType.Decrement => throw new NotImplementedException(),
+            TokenType.BitwiseComplement => throw new NotImplementedException(),
+            TokenType.BitwiseAnd => throw new NotImplementedException(),
+            TokenType.BitwiseOr => throw new NotImplementedException(),
+            TokenType.BitwiseXOr => throw new NotImplementedException(),
+            TokenType.BitwiseShiftLeft => throw new NotImplementedException(),
+            TokenType.BitwiseShiftRight => throw new NotImplementedException(),
+            TokenType.Semicolon => throw new NotImplementedException(),
+            TokenType.ExternKeyword => throw new NotImplementedException(),
+            TokenType.IfKeyword => throw new NotImplementedException(),
+            TokenType.ElseKeyword => throw new NotImplementedException(),
+            TokenType.WhileKeyword => throw new NotImplementedException(),
+            TokenType.AutoKeyword => throw new NotImplementedException(),
+            TokenType.SwitchKeyword => throw new NotImplementedException(),
+            TokenType.CaseKeyword => throw new NotImplementedException(),
+            TokenType.BreakKeyword => throw new NotImplementedException(),
             _ => throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} ParseExpression: {Peek()}"),
         };
     }
 
-    VariableDeclarator ParseVariableAssignment(Token identifier)
+    private VariableDeclarator ParseVariableAssignment(Token identifier)
     {
-        Eat(TokenType.Assignment);
+        _ = Eat(TokenType.Assignment);
         Expression value = ParseBinaryExpression();
-        Eat(TokenType.Semicolon);
+        _ = Eat(TokenType.Semicolon);
 
         Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Assign);
 
@@ -315,16 +455,69 @@ public partial class Parser(CompilationData data)
         };
     }
 
-    VariableDeclarator ParseVariableAssignmentShorthand(Token identifier)
+    private VariableDeclarator ParseVariableAssignmentShorthand(Token identifier)
     {
         Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Assign);
         Expression value = Peek() switch
         {
             TokenType.Increment => new BinaryExpression(TokenType.Addition, new Variable(symbol), new IntValue(1)),
+            TokenType.Eof => throw new NotImplementedException(),
+            TokenType.Garbage => throw new NotImplementedException(),
+            TokenType.None => throw new NotImplementedException(),
+            TokenType.Comment => throw new NotImplementedException(),
+            TokenType.Identifier => throw new NotImplementedException(),
+            TokenType.IntegerLiteral => throw new NotImplementedException(),
+            TokenType.FloatLiteral => throw new NotImplementedException(),
+            TokenType.StringLiteral => throw new NotImplementedException(),
+            TokenType.CharLiteral => throw new NotImplementedException(),
+            TokenType.OpenParenthesis => throw new NotImplementedException(),
+            TokenType.CloseParenthesis => throw new NotImplementedException(),
+            TokenType.OpenBracket => throw new NotImplementedException(),
+            TokenType.CloseBracket => throw new NotImplementedException(),
+            TokenType.OpenScope => throw new NotImplementedException(),
+            TokenType.CloseScope => throw new NotImplementedException(),
+            TokenType.Dot => throw new NotImplementedException(),
+            TokenType.Comma => throw new NotImplementedException(),
+            TokenType.Addition => throw new NotImplementedException(),
+            TokenType.Subtraction => throw new NotImplementedException(),
+            TokenType.Multiplication => throw new NotImplementedException(),
+            TokenType.Division => throw new NotImplementedException(),
+            TokenType.Modulo => throw new NotImplementedException(),
+            TokenType.LessThan => throw new NotImplementedException(),
+            TokenType.GreaterThan => throw new NotImplementedException(),
+            TokenType.LessThanEqual => throw new NotImplementedException(),
+            TokenType.GreaterThanEqual => throw new NotImplementedException(),
+            TokenType.EqualEqual => throw new NotImplementedException(),
+            TokenType.NotEqual => throw new NotImplementedException(),
+            TokenType.LogicalAnd => throw new NotImplementedException(),
+            TokenType.LogicalOr => throw new NotImplementedException(),
+            TokenType.LogicalNot => throw new NotImplementedException(),
+            TokenType.Assignment => throw new NotImplementedException(),
+            TokenType.AdditionAssignment => throw new NotImplementedException(),
+            TokenType.SubtractionAssignment => throw new NotImplementedException(),
+            TokenType.MultiplicationAssignment => throw new NotImplementedException(),
+            TokenType.DivisionAssignment => throw new NotImplementedException(),
+            TokenType.ModuloAssignment => throw new NotImplementedException(),
+            TokenType.Decrement => throw new NotImplementedException(),
+            TokenType.BitwiseComplement => throw new NotImplementedException(),
+            TokenType.BitwiseAnd => throw new NotImplementedException(),
+            TokenType.BitwiseOr => throw new NotImplementedException(),
+            TokenType.BitwiseXOr => throw new NotImplementedException(),
+            TokenType.BitwiseShiftLeft => throw new NotImplementedException(),
+            TokenType.BitwiseShiftRight => throw new NotImplementedException(),
+            TokenType.Semicolon => throw new NotImplementedException(),
+            TokenType.ExternKeyword => throw new NotImplementedException(),
+            TokenType.IfKeyword => throw new NotImplementedException(),
+            TokenType.ElseKeyword => throw new NotImplementedException(),
+            TokenType.WhileKeyword => throw new NotImplementedException(),
+            TokenType.AutoKeyword => throw new NotImplementedException(),
+            TokenType.SwitchKeyword => throw new NotImplementedException(),
+            TokenType.CaseKeyword => throw new NotImplementedException(),
+            TokenType.BreakKeyword => throw new NotImplementedException(),
             _ => throw new NotImplementedException("" + Peek())
         };
-        Eat(TokenType.Increment);
-        Eat(TokenType.Semicolon);
+        _ = Eat(TokenType.Increment);
+        _ = Eat(TokenType.Semicolon);
 
         return new VariableDeclarator(symbol, value)
         {

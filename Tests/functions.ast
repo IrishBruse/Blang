@@ -1,8 +1,115 @@
-CompilationUnit: 
-  FunctionDecleration: 
-    ExternalStatement: printf
-    FunctionCall: printf "Test: functions\n"
-    FunctionCall: other 
-  FunctionDecleration: 
-    ExternalStatement: printf
-    FunctionCall: printf "Pass\n"
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "Test: functions\\n",
+              "Range": {
+                "Start": 38,
+                "End": 57
+              }
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 37
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "other",
+            "Kind": 2
+          },
+          "Parameters": [],
+          "Range": {
+            "Start": 65,
+            "End": 70
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 75
+      }
+    },
+    {
+      "Symbol": {
+        "Name": "other",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 91,
+            "End": 104
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "Pass\\n",
+              "Range": {
+                "Start": 116,
+                "End": 124
+              }
+            }
+          ],
+          "Range": {
+            "Start": 109,
+            "End": 115
+          }
+        }
+      ],
+      "Range": {
+        "Start": 77,
+        "End": 128
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 128
+  }
+}

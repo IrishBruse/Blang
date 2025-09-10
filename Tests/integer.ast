@@ -1,5 +1,93 @@
-CompilationUnit: 
-  FunctionDecleration: 
-    ExternalStatement: printf
-    FunctionCall: printf "%d\n", -2147483648
-    FunctionCall: printf "%d\n", 2147483647
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "%d\\n",
+              "Range": {
+                "Start": 38,
+                "End": 44
+              }
+            },
+            {
+              "_Type": "IntValue",
+              "Value": -2147483648,
+              "Range": {
+                "Start": 46,
+                "End": 57
+              }
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 37
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "%d\\n",
+              "Range": {
+                "Start": 116,
+                "End": 122
+              }
+            },
+            {
+              "_Type": "IntValue",
+              "Value": 2147483647,
+              "Range": {
+                "Start": 124,
+                "End": 134
+              }
+            }
+          ],
+          "Range": {
+            "Start": 109,
+            "End": 115
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 138
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 138
+  }
+}

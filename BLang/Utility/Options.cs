@@ -55,10 +55,10 @@ public class Options
             .WithParsed<RunOptions>(opt => options = opt)
             .WithParsed<TestOptions>(opt => options = opt);
 
-        parserResult.WithNotParsed(errors => HandleErrors(errors, parserResult));
+        _ = parserResult.WithNotParsed(errors => HandleErrors(errors, parserResult));
     }
 
-    static void HandleErrors(IEnumerable<Error> errors, ParserResult<object> parserResult)
+    private static void HandleErrors(IEnumerable<Error> errors, ParserResult<object> parserResult)
     {
         if (errors.IsVersion())
         {
@@ -73,10 +73,10 @@ public class Options
             help.AdditionalNewLineAfterOption = false;
             help.AddDashesToOption = true;
 
-            help.AddPreOptionsLine($"Usage: {AppName} <command> [options]");
-            help.AddPreOptionsLine($"Usage: {AppName} <file> [options]");
-            help.AddPreOptionsLine(" ");
-            help.AddPreOptionsLine($"Options:");
+            _ = help.AddPreOptionsLine($"Usage: {AppName} <command> [options]");
+            _ = help.AddPreOptionsLine($"Usage: {AppName} <file> [options]");
+            _ = help.AddPreOptionsLine(" ");
+            _ = help.AddPreOptionsLine($"Options:");
 
             return help;
         }, example =>

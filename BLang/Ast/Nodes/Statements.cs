@@ -1,6 +1,17 @@
 namespace BLang.Ast.Nodes;
+
+using System.Text.Json.Serialization;
 using BLang.Utility;
 
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "_Type")]
+[JsonDerivedType(typeof(GlobalVariable), nameof(GlobalVariable))]
+[JsonDerivedType(typeof(ExternalStatement), nameof(ExternalStatement))]
+[JsonDerivedType(typeof(WhileStatement), nameof(WhileStatement))]
+[JsonDerivedType(typeof(SwitchStatement), nameof(SwitchStatement))]
+[JsonDerivedType(typeof(IfStatement), nameof(IfStatement))]
+[JsonDerivedType(typeof(AutoStatement), nameof(AutoStatement))]
+[JsonDerivedType(typeof(FunctionCall), nameof(FunctionCall))]
+[JsonDerivedType(typeof(VariableDeclarator), nameof(VariableDeclarator))]
 public abstract record Statement() : AstNode;
 
 public record GlobalVariable(Symbol Symbol, int? Value) : Statement;

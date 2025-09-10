@@ -11,8 +11,8 @@ public class Lexer(CompilationData data)
     public StreamReader Source = null!;
     public string FilePath = "";
 
-    int endIndex;
-    int startIndex;
+    private int endIndex;
+    private int startIndex;
 
     public IEnumerator<Token> Lex(string text)
     {
@@ -49,12 +49,12 @@ public class Lexer(CompilationData data)
 
                 if (c == '/' && p == '/')
                 {
-                    LexSingleLineComment();
+                    _ = LexSingleLineComment();
                     continue;
                 }
                 else if (c == '/' && p == '*')
                 {
-                    LexMultiLineComment();
+                    _ = LexMultiLineComment();
                     continue;
                 }
 
@@ -97,7 +97,7 @@ public class Lexer(CompilationData data)
         yield return new Token(TokenType.Eof, string.Empty, EndTokenRange());
     }
 
-    void EatWhitespace(char c)
+    private void EatWhitespace(char c)
     {
         while (char.IsWhiteSpace(Peek()))
         {
@@ -112,10 +112,10 @@ public class Lexer(CompilationData data)
             }
         }
 
-        EndTokenRange();
+        _ = EndTokenRange();
     }
 
-    Token LexOperator(char c, TokenType type)
+    private Token LexOperator(char c, TokenType type)
     {
         char p = Peek();
 
@@ -200,7 +200,7 @@ public class Lexer(CompilationData data)
         return new Token(type, op, EndTokenRange());
     }
 
-    Token LexSingleLineComment()
+    private Token LexSingleLineComment()
     {
         StringBuilder comment = new("/");
 
@@ -213,27 +213,20 @@ public class Lexer(CompilationData data)
         return new Token(TokenType.Comment, comment.ToString(), EndTokenRange());
     }
 
-    Token LexMultiLineComment()
+    private Token LexMultiLineComment()
     {
         StringBuilder comment = new("/*");
 
-        Next(); // Eat *
+        _ = Next(); // Eat *
 
         while (!Source.EndOfStream)
         {
             char c = Next();
-            if (c == '\n')
-            {
-                _ = comment.Append("\\n");
-            }
-            else
-            {
-                _ = comment.Append(c);
-            }
+            _ = c == '\n' ? comment.Append("\\n") : comment.Append(c);
 
             if (c == '*' && Peek() == '/')
             {
-                comment.Append(Next());
+                _ = comment.Append(Next());
                 break;
             }
         }
@@ -241,12 +234,12 @@ public class Lexer(CompilationData data)
         return new Token(TokenType.Comment, comment.ToString(), EndTokenRange());
     }
 
-    Token LexBracket(char c, TokenType type)
+    private Token LexBracket(char c, TokenType type)
     {
         return new Token(type, c.ToString(), EndTokenRange());
     }
 
-    Token LexString()
+    private Token LexString()
     {
         StringBuilder literal = new();
 
@@ -263,13 +256,13 @@ public class Lexer(CompilationData data)
         return new Token(TokenType.StringLiteral, literal.ToString(), EndTokenRange());
     }
 
-    Token LexIdentifier(char c)
+    private Token LexIdentifier(char c)
     {
         StringBuilder identifierBuilder = new(c.ToString());
 
         while (char.IsLetterOrDigit(Peek()) || (Peek() == '_' && !IsLineBreak(Peek())))
         {
-            identifierBuilder.Append(Next());
+            _ = identifierBuilder.Append(Next());
         }
 
         string identifier = identifierBuilder.ToString();
@@ -287,30 +280,30 @@ public class Lexer(CompilationData data)
         };
     }
 
-    char Peek()
+    private char Peek()
     {
         return (char)Source.Peek();
     }
 
-    Token LexNumber(char c)
+    private Token LexNumber(char c)
     {
         StringBuilder number = new(c.ToString());
 
         while (char.IsDigit(Peek()))
         {
             c = Next();
-            number.Append(c);
+            _ = number.Append(c);
         }
 
         return new Token(TokenType.IntegerLiteral, number.ToString(), EndTokenRange());
     }
 
-    static bool IsLineBreak(char c)
+    private static bool IsLineBreak(char c)
     {
-        return c == '\n' || c == '\r';
+        return c is '\n' or '\r';
     }
 
-    char Next()
+    private char Next()
     {
         char c = (char)Source.Read();
 

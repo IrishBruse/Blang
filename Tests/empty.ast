@@ -1,2 +1,21 @@
-CompilationUnit: 
-  FunctionDecleration:
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [],
+      "Range": {
+        "Start": 0,
+        "End": 9
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 9
+  }
+}

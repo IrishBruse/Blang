@@ -1,10 +1,197 @@
-CompilationUnit: 
-  FunctionDecleration: 
-    ExternalStatement: printf
-    AutoStatement: a,b,c
-    VariableDeclarator: a
-      IntValue: 12
-    FunctionCall: printf "a %d\n", a
-    VariableDeclarator: b
-    VariableDeclarator: c
-    FunctionCall: printf "c %d\n", c
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Name": "a",
+              "Kind": 0
+            },
+            {
+              "Name": "b",
+              "Kind": 0
+            },
+            {
+              "Name": "c",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 44
+          }
+        },
+        {
+          "_Type": "VariableDeclarator",
+          "Symbol": {
+            "Name": "a",
+            "Kind": 0
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 12,
+            "Range": {
+              "Start": 54,
+              "End": 56
+            }
+          },
+          "Range": {
+            "Start": 50,
+            "End": 51
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "a %d\\n",
+              "Range": {
+                "Start": 69,
+                "End": 77
+              }
+            },
+            {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "a",
+                "Kind": 0
+              },
+              "Range": {
+                "Start": 79,
+                "End": 80
+              }
+            }
+          ],
+          "Range": {
+            "Start": 62,
+            "End": 68
+          }
+        },
+        {
+          "_Type": "VariableDeclarator",
+          "Symbol": {
+            "Name": "b",
+            "Kind": 0
+          },
+          "Value": {
+            "_Type": "AddressOfExpression",
+            "expr": {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "a",
+                "Kind": 0
+              },
+              "Range": {
+                "Start": 93,
+                "End": 94
+              }
+            },
+            "Range": {
+              "Start": 93,
+              "End": 94
+            }
+          },
+          "Range": {
+            "Start": 88,
+            "End": 89
+          }
+        },
+        {
+          "_Type": "VariableDeclarator",
+          "Symbol": {
+            "Name": "c",
+            "Kind": 0
+          },
+          "Value": {
+            "_Type": "PointerDereferenceExpression",
+            "expr": {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "b",
+                "Kind": 0
+              },
+              "Range": {
+                "Start": 106,
+                "End": 107
+              }
+            },
+            "Range": {
+              "Start": 106,
+              "End": 107
+            }
+          },
+          "Range": {
+            "Start": 101,
+            "End": 102
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "c %d\\n",
+              "Range": {
+                "Start": 120,
+                "End": 128
+              }
+            },
+            {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "c",
+                "Kind": 0
+              },
+              "Range": {
+                "Start": 130,
+                "End": 131
+              }
+            }
+          ],
+          "Range": {
+            "Start": 113,
+            "End": 119
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 135
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 135
+  }
+}

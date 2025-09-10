@@ -11,20 +11,20 @@ public class Program
         switch (options)
         {
             case TestOptions:
-            Tester.Test();
-            break;
+                Tester.Test();
+                break;
 
             case RunOptions:
-            Run();
-            break;
+                Run();
+                break;
 
             case FormatOptions:
-            Run();
-            break;
+                Run();
+                break;
 
             case BuildOptions:
-            Build();
-            break;
+                Build();
+                break;
         }
     }
 
@@ -34,7 +34,7 @@ public class Program
         CompileOutput output = Compiler.Compile(opt.File);
         Error(output.Errors);
 
-        Executable.Run(output.Executable);
+        _ = Executable.Run(output.Executable);
     }
 
 

@@ -13,16 +13,16 @@ public class QbeTarget(CompilationData data) : BaseTarget
     public const string Target = "qbe";
     public override int Indention => 4;
 
-    readonly Dictionary<string, string> strings = [];
-    readonly HashSet<Symbol> externs = [];
+    private readonly Dictionary<string, string> strings = [];
+    private readonly HashSet<Symbol> externs = [];
 
-    readonly Dictionary<Symbol, string> currentSsaRegisters = [];
-    readonly Dictionary<string, string> memoryAllocations = [];
-    readonly Dictionary<Symbol, int> ssaVersionCounters = [];
+    private readonly Dictionary<Symbol, string> currentSsaRegisters = [];
+    private readonly Dictionary<string, string> memoryAllocations = [];
+    private readonly Dictionary<Symbol, int> ssaVersionCounters = [];
 
-    int conditionIndex = 0;
+    private int conditionIndex;
 
-    public string Output(CompilationUnit node)
+    public string ToOutput(CompilationUnit node)
     {
         currentSsaRegisters.Clear();
         ssaVersionCounters.Clear();
@@ -31,7 +31,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         _ = data;
 
         VisitCompilationUnit(node);
-        return output.ToString();
+        return Output.ToString();
     }
 
     public void VisitCompilationUnit(CompilationUnit node)
@@ -39,7 +39,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         foreach (GlobalVariable variable in node.GlobalVariables)
         {
             Comment(variable.Symbol.Name);
-            CreateGlobalMemoryRegister(variable.Symbol);
+            _ = CreateGlobalMemoryRegister(variable.Symbol);
             string value = variable.Value == null ? "z 4" : "w " + variable.Value;
             Write($"data ${variable.Symbol.Name} = {{ {value} }}");
             Write();
@@ -55,7 +55,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         GenerateExternsSection();
     }
 
-    void GenerateDataSection()
+    private void GenerateDataSection()
     {
         Comment("Data");
         foreach ((string value, string name) in strings)
@@ -64,7 +64,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         }
     }
 
-    void GenerateExternsSection()
+    private void GenerateExternsSection()
     {
         Comment("Externs");
         foreach (Symbol external in externs)
@@ -83,17 +83,17 @@ public class QbeTarget(CompilationData data) : BaseTarget
             case VariableDeclarator s: VisitVariableAssignment(s); break;
             case WhileStatement s: VisitWhileStatement(s); break;
             case IfStatement s: VisitIfStatement(s); break;
-            default: throw new Exception(node.ToString());
+            default: throw new ParserException(node.ToString());
         }
     }
 
-    void BeginScope()
+    private void BeginScope()
     {
         Write("{");
         Indent();
     }
 
-    void EndScope()
+    private void EndScope()
     {
         Dedent();
         Write("}");
@@ -124,7 +124,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         Write();
     }
 
-    void EmitBody(Statement[] body)
+    private void EmitBody(Statement[] body)
     {
         foreach (Statement stmt in body)
         {
@@ -136,7 +136,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
     {
         foreach (Symbol extrn in node.Externals)
         {
-            externs.Add(extrn);
+            _ = externs.Add(extrn);
         }
     }
 
@@ -199,7 +199,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         Write($"call ${node.Symbol}({parameters})");
     }
 
-    string PassParameterValue(Expression[] parameters)
+    private string PassParameterValue(Expression[] parameters)
     {
         List<string> registers = [];
         foreach (AstNode expr in parameters)
@@ -208,19 +208,19 @@ public class QbeTarget(CompilationData data) : BaseTarget
             switch (expr)
             {
                 case StringValue v:
-                reg = VisitStringValue(v);
-                registers.Add($"l ${reg}");
-                break;
+                    reg = VisitStringValue(v);
+                    registers.Add($"l ${reg}");
+                    break;
 
                 case IntValue v:
-                registers.Add($"w {v.Value}");
-                break;
+                    registers.Add($"w {v.Value}");
+                    break;
 
                 case Variable v:
-                reg = CreateTempRegister(v.Symbol);
-                Write($"{reg} =w loadw {GetMemoryRegister(v.Symbol)}");
-                registers.Add($"w {reg}");
-                break;
+                    reg = CreateTempRegister(v.Symbol);
+                    Write($"{reg} =w loadw {GetMemoryRegister(v.Symbol)}");
+                    registers.Add($"w {reg}");
+                    break;
 
                 default: throw new ParserException($"Unknown parameter {expr.GetType()}({expr})");
             }
@@ -246,88 +246,92 @@ public class QbeTarget(CompilationData data) : BaseTarget
         switch (expr)
         {
             case Variable variable:
-            {
-                string loadReg = CreateTempRegister(variable.Symbol);
-                string memReg = GetMemoryRegister(variable.Symbol);
-                Write($"{loadReg} =w loadw {memReg}");
-                return loadReg;
-            }
+                {
+                    string loadReg = CreateTempRegister(variable.Symbol);
+                    string memReg = GetMemoryRegister(variable.Symbol);
+                    Write($"{loadReg} =w loadw {memReg}");
+                    return loadReg;
+                }
 
             case IntValue number:
-            {
-                return number.Value.ToString();
-            }
+                {
+                    return number.Value.ToString();
+                }
 
             case AddressOfExpression address:
-            {
-                if (address.expr is not Variable var)
                 {
-                    throw new Exception("Address-of operator only supported for variables.");
-                }
+                    if (address.Expr is not Variable var)
+                    {
+                        throw new ParserException("Address-of operator only supported for variables.");
+                    }
 
-                return GetMemoryRegister(var.Symbol);
-            }
+                    return GetMemoryRegister(var.Symbol);
+                }
 
             case PointerDereferenceExpression pointerDereference:
-            {
-                if (pointerDereference.expr is not Variable variable)
                 {
-                    throw new Exception("Pointer dereference operator only supported for variables.");
+                    if (pointerDereference.Expr is not Variable variable)
+                    {
+                        throw new ParserException("Pointer dereference operator only supported for variables.");
+                    }
+
+                    string addressReg = CreateTempRegister(variable.Symbol);
+                    string memReg = GetMemoryRegister(variable.Symbol);
+                    Write($"{addressReg} =l loadw {memReg}");
+
+                    Write($"# test");
+                    string loadReg = NewTempReg();
+                    Write($"{loadReg} =w loadw {addressReg}");
+                    return loadReg;
                 }
-
-                string addressReg = CreateTempRegister(variable.Symbol);
-                string memReg = GetMemoryRegister(variable.Symbol);
-                Write($"{addressReg} =l loadw {memReg}");
-
-                Write($"# test");
-                string loadReg = NewTempReg();
-                Write($"{loadReg} =w loadw {addressReg}");
-                return loadReg;
-            }
 
             case BinaryExpression binary:
-            {
-                string leftOp = GenerateBinaryExpressionIR(binary.Left, targetSymbol);
-                string rightOp = GenerateBinaryExpressionIR(binary.Right, targetSymbol);
-
-                string reg = CreateTempRegister(targetSymbol);
-                switch (binary.Operation)
                 {
-                    case TokenType.Addition:
-                    Write($"{reg} =w add {leftOp}, {rightOp}");
-                    break;
+                    string leftOp = GenerateBinaryExpressionIR(binary.Left, targetSymbol);
+                    string rightOp = GenerateBinaryExpressionIR(binary.Right, targetSymbol);
 
-                    case TokenType.Multiplication:
-                    Write($"{reg} =w mul {leftOp}, {rightOp}");
-                    break;
+                    string reg = CreateTempRegister(targetSymbol);
+#pragma warning disable IDE0010
+                    switch (binary.Operation)
+#pragma warning restore IDE0010
+                    {
+                        case TokenType.Addition:
+                            Write($"{reg} =w add {leftOp}, {rightOp}");
+                            break;
 
-                    case TokenType.LessThan:
-                    Write($"{reg} =w csltw {leftOp}, {rightOp}");
-                    break;
+                        case TokenType.Multiplication:
+                            Write($"{reg} =w mul {leftOp}, {rightOp}");
+                            break;
 
-                    case TokenType.LessThanEqual:
-                    Write($"{reg} =w cslew {leftOp}, {rightOp}");
-                    break;
+                        case TokenType.LessThan:
+                            Write($"{reg} =w csltw {leftOp}, {rightOp}");
+                            break;
 
-                    case TokenType.Modulo:
-                    Write($"{reg} =w rem {leftOp}, {rightOp}");
-                    break;
+                        case TokenType.LessThanEqual:
+                            Write($"{reg} =w cslew {leftOp}, {rightOp}");
+                            break;
 
-                    case TokenType.EqualEqual:
-                    Write($"{reg} =w ceqw {leftOp}, {rightOp}");
-                    break;
+                        case TokenType.Modulo:
+                            Write($"{reg} =w rem {leftOp}, {rightOp}");
+                            break;
 
-                    case TokenType.BitwiseOr:
-                    Write($"{reg} =w or {leftOp}, {rightOp}");
-                    break;
+                        case TokenType.EqualEqual:
+                            Write($"{reg} =w ceqw {leftOp}, {rightOp}");
+                            break;
 
-                    default: throw new Exception("Unknown operator " + binary.Operation);
+                        case TokenType.BitwiseOr:
+                            Write($"{reg} =w or {leftOp}, {rightOp}");
+                            break;
+
+                        default: throw new ParserException("Unknown operator " + binary.Operation);
+                    }
+                    return reg;
                 }
-                return reg;
-            }
+
+            default: throw new ParserException("Unknown expression type " + expr);
         }
 
-        throw new Exception("Unreachable");
+        throw new ParserException("Unreachable");
     }
 
     public string VisitStringValue(StringValue stringValue)
@@ -348,21 +352,14 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public string CreateTempRegister(Symbol symbol)
     {
-        if (!ssaVersionCounters.TryGetValue(symbol, out int value))
-        {
-            ssaVersionCounters[symbol] = 0;
-        }
-        else
-        {
-            ssaVersionCounters[symbol] = ++value;
-        }
+        ssaVersionCounters[symbol] = !ssaVersionCounters.TryGetValue(symbol, out int value) ? 0 : ++value;
 
         string qbeReg = $"%{symbol.Name}_{ssaVersionCounters[symbol]}";
         currentSsaRegisters[symbol] = qbeReg;
         return qbeReg;
     }
 
-    int tempRegister = 0;
+    private int tempRegister;
     public string NewTempReg()
     {
         string qbeReg = $"%temp_{tempRegister}";

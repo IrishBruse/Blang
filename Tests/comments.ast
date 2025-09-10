@@ -1,3 +1,33 @@
-CompilationUnit: 
-  FunctionDecleration: 
-  FunctionDecleration:
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [],
+      "Range": {
+        "Start": 15,
+        "End": 51
+      }
+    },
+    {
+      "Symbol": {
+        "Name": "test",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [],
+      "Range": {
+        "Start": 82,
+        "End": 90
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 90
+  }
+}

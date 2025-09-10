@@ -19,11 +19,11 @@ public partial class Parser
         return tokens.Current.TokenType;
     }
 
-    Token Next()
+    private Token Next()
     {
         Token token = tokens.Current;
         previousTokenRange = token.Range;
-        tokens.MoveNext();
+        _ = tokens.MoveNext();
 
         if (options.Tokens)
         {
@@ -33,7 +33,7 @@ public partial class Parser
         return token;
     }
 
-    Token Eat(TokenType type)
+    private Token Eat(TokenType type)
     {
         Token token = Next();
 
@@ -46,7 +46,7 @@ public partial class Parser
         return token;
     }
 
-    bool TryEat(TokenType type, out Token? token)
+    private bool TryEat(TokenType type, out Token? token)
     {
         token = Next();
 
@@ -58,15 +58,15 @@ public partial class Parser
         return true;
     }
 
-    void EatComments()
+    private void EatComments()
     {
         while (Peek(TokenType.Comment))
         {
-            Eat(TokenType.Comment);
+            _ = Eat(TokenType.Comment);
         }
     }
 
-    Variable ParseVariable()
+    private Variable ParseVariable()
     {
         Token variable = Eat(TokenType.Identifier);
         Symbol? symbol = symbols.GetOrAdd(variable, SymbolKind.Load);
@@ -81,7 +81,7 @@ public partial class Parser
         };
     }
 
-    IntValue ParseInteger()
+    private IntValue ParseInteger()
     {
         Token integer = Eat(TokenType.IntegerLiteral);
 
@@ -97,7 +97,7 @@ public partial class Parser
         };
     }
 
-    StringValue ParseString()
+    private StringValue ParseString()
     {
         Token str = Eat(TokenType.StringLiteral);
         return new StringValue(str.Content)

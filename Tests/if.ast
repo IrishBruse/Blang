@@ -1,6 +1,110 @@
-CompilationUnit: 
-  FunctionDecleration: 
-    ExternalStatement: printf
-    FunctionCall: printf "Test: if\n"
-    IfStatement: (0 < 1)
-      FunctionCall: printf "Pass"
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "Test: if\\n",
+              "Range": {
+                "Start": 38,
+                "End": 50
+              }
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 37
+          }
+        },
+        {
+          "_Type": "IfStatement",
+          "Condition": {
+            "Operation": 20,
+            "Left": {
+              "_Type": "IntValue",
+              "Value": 0,
+              "Range": {
+                "Start": 61,
+                "End": 62
+              }
+            },
+            "Right": {
+              "_Type": "IntValue",
+              "Value": 1,
+              "Range": {
+                "Start": 63,
+                "End": 64
+              }
+            },
+            "Range": {
+              "Start": 61,
+              "End": 64
+            }
+          },
+          "Body": [
+            {
+              "_Type": "FunctionCall",
+              "Symbol": {
+                "Name": "printf",
+                "Kind": 0
+              },
+              "Parameters": [
+                {
+                  "_Type": "StringValue",
+                  "Value": "Pass",
+                  "Range": {
+                    "Start": 87,
+                    "End": 93
+                  }
+                }
+              ],
+              "Range": {
+                "Start": 80,
+                "End": 86
+              }
+            }
+          ],
+          "ElseBody": null,
+          "Range": {
+            "Start": 57,
+            "End": 101
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 103
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 103
+  }
+}

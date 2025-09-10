@@ -10,7 +10,7 @@ public class Globals
 {
     public static Options options { get; set; } = null!;
 
-    static void Print(string? message, string? prefix, ConsoleColor? color = null)
+    private static void Print(string? message, string? prefix, ConsoleColor? color = null)
     {
         if (!string.IsNullOrEmpty(message))
         {

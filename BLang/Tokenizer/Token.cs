@@ -121,16 +121,16 @@ public static class Extensions
 {
     public static bool IsEnd(this TokenType t)
     {
-        return t == TokenType.Garbage || t == TokenType.Eof;
+        return t is TokenType.Garbage or TokenType.Eof;
     }
 
     public static bool IsKeyword(this TokenType t)
     {
-        return t == TokenType.ExternKeyword ||
-            t == TokenType.IfKeyword ||
-            t == TokenType.ElseKeyword ||
-            t == TokenType.WhileKeyword ||
-            t == TokenType.AutoKeyword;
+        return t is TokenType.ExternKeyword or
+            TokenType.IfKeyword or
+            TokenType.ElseKeyword or
+            TokenType.WhileKeyword or
+            TokenType.AutoKeyword;
     }
 
     public static string ToCharString(this TokenType t)
@@ -163,6 +163,40 @@ public static class Extensions
             TokenType.NotEqual => "!=",
 
             TokenType.BitwiseOr => "|",
+            TokenType.Eof => throw new System.NotImplementedException(),
+            TokenType.Garbage => throw new System.NotImplementedException(),
+            TokenType.None => throw new System.NotImplementedException(),
+            TokenType.Comment => throw new System.NotImplementedException(),
+            TokenType.Identifier => throw new System.NotImplementedException(),
+            TokenType.IntegerLiteral => throw new System.NotImplementedException(),
+            TokenType.FloatLiteral => throw new System.NotImplementedException(),
+            TokenType.StringLiteral => throw new System.NotImplementedException(),
+            TokenType.CharLiteral => throw new System.NotImplementedException(),
+            TokenType.Dot => throw new System.NotImplementedException(),
+            TokenType.LogicalAnd => throw new System.NotImplementedException(),
+            TokenType.LogicalOr => throw new System.NotImplementedException(),
+            TokenType.LogicalNot => throw new System.NotImplementedException(),
+            TokenType.Assignment => throw new System.NotImplementedException(),
+            TokenType.AdditionAssignment => throw new System.NotImplementedException(),
+            TokenType.SubtractionAssignment => throw new System.NotImplementedException(),
+            TokenType.MultiplicationAssignment => throw new System.NotImplementedException(),
+            TokenType.DivisionAssignment => throw new System.NotImplementedException(),
+            TokenType.ModuloAssignment => throw new System.NotImplementedException(),
+            TokenType.Increment => throw new System.NotImplementedException(),
+            TokenType.Decrement => throw new System.NotImplementedException(),
+            TokenType.BitwiseComplement => throw new System.NotImplementedException(),
+            TokenType.BitwiseAnd => throw new System.NotImplementedException(),
+            TokenType.BitwiseXOr => throw new System.NotImplementedException(),
+            TokenType.BitwiseShiftLeft => throw new System.NotImplementedException(),
+            TokenType.BitwiseShiftRight => throw new System.NotImplementedException(),
+            TokenType.ExternKeyword => throw new System.NotImplementedException(),
+            TokenType.IfKeyword => throw new System.NotImplementedException(),
+            TokenType.ElseKeyword => throw new System.NotImplementedException(),
+            TokenType.WhileKeyword => throw new System.NotImplementedException(),
+            TokenType.AutoKeyword => throw new System.NotImplementedException(),
+            TokenType.SwitchKeyword => throw new System.NotImplementedException(),
+            TokenType.CaseKeyword => throw new System.NotImplementedException(),
+            TokenType.BreakKeyword => throw new System.NotImplementedException(),
             _ => throw new System.Exception("Unhandled tokentype " + t),
         };
     }
