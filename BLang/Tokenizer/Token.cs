@@ -116,6 +116,7 @@ public enum TokenType
     // Pointers
     AddressOf = BitwiseAnd,
     PointerDereference = Multiplication,
+    ArrayIndexing = 52,
 }
 
 public static class Extensions

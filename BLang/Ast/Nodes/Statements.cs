@@ -11,7 +11,7 @@ using BLang.Utility;
 [JsonDerivedType(typeof(IfStatement), nameof(IfStatement))]
 [JsonDerivedType(typeof(AutoStatement), nameof(AutoStatement))]
 [JsonDerivedType(typeof(FunctionCall), nameof(FunctionCall))]
-[JsonDerivedType(typeof(VariableDeclarator), nameof(VariableDeclarator))]
+[JsonDerivedType(typeof(VariableDeclaration), nameof(VariableDeclaration))]
 public abstract record Statement() : AstNode;
 
 public record GlobalVariable(Symbol Symbol, int? Value) : Statement;
@@ -28,4 +28,4 @@ public record AutoStatement(Symbol[] Variables) : Statement;
 
 public record FunctionCall(Symbol Symbol, Expression[] Parameters) : Statement;
 
-public record VariableDeclarator(Symbol Symbol, Expression Value) : Statement;
+public record VariableDeclaration(Symbol Symbol, Expression Value) : Statement;

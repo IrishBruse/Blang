@@ -4,7 +4,7 @@ using BLang.Utility;
 
 public class UnitTest1
 {
-    private static string TestPath = "../../../../Tests/";
+    public static string TestPath = "../../../../Tests/";
 
     [Theory]
     [MemberData(nameof(GetTests))]
@@ -13,6 +13,7 @@ public class UnitTest1
         BaseOptions.Parse(["test"]);
 
         string testFile = Path.GetFullPath(file);
+        Console.WriteLine("Testing " + testFile);
         Tester.RunTestFile(testFile);
     }
 

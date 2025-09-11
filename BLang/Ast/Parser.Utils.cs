@@ -66,7 +66,7 @@ public partial class Parser
         }
     }
 
-    private Variable ParseVariable()
+    private Expression ParseIdentifier()
     {
         Token variable = Eat(TokenType.Identifier);
         Symbol? symbol = symbols.GetOrAdd(variable, SymbolKind.Load);
@@ -75,6 +75,25 @@ public partial class Parser
             string loc = data.GetFileLocation(variable.Range.Start);
             throw new ParserException($"{loc}  {variable}");
         }
+
+        // array[index] -> * (array + index)
+        if (Peek(TokenType.OpenBracket))
+        {
+            _ = Eat(TokenType.OpenBracket);
+            Expression index = ParseIdentifier();
+            _ = Eat(TokenType.CloseBracket);
+
+            // Create a pointer dereference expression
+            return new BinaryExpression(
+                    TokenType.ArrayIndexing,
+                    new Variable(symbol) { Range = variable.Range },
+                    index
+            )
+            {
+                Range = variable.Range
+            };
+        }
+
         return new Variable(symbol)
         {
             Range = variable.Range

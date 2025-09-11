@@ -1,10 +1,11 @@
 namespace BLang.Ast;
 
 using System.Collections.Generic;
-
+using System.Runtime.CompilerServices;
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;
+using BLang.Utility;
 
 public partial class Parser
 {
@@ -49,62 +50,69 @@ public partial class Parser
         {
             TokenType.OpenParenthesis => ParseGroupExpression(),
             TokenType.IntegerLiteral => ParseInteger(),
-            TokenType.Identifier => ParseVariable(),
+            TokenType.Identifier => ParseIdentifier(),
 
             // Pointers
             TokenType.AddressOf => ParseAddressOf(),
             TokenType.PointerDereference => ParsePointerDereference(),
-            TokenType.Eof => throw new System.NotImplementedException(),
-            TokenType.Garbage => throw new System.NotImplementedException(),
-            TokenType.None => throw new System.NotImplementedException(),
-            TokenType.Comment => throw new System.NotImplementedException(),
-            TokenType.FloatLiteral => throw new System.NotImplementedException(),
-            TokenType.StringLiteral => throw new System.NotImplementedException(),
-            TokenType.CharLiteral => throw new System.NotImplementedException(),
-            TokenType.CloseParenthesis => throw new System.NotImplementedException(),
-            TokenType.OpenBracket => throw new System.NotImplementedException(),
-            TokenType.CloseBracket => throw new System.NotImplementedException(),
-            TokenType.OpenScope => throw new System.NotImplementedException(),
-            TokenType.CloseScope => throw new System.NotImplementedException(),
-            TokenType.Dot => throw new System.NotImplementedException(),
-            TokenType.Comma => throw new System.NotImplementedException(),
-            TokenType.Addition => throw new System.NotImplementedException(),
-            TokenType.Subtraction => throw new System.NotImplementedException(),
-            TokenType.Division => throw new System.NotImplementedException(),
-            TokenType.Modulo => throw new System.NotImplementedException(),
-            TokenType.LessThan => throw new System.NotImplementedException(),
-            TokenType.GreaterThan => throw new System.NotImplementedException(),
-            TokenType.LessThanEqual => throw new System.NotImplementedException(),
-            TokenType.GreaterThanEqual => throw new System.NotImplementedException(),
-            TokenType.EqualEqual => throw new System.NotImplementedException(),
-            TokenType.NotEqual => throw new System.NotImplementedException(),
-            TokenType.LogicalAnd => throw new System.NotImplementedException(),
-            TokenType.LogicalOr => throw new System.NotImplementedException(),
-            TokenType.LogicalNot => throw new System.NotImplementedException(),
-            TokenType.Assignment => throw new System.NotImplementedException(),
-            TokenType.AdditionAssignment => throw new System.NotImplementedException(),
-            TokenType.SubtractionAssignment => throw new System.NotImplementedException(),
-            TokenType.MultiplicationAssignment => throw new System.NotImplementedException(),
-            TokenType.DivisionAssignment => throw new System.NotImplementedException(),
-            TokenType.ModuloAssignment => throw new System.NotImplementedException(),
-            TokenType.Increment => throw new System.NotImplementedException(),
-            TokenType.Decrement => throw new System.NotImplementedException(),
-            TokenType.BitwiseComplement => throw new System.NotImplementedException(),
-            TokenType.BitwiseOr => throw new System.NotImplementedException(),
-            TokenType.BitwiseXOr => throw new System.NotImplementedException(),
-            TokenType.BitwiseShiftLeft => throw new System.NotImplementedException(),
-            TokenType.BitwiseShiftRight => throw new System.NotImplementedException(),
-            TokenType.Semicolon => throw new System.NotImplementedException(),
-            TokenType.ExternKeyword => throw new System.NotImplementedException(),
-            TokenType.IfKeyword => throw new System.NotImplementedException(),
-            TokenType.ElseKeyword => throw new System.NotImplementedException(),
-            TokenType.WhileKeyword => throw new System.NotImplementedException(),
-            TokenType.AutoKeyword => throw new System.NotImplementedException(),
-            TokenType.SwitchKeyword => throw new System.NotImplementedException(),
-            TokenType.CaseKeyword => throw new System.NotImplementedException(),
-            TokenType.BreakKeyword => throw new System.NotImplementedException(),
-            _ => throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParsePrimary)} of type {Peek()}"),
+
+            //
+            TokenType.Eof => Unexpected(data),
+            TokenType.Garbage => Unexpected(data),
+            TokenType.None => Unexpected(data),
+            TokenType.Comment => Unexpected(data),
+            TokenType.FloatLiteral => Unexpected(data),
+            TokenType.StringLiteral => Unexpected(data),
+            TokenType.CharLiteral => Unexpected(data),
+            TokenType.CloseParenthesis => Unexpected(data),
+            TokenType.OpenBracket => Unexpected(data),
+            TokenType.CloseBracket => Unexpected(data),
+            TokenType.OpenScope => Unexpected(data),
+            TokenType.CloseScope => Unexpected(data),
+            TokenType.Dot => Unexpected(data),
+            TokenType.Comma => Unexpected(data),
+            TokenType.Addition => Unexpected(data),
+            TokenType.Subtraction => Unexpected(data),
+            TokenType.Division => Unexpected(data),
+            TokenType.Modulo => Unexpected(data),
+            TokenType.LessThan => Unexpected(data),
+            TokenType.GreaterThan => Unexpected(data),
+            TokenType.LessThanEqual => Unexpected(data),
+            TokenType.GreaterThanEqual => Unexpected(data),
+            TokenType.EqualEqual => Unexpected(data),
+            TokenType.NotEqual => Unexpected(data),
+            TokenType.LogicalAnd => Unexpected(data),
+            TokenType.LogicalOr => Unexpected(data),
+            TokenType.LogicalNot => Unexpected(data),
+            TokenType.Assignment => Unexpected(data),
+            TokenType.AdditionAssignment => Unexpected(data),
+            TokenType.SubtractionAssignment => Unexpected(data),
+            TokenType.MultiplicationAssignment => Unexpected(data),
+            TokenType.DivisionAssignment => Unexpected(data),
+            TokenType.ModuloAssignment => Unexpected(data),
+            TokenType.Increment => Unexpected(data),
+            TokenType.Decrement => Unexpected(data),
+            TokenType.BitwiseComplement => Unexpected(data),
+            TokenType.BitwiseOr => Unexpected(data),
+            TokenType.BitwiseXOr => Unexpected(data),
+            TokenType.BitwiseShiftLeft => Unexpected(data),
+            TokenType.BitwiseShiftRight => Unexpected(data),
+            TokenType.Semicolon => Unexpected(data),
+            TokenType.ExternKeyword => Unexpected(data),
+            TokenType.IfKeyword => Unexpected(data),
+            TokenType.ElseKeyword => Unexpected(data),
+            TokenType.WhileKeyword => Unexpected(data),
+            TokenType.AutoKeyword => Unexpected(data),
+            TokenType.SwitchKeyword => Unexpected(data),
+            TokenType.CaseKeyword => Unexpected(data),
+            TokenType.BreakKeyword => Unexpected(data),
+            _ => Unexpected(data),
         };
+    }
+
+    private Expression Unexpected(CompilationData data, [CallerMemberName] string callerName = "")
+    {
+        throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {callerName} of type {Peek()}");
     }
 
     private AddressOfExpression ParseAddressOf()

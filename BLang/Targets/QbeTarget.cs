@@ -80,7 +80,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
             case ExternalStatement s: VisitExternalStatement(s); break;
             case FunctionCall s: VisitFunctionCall(s); break;
             case AutoStatement s: VisitAutoStatement(s); break;
-            case VariableDeclarator s: VisitVariableAssignment(s); break;
+            case VariableDeclaration s: VisitVariableAssignment(s); break;
             case WhileStatement s: VisitWhileStatement(s); break;
             case IfStatement s: VisitIfStatement(s); break;
             default: throw new ParserException(node.ToString());
@@ -229,7 +229,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
         return string.Join(", ", registers);
     }
 
-    public void VisitVariableAssignment(VariableDeclarator variableAssignment)
+    public void VisitVariableAssignment(VariableDeclaration variableAssignment)
     {
         Expression value = variableAssignment.Value;
 
