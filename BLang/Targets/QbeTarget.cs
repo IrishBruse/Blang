@@ -36,7 +36,7 @@ public class QbeTarget(CompilationData data) : BaseTarget
 
     public void VisitCompilationUnit(CompilationUnit node)
     {
-        foreach (GlobalVariable variable in node.GlobalVariables)
+        foreach (VariableDecleration variable in node.GlobalVariables)
         {
             Comment(variable.Symbol.Name);
             _ = CreateGlobalMemoryRegister(variable.Symbol);

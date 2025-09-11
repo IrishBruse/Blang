@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 using BLang.Utility;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "_Type")]
-[JsonDerivedType(typeof(GlobalVariable), nameof(GlobalVariable))]
+[JsonDerivedType(typeof(VariableDecleration), nameof(VariableDecleration))]
 [JsonDerivedType(typeof(ExternalStatement), nameof(ExternalStatement))]
 [JsonDerivedType(typeof(WhileStatement), nameof(WhileStatement))]
 [JsonDerivedType(typeof(SwitchStatement), nameof(SwitchStatement))]
@@ -14,7 +14,7 @@ using BLang.Utility;
 [JsonDerivedType(typeof(VariableDeclaration), nameof(VariableDeclaration))]
 public abstract record Statement() : AstNode;
 
-public record GlobalVariable(Symbol Symbol, int? Value) : Statement;
+public record VariableDecleration(Symbol Symbol, int? Value) : Statement;
 
 public record ExternalStatement(Symbol[] Externals) : Statement;
 

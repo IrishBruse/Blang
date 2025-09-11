@@ -10,6 +10,6 @@ public abstract record AstNode
 #pragma warning restore CA1051
 }
 
-public record CompilationUnit(List<FunctionDecleration> FunctionDeclarations, List<GlobalVariable> GlobalVariables) : AstNode;
+public record CompilationUnit(List<FunctionDecleration> FunctionDeclarations, List<VariableDecleration> GlobalVariables) : AstNode;
 
 public record FunctionDecleration(Symbol Symbol, Expression[] Parameters, Statement[] Body) : AstNode;

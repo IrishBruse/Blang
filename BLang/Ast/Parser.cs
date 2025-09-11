@@ -23,14 +23,13 @@ public partial class Parser(CompilationData data)
             Console.WriteLine(tokens.Current);
         }
 
-        _ = tokens.MoveNext();
         return ParseTopLevel();
     }
 
     private CompilationUnit ParseTopLevel()
     {
         List<FunctionDecleration> functions = [];
-        List<GlobalVariable> globals = [];
+        List<VariableDecleration> globals = [];
 
         SourceRange start = previousTokenRange;
 
@@ -188,6 +187,7 @@ public partial class Parser(CompilationData data)
             TokenType.ElseKeyword => throw new NotImplementedException(),
             TokenType.CaseKeyword => throw new NotImplementedException(),
             TokenType.BreakKeyword => throw new NotImplementedException(),
+            TokenType.ArrayIndexing => throw new NotImplementedException(),
             _ => throw new InvalidTokenException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParseStatement)} of type {Peek()}")
         };
     }
