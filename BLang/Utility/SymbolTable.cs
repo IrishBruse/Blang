@@ -128,7 +128,7 @@ public class SymbolTable
 
     public static void Log(string message)
     {
-        if (Options.DebugSymbol)
+        if (Options.Symbols)
         {
             Debug(message, "SYM");
         }

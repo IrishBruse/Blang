@@ -23,8 +23,8 @@ public partial class Parser
     {
         Token token = tokens.Current;
         previousTokenRange = token.Range;
-        _ = tokens.MoveNext();
 
+        _ = tokens.MoveNext();
         if (Options.Tokens)
         {
             Console.WriteLine(tokens.Current);

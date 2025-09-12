@@ -18,6 +18,7 @@ public partial class Parser(CompilationData data)
     {
         this.tokens = tokens;
 
+        _ = tokens.MoveNext();
         if (Options.Tokens)
         {
             Console.WriteLine(tokens.Current);
@@ -439,6 +440,7 @@ public partial class Parser(CompilationData data)
             TokenType.SwitchKeyword => throw new NotImplementedException(),
             TokenType.CaseKeyword => throw new NotImplementedException(),
             TokenType.BreakKeyword => throw new NotImplementedException(),
+            TokenType.ArrayIndexing => throw new NotImplementedException(),
             _ => throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} ParseExpression: {Peek()}"),
         };
     }

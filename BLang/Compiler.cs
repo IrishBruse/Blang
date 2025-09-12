@@ -19,18 +19,19 @@ public static class Compiler
     {
         CompileOutput output = new();
         CompilationData data = new(file);
-        Lexer lexer = new(data);
-        Parser parser = new(data);
 
+        Lexer lexer = new(data);
         IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
+
+        Parser parser = new(data);
         CompilationUnit unit = parser.Parse(tokens);
 
-        string target = Options.Target;
+        string target = "qbe";
 
         CreateOutputDirectories(file, target);
         (string objFile, string binFile) = GetOutputFile(file, target);
 
-        JsonSerializerOptions jsonOptions = Options is TestOptions ? TestAstJsonOptions : AstJsonOptions;
+        JsonSerializerOptions jsonOptions = Options.Verb == Verb.Test ? TestAstJsonOptions : AstJsonOptions;
         string astJson = JsonSerializer.Serialize(unit, jsonOptions);
         output.AstOutput = astJson;
         Debug(output.AstOutput);

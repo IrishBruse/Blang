@@ -1,49 +1,151 @@
 namespace BLang;
 
+using System.CommandLine;
 using BLang.Utility;
 
 public class Program
 {
-    public static void Main(string[] args)
+    private static Option<bool> DebugFlag = new("--debug")
     {
-        BaseOptions.Parse(args);
+        Description = "DebugFlag Description",
+    };
 
-        switch (Options)
-        {
-            case TestOptions:
-                Tester.Test("Tests/");
-                break;
+    private static Option<bool> TokensFlag = new("--tokens")
+    {
+        Description = "TokensFlag Description",
+    };
 
-            case RunOptions:
-                Run();
-                break;
+    private static Option<bool> SymbolsFlag = new("--symbols")
+    {
+        Description = "SymbolsFlag Description",
+    };
 
-            case FormatOptions:
-                Run();
-                break;
+    private static Argument<string> FileArg = new("file")
+    {
+        Description = "RunFileArg Description",
+    };
 
-            case BuildOptions:
-                Build();
-                break;
-            default:
-                break;
-        }
+    // Test Flags
+    private static Option<bool> UpdateSnapshotFlag = new("--updateSnapshot", "-u")
+    {
+        Description = "UpdateSnapshotArg Description",
+    };
+
+
+    public static int Main(string[] args)
+    {
+        RootCommand rootCommand = BuildCommand();
+        rootCommand.Subcommands.Add(RunCommand());
+        rootCommand.Subcommands.Add(TestCommand());
+
+        ParseResult result = rootCommand.Parse(args);
+
+        return result.Invoke();
     }
 
-    public static void Run()
+    private static RootCommand BuildCommand()
     {
-        RunOptions opt = (RunOptions)Options;
-        CompileOutput output = Compiler.Compile(opt.File);
+        RootCommand rootCommand = new("Compiler for the b programming lanaugage.");
+
+        rootCommand.Add(FileArg);
+
+        // Global Flags
+        rootCommand.Add(DebugFlag);
+        rootCommand.Add(TokensFlag);
+        rootCommand.Add(SymbolsFlag);
+
+        rootCommand.SetAction(Build);
+        return rootCommand;
+    }
+
+    private static int Build(ParseResult parseResult)
+    {
+        Options.Verb = Verb.Build;
+        ParseFlags(parseResult);
+
+        string file = parseResult.GetValue(FileArg)!;
+
+        CompileOutput output = Compiler.Compile(file);
+        Error(output.Errors);
+
+        return 0;
+    }
+
+    private static Command TestCommand()
+    {
+        Command testCommand = new("test", "Test compiler output");
+
+        // Global Flags
+        testCommand.Add(DebugFlag);
+        testCommand.Add(TokensFlag);
+        testCommand.Add(SymbolsFlag);
+
+        // Args
+        testCommand.Add(FileArg);
+
+        testCommand.Add(UpdateSnapshotFlag);
+        testCommand.SetAction(Test);
+        return testCommand;
+    }
+
+    private static int Test(ParseResult parseResult)
+    {
+        Options.Verb = Verb.Test;
+        ParseFlags(parseResult);
+
+        string? file = parseResult.GetValue(FileArg);
+
+        if (file != null)
+        {
+            Tester.RunTestFile(file);
+        }
+        else
+        {
+            Tester.Test("Tests/");
+        }
+
+        return 0;
+    }
+
+    private static Command RunCommand()
+    {
+        Command runCommand = new("run", "Run .b file");
+
+        // Global Flags
+        runCommand.Add(DebugFlag);
+        runCommand.Add(TokensFlag);
+        runCommand.Add(SymbolsFlag);
+
+        // Args
+        runCommand.Add(FileArg);
+
+        runCommand.SetAction(Run);
+        return runCommand;
+    }
+
+
+    private static int Run(ParseResult parseResult)
+    {
+        Options.Verb = Verb.Run;
+        ParseFlags(parseResult);
+
+        string file = parseResult.GetValue(FileArg)!;
+
+        CompileOutput output = Compiler.Compile(file);
         Error(output.Errors);
 
         _ = Executable.Run(output.Executable);
+
+        return 0;
     }
 
 
-    public static void Build()
+    private static void ParseFlags(ParseResult parseResult)
     {
-        BuildOptions opt = (BuildOptions)Options;
-        CompileOutput output = Compiler.Compile(opt.File);
-        Error(output.Errors);
+        Options.Debug = parseResult.GetValue(DebugFlag);
+        Options.Tokens = parseResult.GetValue(TokensFlag);
+        Options.Symbols = parseResult.GetValue(SymbolsFlag);
+
+        Options.UpdateSnapshots = parseResult.GetValue(UpdateSnapshotFlag);
     }
 }

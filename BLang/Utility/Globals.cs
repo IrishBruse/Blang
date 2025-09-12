@@ -8,8 +8,6 @@ using System;
 
 public class Globals
 {
-    public static BaseOptions Options { get; set; } = null!;
-
     private static void Print(string? message, string? prefix, ConsoleColor? color = null)
     {
         if (!string.IsNullOrEmpty(message))

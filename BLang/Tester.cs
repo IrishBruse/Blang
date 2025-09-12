@@ -1,7 +1,6 @@
 namespace BLang;
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -11,7 +10,6 @@ using static BLang.Utility.Colors;
 
 public class Tester
 {
-    private static readonly TestOptions Opt = (TestOptions)Options;
     public static void Test(string path)
     {
         string[] tests = Directory.GetFiles(path, "*.b");
@@ -20,20 +18,6 @@ public class Tester
         {
             RunTestFile(testFile);
         }
-    }
-
-    public static List<string[]> GetTests(string path)
-    {
-        string[] files = Directory.GetFiles(path, "*.b");
-
-        List<string[]> tests = new();
-
-        foreach (string file in files)
-        {
-            tests.Add([file]);
-        }
-
-        return tests;
     }
 
     public static void RunTestFile(string testFile)
@@ -54,7 +38,7 @@ public class Tester
 
         try
         {
-            if (Opt.UpdateSnapshots)
+            if (Options.UpdateSnapshots)
             {
                 UpdateSnapshot(testFile, output, time);
             }

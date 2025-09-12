@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLang", "BLang\BLang.csproj", "{447BDA23-CF7E-4701-AA39-8021BD3AA303}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLang.Tests", "BLang.Tests\BLang.Tests.csproj", "{FF1A1C6B-A617-4F46-89B1-8CAC714969EB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
