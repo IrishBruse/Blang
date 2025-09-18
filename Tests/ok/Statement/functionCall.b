@@ -1,7 +1,4 @@
 main() {
-    extrn printf;
-    printf("Test: functions\n");
-
     other();
 }
 

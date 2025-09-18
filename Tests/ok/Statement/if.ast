@@ -16,29 +16,8 @@
             }
           ],
           "Range": {
-            "Start": 13,
-            "End": 26
-          }
-        },
-        {
-          "_Type": "FunctionCall",
-          "Symbol": {
-            "Name": "printf",
-            "Kind": 0
-          },
-          "Parameters": [
-            {
-              "_Type": "StringValue",
-              "Value": "Test: if\\n",
-              "Range": {
-                "Start": 38,
-                "End": 50
-              }
-            }
-          ],
-          "Range": {
-            "Start": 31,
-            "End": 37
+            "Start": 15,
+            "End": 28
           }
         },
         {
@@ -49,21 +28,21 @@
               "_Type": "IntValue",
               "Value": 0,
               "Range": {
-                "Start": 61,
-                "End": 62
+                "Start": 38,
+                "End": 39
               }
             },
             "Right": {
               "_Type": "IntValue",
               "Value": 1,
               "Range": {
-                "Start": 63,
-                "End": 64
+                "Start": 40,
+                "End": 41
               }
             },
             "Range": {
-              "Start": 61,
-              "End": 64
+              "Start": 38,
+              "End": 41
             }
           },
           "Body": [
@@ -78,33 +57,33 @@
                   "_Type": "StringValue",
                   "Value": "Pass",
                   "Range": {
-                    "Start": 87,
-                    "End": 93
+                    "Start": 66,
+                    "End": 72
                   }
                 }
               ],
               "Range": {
-                "Start": 80,
-                "End": 86
+                "Start": 59,
+                "End": 65
               }
             }
           ],
           "ElseBody": null,
           "Range": {
-            "Start": 57,
-            "End": 101
+            "Start": 34,
+            "End": 81
           }
         }
       ],
       "Range": {
         "Start": 0,
-        "End": 103
+        "End": 84
       }
     }
   ],
   "GlobalVariables": [],
   "Range": {
     "Start": 0,
-    "End": 103
+    "End": 84
   }
 }

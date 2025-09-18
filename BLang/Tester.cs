@@ -117,7 +117,7 @@ public class Tester
         }
         else if (astOutput != output.AstOutput)
         {
-            (int line, string line1, string line2) = FindFirstDifferentLine(astOutput, output.AstOutput);
+            (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, output.AstOutput);
             // error = $"Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}\n{text}";
             error = $"""
             Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}
@@ -159,19 +159,19 @@ public class Tester
         return (astOutput, stdOutput);
     }
 
-    public static Tuple<int, string, string> FindFirstDifferentLine(string content1, string content2)
+    public static Tuple<int, string?, string?> FindFirstDifferentLine(string content1, string content2)
     {
         using StringReader reader1 = new(content1);
         using StringReader reader2 = new(content2);
-        string line1;
-        string line2;
+        string? line1;
+        string? line2;
         int lineNumber = 1;
 
         while ((line1 = reader1.ReadLine()) != null && (line2 = reader2.ReadLine()) != null)
         {
             if (line1 != line2)
             {
-                return Tuple.Create(lineNumber, line1, line2);
+                return Tuple.Create<int, string?, string?>(lineNumber, line1, line2);
             }
             lineNumber++;
         }
@@ -190,11 +190,11 @@ public class Tester
             // We return null for the line content since content1 has no more lines.
             else
             {
-                return Tuple.Create(lineNumber, string.Empty, string.Empty);
+                return Tuple.Create<int, string?, string?>(lineNumber, string.Empty, string.Empty);
             }
         }
 
         // If we reach here, strings are identical
-        return Tuple.Create(0, string.Empty, string.Empty);
+        return Tuple.Create<int, string?, string?>(0, string.Empty, string.Empty);
     }
 }

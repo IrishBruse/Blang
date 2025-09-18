@@ -1,4 +1,0 @@
-System.InvalidOperationException: Cannot start process because a file name has not been provided.
-   at System.Diagnostics.Process.Start()
-   at System.Diagnostics.Process.Start(ProcessStartInfo startInfo)
-   at BLang.Utility.Executable.Capture(String executable, String arguments) in /home/econn/git/Blang/BLang/Utility/Executable.cs:line 27

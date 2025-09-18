@@ -34,6 +34,8 @@ public static class Compiler
 
     private static CompileOutput QbeTarget(string file, CompilationData data, CompilationUnit unit)
     {
+        CreateOutputDirectories(file, "qbe");
+
         (string objFile, string binFile) = GetOutputFile(file, Targets.QbeTarget.Target);
         CompileOutput output = new();
 
@@ -45,7 +47,7 @@ public static class Compiler
             return output;
         }
 
-        if (!RunExecutable("qbe", $"{objFile}.ssa -o {objFile}.s", output))
+        if (!RunExecutable("gcc", $"{objFile}.s -o {binFile}", output))
         {
             return output;
         }
@@ -53,7 +55,7 @@ public static class Compiler
         output.Executable = binFile;
         output.Success = true;
 
-        return default;
+        return output;
     }
 
     private static bool RunExecutable(string command, string args, CompileOutput output)

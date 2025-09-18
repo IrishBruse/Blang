@@ -16,8 +16,8 @@
             }
           ],
           "Range": {
-            "Start": 13,
-            "End": 26
+            "Start": 15,
+            "End": 28
           }
         },
         {
@@ -29,12 +29,12 @@
             }
           ],
           "Range": {
-            "Start": 31,
-            "End": 38
+            "Start": 36,
+            "End": 43
           }
         },
         {
-          "_Type": "VariableDeclarator",
+          "_Type": "VariableDeclaration",
           "Symbol": {
             "Name": "i",
             "Kind": 0
@@ -43,13 +43,13 @@
             "_Type": "IntValue",
             "Value": 0,
             "Range": {
-              "Start": 47,
-              "End": 48
+              "Start": 53,
+              "End": 54
             }
           },
           "Range": {
-            "Start": 43,
-            "End": 44
+            "Start": 49,
+            "End": 50
           }
         },
         {
@@ -63,21 +63,21 @@
                 "Kind": 0
               },
               "Range": {
-                "Start": 61,
-                "End": 62
+                "Start": 68,
+                "End": 69
               }
             },
             "Right": {
               "_Type": "IntValue",
               "Value": 10,
               "Range": {
-                "Start": 63,
-                "End": 65
+                "Start": 70,
+                "End": 72
               }
             },
             "Range": {
-              "Start": 61,
-              "End": 65
+              "Start": 68,
+              "End": 72
             }
           },
           "Body": [
@@ -90,10 +90,10 @@
               "Parameters": [
                 {
                   "_Type": "StringValue",
-                  "Value": "%d",
+                  "Value": "%d ",
                   "Range": {
-                    "Start": 88,
-                    "End": 92
+                    "Start": 97,
+                    "End": 102
                   }
                 },
                 {
@@ -103,18 +103,18 @@
                     "Kind": 0
                   },
                   "Range": {
-                    "Start": 94,
-                    "End": 95
+                    "Start": 104,
+                    "End": 105
                   }
                 }
               ],
               "Range": {
-                "Start": 81,
-                "End": 87
+                "Start": 90,
+                "End": 96
               }
             },
             {
-              "_Type": "VariableDeclarator",
+              "_Type": "VariableDeclaration",
               "Symbol": {
                 "Name": "i",
                 "Kind": 0
@@ -147,26 +147,26 @@
                 }
               },
               "Range": {
-                "Start": 106,
-                "End": 107
+                "Start": 117,
+                "End": 118
               }
             }
           ],
           "Range": {
-            "Start": 54,
-            "End": 116
+            "Start": 61,
+            "End": 128
           }
         }
       ],
       "Range": {
         "Start": 0,
-        "End": 118
+        "End": 131
       }
     }
   ],
   "GlobalVariables": [],
   "Range": {
     "Start": 0,
-    "End": 118
+    "End": 131
   }
 }

@@ -1,0 +1,56 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "exit",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 14,
+            "End": 25
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "exit",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "IntValue",
+              "Value": 0,
+              "Range": {
+                "Start": 36,
+                "End": 37
+              }
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 35
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 42
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 42
+  }
+}

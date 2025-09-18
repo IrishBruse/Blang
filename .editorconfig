@@ -14,7 +14,7 @@ dotnet_diagnostic.IDE0060.severity = none
 dotnet_diagnostic.CA1305.severity = none
 dotnet_diagnostic.IDE0025.severity = none
 dotnet_diagnostic.IDE0028.severity = none # default constructor simplified
-
+dotnet_diagnostic.IDE0078.severity = none # pattern matching
 
 # Set the default severity for all style rules to 'warning'.
 dotnet_analyzer_diagnostic.severity = warning

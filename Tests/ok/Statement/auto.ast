@@ -1,0 +1,54 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Name": "foo",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 14,
+            "End": 23
+          }
+        },
+        {
+          "_Type": "VariableDeclaration",
+          "Symbol": {
+            "Name": "foo",
+            "Kind": 0
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 123,
+            "Range": {
+              "Start": 35,
+              "End": 38
+            }
+          },
+          "Range": {
+            "Start": 29,
+            "End": 32
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 42
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 42
+  }
+}
