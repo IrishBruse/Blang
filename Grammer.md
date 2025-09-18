@@ -24,25 +24,25 @@
 
 ## Grammar
 
-### Program (CompilationUnit)
 ```
+Program (CompilationUnit)
   | Definition*
 ```
 
-### Definition
 ```
+Definition
   | (Name, ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
   | (Name, '(', (Name, (',', Name)*)?, ')', Statement)
 ```
 
-### Ival
 ```
+Ival
   | Constant
   | Name
 ```
 
-### Statement
 ```
+Statement
   | ('auto', Name, Constant?, (',', Name, Constant?)*, ';', Statement)
   | ('extrn', Name, (',', Name)*, ';', Statement)
   | (Name, ':', Statement)
@@ -57,8 +57,8 @@
 ```
 
 
-### Rvalue
 ```
+Rvalue
   | ('(', Rvalue, ')')
   | Lvalue
   | Constant
@@ -72,25 +72,25 @@
   | (Rvalue, '(', (Rvalue, (',', Rvalue)*)?, ')')
 ```
 
-### Assign
 ```
+Assign
   | '=', Binary?
 ```
 
-### IncDec
 ```
+IncDec
   | '++'
   | '--'
 ```
 
-### Unary
 ```
+Unary
   | '-'
   | '!'
 ```
 
-### Binary
 ```
+Binary
   | '|' | '&'
   | '==' | '!='
   | '<' | '<=' | '>' | '>='
@@ -99,21 +99,21 @@
   | '%' | '*' | '/'
 ```
 
-### Lvalue
 ```
+Lvalue
   | Name
   | ('*', Rvalue)
   | (Rvalue, '[', Rvalue, ']')
 ```
 
-### Constant
 ```
+Constant
   | <digit>+
   | ('\'', <char>[1-2], '\'')
   | ('"', <char>*, '"')
 ```
 
-### Name
 ```
+Name
   | <alpha>, (<alpha> | <digit>)[0-7]
 ```
