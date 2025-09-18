@@ -12,7 +12,7 @@ public class Tester
 {
     public static void Test(string path)
     {
-        string[] tests = Directory.GetFiles(path, "*.b");
+        string[] tests = Directory.GetFiles(path, "*.b", SearchOption.AllDirectories);
 
         foreach (string testFile in tests)
         {
@@ -117,7 +117,15 @@ public class Tester
         }
         else if (astOutput != output.AstOutput)
         {
-            error = $"ast missmatch: {output.AstOutput}";
+            (int line, string line1, string line2) = FindFirstDifferentLine(astOutput, output.AstOutput);
+            // error = $"Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}\n{text}";
+            error = $"""
+            Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}
+            Expected:
+            {line1}
+            Recieved:
+            {line2}
+            """;
         }
         else if (stdOutput != runOutputStdErr)
         {
@@ -133,7 +141,7 @@ public class Tester
             success = true;
         }
 
-        string time = Gray(DateTime.Now.Millisecond - start + "ms");
+        string time = Gray("(" + (DateTime.Now.Millisecond - start) + "ms)");
         string icon = success ? Green(IconPass) : Red(IconFail);
 
         Log($"{icon} {testFile} {time}");
@@ -149,5 +157,44 @@ public class Tester
         string stdOutput = File.Exists(stdFile) ? File.ReadAllText(stdFile) : "";
 
         return (astOutput, stdOutput);
+    }
+
+    public static Tuple<int, string, string> FindFirstDifferentLine(string content1, string content2)
+    {
+        using StringReader reader1 = new(content1);
+        using StringReader reader2 = new(content2);
+        string line1;
+        string line2;
+        int lineNumber = 1;
+
+        while ((line1 = reader1.ReadLine()) != null && (line2 = reader2.ReadLine()) != null)
+        {
+            if (line1 != line2)
+            {
+                return Tuple.Create(lineNumber, line1, line2);
+            }
+            lineNumber++;
+        }
+
+        // Check for differences in length
+        if (reader1.ReadLine() != null || reader2.ReadLine() != null)
+        {
+            // If content1 is longer, we return the first line of content1 that doesn't have a match in content2.
+            if (reader1.Peek() != -1)
+            {
+                line1 = reader2.ReadLine();
+                line2 = reader2.ReadLine();
+                return Tuple.Create(lineNumber, line1, line2);
+            }
+            // If content2 is longer, the first different line is the end of content1.
+            // We return null for the line content since content1 has no more lines.
+            else
+            {
+                return Tuple.Create(lineNumber, string.Empty, string.Empty);
+            }
+        }
+
+        // If we reach here, strings are identical
+        return Tuple.Create(0, string.Empty, string.Empty);
     }
 }

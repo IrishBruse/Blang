@@ -1,6 +1,5 @@
 namespace BLang;
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -20,53 +19,71 @@ public static class Compiler
         CompileOutput output = new();
         CompilationData data = new(file);
 
-        Lexer lexer = new(data);
-        IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
+        IEnumerator<Token> tokens = LexFile(file, data);
+        CompilationUnit unit = ParseTokens(tokens, data);
 
-        Parser parser = new(data);
-        CompilationUnit unit = parser.Parse(tokens);
-
-        string target = "qbe";
-
-        CreateOutputDirectories(file, target);
-        (string objFile, string binFile) = GetOutputFile(file, target);
-
-        JsonSerializerOptions jsonOptions = Options.Verb == Verb.Test ? TestAstJsonOptions : AstJsonOptions;
-        string astJson = JsonSerializer.Serialize(unit, jsonOptions);
-        output.AstOutput = astJson;
-        Debug(output.AstOutput);
-
-        if (target == QbeTarget.Target)
+        if (Options.Target == CompilationTarget.Qbe)
         {
-            QbeTarget qbeTarget = new(data);
-
-            string qbeIR = qbeTarget.ToOutput(unit);
-            File.WriteAllText(objFile + ".ssa", qbeIR);
-
-            Executable exe = Executable.Capture("qbe", $"{objFile}.ssa -o {objFile}.s");
-            if (!exe.Success())
-            {
-                Error(exe.StdError, "ERR");
-                output.Success = false;
-                return output;
-            }
-
-            exe = Executable.Capture("gcc", $"{objFile}.s -g -o {binFile}");
-            if (!exe.Success())
-            {
-                Error(exe.StdError, "ERR");
-                output.Success = false;
-                return output;
-            }
+            output = QbeTarget(file, data, unit);
         }
-        else
+
+        output.AstOutput = GenerateAstJson(unit);
+
+        return output;
+    }
+
+    private static CompileOutput QbeTarget(string file, CompilationData data, CompilationUnit unit)
+    {
+        (string objFile, string binFile) = GetOutputFile(file, Targets.QbeTarget.Target);
+        CompileOutput output = new();
+
+        string qbeIR = new QbeTarget(data).ToOutput(unit);
+        File.WriteAllText(objFile + ".ssa", qbeIR);
+
+        if (!RunExecutable("qbe", $"{objFile}.ssa -o {objFile}.s", output))
         {
-            throw new ArgumentException("Unknown target " + target);
+            return output;
+        }
+
+        if (!RunExecutable("qbe", $"{objFile}.ssa -o {objFile}.s", output))
+        {
+            return output;
         }
 
         output.Executable = binFile;
+        output.Success = true;
 
-        return output;
+        return default;
+    }
+
+    private static bool RunExecutable(string command, string args, CompileOutput output)
+    {
+        Executable exe = Executable.Capture(command, args);
+        if (!exe.Success())
+        {
+            Error(exe.StdError, "ERR");
+            output.Success = false;
+            return false;
+        }
+        return true;
+    }
+
+    private static IEnumerator<Token> LexFile(string file, CompilationData data)
+    {
+        Lexer lexer = new(data);
+        return lexer.Lex(File.OpenText(file), file);
+    }
+
+    private static CompilationUnit ParseTokens(IEnumerator<Token> tokens, CompilationData data)
+    {
+        Parser parser = new(data);
+        return parser.Parse(tokens);
+    }
+
+    private static string GenerateAstJson(CompilationUnit unit)
+    {
+        JsonSerializerOptions jsonOptions = Options.Verb == Verb.Test ? TestAstJsonOptions : AstJsonOptions;
+        return JsonSerializer.Serialize(unit, jsonOptions);
     }
 
     private static (string, string) GetOutputFile(string inputFile, string target)

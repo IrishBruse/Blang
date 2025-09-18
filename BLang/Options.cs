@@ -8,12 +8,12 @@ public static class Options
     public static bool Debug { get; set; }
     public static bool Tokens { get; set; }
     public static bool Symbols { get; set; }
-
-
-    // Run Flags
+    public static CompilationTarget Target { get; set; } = CompilationTarget.Qbe;
 
     // Test Flags
     public static bool UpdateSnapshots { get; set; }
+
+    // Run Flags
 
     // Build Flags
 }
@@ -23,4 +23,9 @@ public enum Verb
     Run,
     Build,
     Test,
+}
+
+public enum CompilationTarget
+{
+    Qbe
 }

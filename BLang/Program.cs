@@ -26,10 +26,18 @@ public class Program
     };
 
     // Test Flags
+
+    private static Argument<string> TestFileArg = new("file")
+    {
+        Description = "RunFileArg Description",
+        DefaultValueFactory = (_) => ""
+    };
+
     private static Option<bool> UpdateSnapshotFlag = new("--updateSnapshot", "-u")
     {
         Description = "UpdateSnapshotArg Description",
     };
+
 
 
     public static int Main(string[] args)
@@ -81,7 +89,7 @@ public class Program
         testCommand.Add(SymbolsFlag);
 
         // Args
-        testCommand.Add(FileArg);
+        testCommand.Add(TestFileArg);
 
         testCommand.Add(UpdateSnapshotFlag);
         testCommand.SetAction(Test);
@@ -93,9 +101,9 @@ public class Program
         Options.Verb = Verb.Test;
         ParseFlags(parseResult);
 
-        string? file = parseResult.GetValue(FileArg);
+        string? file = parseResult.GetValue(TestFileArg);
 
-        if (file != null)
+        if (file != null && file != "")
         {
             Tester.RunTestFile(file);
         }
