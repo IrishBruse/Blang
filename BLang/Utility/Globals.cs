@@ -16,7 +16,7 @@ public class Globals
             foreach (string line in message.Split("\n"))
             {
                 string pre = string.IsNullOrEmpty(prefix) ? "" : $"[{prefix}] ";
-                Console.WriteLine(pre + line);
+                Console.Error.WriteLine(pre + line);
             }
             if (color != null) Console.ResetColor();
         }

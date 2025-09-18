@@ -3,6 +3,8 @@ namespace BLang;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using BLang.Ast;
 using BLang.Ast.Nodes;
 using BLang.Targets;
@@ -11,9 +13,6 @@ using BLang.Utility;
 
 public static class Compiler
 {
-    private static JsonSerializerOptions AstJsonOptions = new() { WriteIndented = true };
-    private static JsonSerializerOptions TestAstJsonOptions = new() { WriteIndented = true, IncludeFields = true };
-
     public static CompileOutput Compile(string file)
     {
         CompileOutput output = new();
@@ -28,6 +27,7 @@ public static class Compiler
         }
 
         output.AstOutput = GenerateAstJson(unit);
+        Debug(output.AstOutput);
 
         return output;
     }
@@ -84,7 +84,7 @@ public static class Compiler
 
     private static string GenerateAstJson(CompilationUnit unit)
     {
-        JsonSerializerOptions jsonOptions = Options.Verb == Verb.Test ? TestAstJsonOptions : AstJsonOptions;
+        JsonTypeInfo<CompilationUnit> jsonOptions = Options.Verb == Verb.Test ? CompilationUnitTestContext.Default.CompilationUnit : CompilationUnitContext.Default.CompilationUnit;
         return JsonSerializer.Serialize(unit, jsonOptions);
     }
 
@@ -106,3 +106,11 @@ public static class Compiler
         _ = Directory.CreateDirectory(Path.Combine(projectDirectory, "bin", target));
     }
 }
+
+[JsonSourceGenerationOptions(WriteIndented = true)]
+[JsonSerializable(typeof(CompilationUnit))]
+public partial class CompilationUnitContext : JsonSerializerContext;
+
+[JsonSourceGenerationOptions(WriteIndented = true, IncludeFields = true)]
+[JsonSerializable(typeof(CompilationUnit))]
+public partial class CompilationUnitTestContext : JsonSerializerContext;

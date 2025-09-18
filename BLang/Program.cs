@@ -1,6 +1,7 @@
 namespace BLang;
 
 using System.CommandLine;
+using System.Diagnostics;
 using BLang.Utility;
 
 public class Program
@@ -37,8 +38,6 @@ public class Program
     {
         Description = "UpdateSnapshotArg Description",
     };
-
-
 
     public static int Main(string[] args)
     {
@@ -79,6 +78,39 @@ public class Program
         return 0;
     }
 
+    private static Command RunCommand()
+    {
+        Command runCommand = new("run", "Run .b file");
+
+        // Global Flags
+        runCommand.Add(DebugFlag);
+        runCommand.Add(TokensFlag);
+        runCommand.Add(SymbolsFlag);
+
+        // Args
+        runCommand.Add(FileArg);
+
+        runCommand.SetAction(Run);
+        return runCommand;
+    }
+
+
+    private static int Run(ParseResult parseResult)
+    {
+        Options.Verb = Verb.Run;
+        ParseFlags(parseResult);
+
+        string file = parseResult.GetValue(FileArg)!;
+
+        CompileOutput output = Compiler.Compile(file);
+        Error(output.Errors);
+
+        _ = Process.Start(output.Executable).Start();
+
+        return 0;
+    }
+
+
     private static Command TestCommand()
     {
         Command testCommand = new("test", "Test compiler output");
@@ -115,37 +147,6 @@ public class Program
         return 0;
     }
 
-    private static Command RunCommand()
-    {
-        Command runCommand = new("run", "Run .b file");
-
-        // Global Flags
-        runCommand.Add(DebugFlag);
-        runCommand.Add(TokensFlag);
-        runCommand.Add(SymbolsFlag);
-
-        // Args
-        runCommand.Add(FileArg);
-
-        runCommand.SetAction(Run);
-        return runCommand;
-    }
-
-
-    private static int Run(ParseResult parseResult)
-    {
-        Options.Verb = Verb.Run;
-        ParseFlags(parseResult);
-
-        string file = parseResult.GetValue(FileArg)!;
-
-        CompileOutput output = Compiler.Compile(file);
-        Error(output.Errors);
-
-        _ = Executable.Run(output.Executable);
-
-        return 0;
-    }
 
 
     private static void ParseFlags(ParseResult parseResult)
