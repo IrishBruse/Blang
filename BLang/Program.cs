@@ -105,7 +105,7 @@ public class Program
         CompileOutput output = Compiler.Compile(file);
         Error(output.Errors);
 
-        _ = Process.Start(output.Executable).Start();
+        _ = Process.Start(output.Executable);
 
         return 0;
     }
