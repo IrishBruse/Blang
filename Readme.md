@@ -12,11 +12,11 @@ Run an example
 
 ![bc](misc/screenshots/bc_run.png)
 
-### Help
+## Help
 
 `❯ ./bc --help`
 
-```bash
+```
 Description:
   Compiler for the b programming lanaugage.
 
@@ -38,7 +38,7 @@ Commands:
   test <file>  Test compiler output
 ```
 
-### Testing
+## Testing
 
 Run all the compiler tests
 
@@ -73,7 +73,7 @@ Run all the compiler tests
 -   Dotnet 8
 -   QBE executable either build from source or use the linux-x86_64 one in `misc/qbe`
 -   cd into the BLang folder in the repo and run
-    -   `dotnet run -- --run -t qbe '../Examples/HelloWorld.b'`
+    -   `dotnet run -- run '../Examples/HelloWorld.b'`
 
 ## References
 
