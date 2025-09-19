@@ -8,35 +8,35 @@ public class Program
 {
     private static Option<bool> DebugFlag = new("--debug")
     {
-        Description = "DebugFlag Description",
+        Description = "Dump compiler debug information.",
     };
 
     private static Option<bool> TokensFlag = new("--tokens")
     {
-        Description = "TokensFlag Description",
+        Description = "Print tokenizers tokens.",
     };
 
     private static Option<bool> SymbolsFlag = new("--symbols")
     {
-        Description = "SymbolsFlag Description",
+        Description = "Print symbol table.",
     };
 
     private static Argument<string> FileArg = new("file")
     {
-        Description = "RunFileArg Description",
+        Description = "Path to .b file.",
     };
 
     // Test Flags
 
     private static Argument<string> TestFileArg = new("file")
     {
-        Description = "RunFileArg Description",
+        Description = "Path to .b test file.",
         DefaultValueFactory = (_) => ""
     };
 
     private static Option<bool> UpdateSnapshotFlag = new("--updateSnapshot", "-u")
     {
-        Description = "UpdateSnapshotArg Description",
+        Description = "Update tests snapshot.",
     };
 
     public static int Main(string[] args)

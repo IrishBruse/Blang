@@ -1,0 +1,255 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
+            }
+          ]
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Name": "i",
+              "Kind": 0
+            }
+          ]
+        },
+        {
+          "_Type": "VariableDeclaration",
+          "Symbol": {
+            "Name": "i",
+            "Kind": 0
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 1
+          }
+        },
+        {
+          "_Type": "WhileStatement",
+          "Condition": {
+            "Operation": 22,
+            "Left": {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "i",
+                "Kind": 0
+              }
+            },
+            "Right": {
+              "_Type": "IntValue",
+              "Value": 100
+            }
+          },
+          "Body": [
+            {
+              "_Type": "IfStatement",
+              "Condition": {
+                "Operation": 39,
+                "Left": {
+                  "_Type": "BinaryExpression",
+                  "Operation": 24,
+                  "Left": {
+                    "_Type": "BinaryExpression",
+                    "Operation": 19,
+                    "Left": {
+                      "_Type": "Variable",
+                      "Symbol": {
+                        "Name": "i",
+                        "Kind": 0
+                      }
+                    },
+                    "Right": {
+                      "_Type": "IntValue",
+                      "Value": 3
+                    }
+                  },
+                  "Right": {
+                    "_Type": "IntValue",
+                    "Value": 0
+                  }
+                },
+                "Right": {
+                  "_Type": "BinaryExpression",
+                  "Operation": 24,
+                  "Left": {
+                    "_Type": "BinaryExpression",
+                    "Operation": 19,
+                    "Left": {
+                      "_Type": "Variable",
+                      "Symbol": {
+                        "Name": "i",
+                        "Kind": 0
+                      }
+                    },
+                    "Right": {
+                      "_Type": "IntValue",
+                      "Value": 5
+                    }
+                  },
+                  "Right": {
+                    "_Type": "IntValue",
+                    "Value": 0
+                  }
+                }
+              },
+              "Body": [
+                {
+                  "_Type": "IfStatement",
+                  "Condition": {
+                    "Operation": 24,
+                    "Left": {
+                      "_Type": "BinaryExpression",
+                      "Operation": 19,
+                      "Left": {
+                        "_Type": "Variable",
+                        "Symbol": {
+                          "Name": "i",
+                          "Kind": 0
+                        }
+                      },
+                      "Right": {
+                        "_Type": "IntValue",
+                        "Value": 3
+                      }
+                    },
+                    "Right": {
+                      "_Type": "IntValue",
+                      "Value": 0
+                    }
+                  },
+                  "Body": [
+                    {
+                      "_Type": "FunctionCall",
+                      "Symbol": {
+                        "Name": "printf",
+                        "Kind": 0
+                      },
+                      "Parameters": [
+                        {
+                          "_Type": "StringValue",
+                          "Value": "Fizz"
+                        }
+                      ]
+                    }
+                  ],
+                  "ElseBody": null
+                },
+                {
+                  "_Type": "IfStatement",
+                  "Condition": {
+                    "Operation": 24,
+                    "Left": {
+                      "_Type": "BinaryExpression",
+                      "Operation": 19,
+                      "Left": {
+                        "_Type": "Variable",
+                        "Symbol": {
+                          "Name": "i",
+                          "Kind": 0
+                        }
+                      },
+                      "Right": {
+                        "_Type": "IntValue",
+                        "Value": 5
+                      }
+                    },
+                    "Right": {
+                      "_Type": "IntValue",
+                      "Value": 0
+                    }
+                  },
+                  "Body": [
+                    {
+                      "_Type": "FunctionCall",
+                      "Symbol": {
+                        "Name": "printf",
+                        "Kind": 0
+                      },
+                      "Parameters": [
+                        {
+                          "_Type": "StringValue",
+                          "Value": "Buzz"
+                        }
+                      ]
+                    }
+                  ],
+                  "ElseBody": null
+                }
+              ],
+              "ElseBody": [
+                {
+                  "_Type": "FunctionCall",
+                  "Symbol": {
+                    "Name": "printf",
+                    "Kind": 0
+                  },
+                  "Parameters": [
+                    {
+                      "_Type": "StringValue",
+                      "Value": "%d"
+                    },
+                    {
+                      "_Type": "Variable",
+                      "Symbol": {
+                        "Name": "i",
+                        "Kind": 0
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "_Type": "FunctionCall",
+              "Symbol": {
+                "Name": "printf",
+                "Kind": 0
+              },
+              "Parameters": [
+                {
+                  "_Type": "StringValue",
+                  "Value": "\\n"
+                }
+              ]
+            },
+            {
+              "_Type": "VariableDeclaration",
+              "Symbol": {
+                "Name": "i",
+                "Kind": 0
+              },
+              "Value": {
+                "_Type": "BinaryExpression",
+                "Operation": 15,
+                "Left": {
+                  "_Type": "Variable",
+                  "Symbol": {
+                    "Name": "i",
+                    "Kind": 0
+                  }
+                },
+                "Right": {
+                  "_Type": "IntValue",
+                  "Value": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "GlobalVariables": []
+}

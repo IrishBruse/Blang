@@ -24,12 +24,12 @@ Usage:
   bc <file> [command] [options]
 
 Arguments:
-  <file>  RunFileArg Description
+  <file>  Path to .b file.
 
 Options:
-  --debug         DebugFlag Description
-  --tokens        TokensFlag Description
-  --symbols       SymbolsFlag Description
+  --debug         Dump compiler debug information.
+  --tokens        Print tokenizers tokens.
+  --symbols       Print symbol table.
   -?, -h, --help  Show help and usage information
   --version       Show version information
 

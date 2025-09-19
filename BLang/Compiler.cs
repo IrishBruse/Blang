@@ -27,7 +27,12 @@ public static class Compiler
         }
 
         output.AstOutput = GenerateAstJson(unit);
-        Debug(output.AstOutput);
+
+        if (Options.Debug)
+        {
+            string astFile = Path.ChangeExtension(file, "ast");
+            File.WriteAllText(astFile, output.AstOutput);
+        }
 
         return output;
     }

@@ -2,11 +2,11 @@
 
 ## Legend
 
-| Notation | Meaning                           |
+| Notation | Meaning
 | :------- | :---------------------------------- |
-| `foo?`   | Zero or one occurrence of `foo`.  |
-| `foo*`   | Zero or more occurrences of `foo`.  |
-| `foo+`   | One or more occurrences of `foo`.   |
+| `foo?`     Zero or one occurrence of `foo`.
+| `foo*`     Zero or more occurrences of `foo`.
+| `foo+`     One or more occurrences of `foo`.
 | `'text'` | Represents the literal text `text`. |
 
 ## Lexical Conventions
@@ -26,94 +26,94 @@
 
 ```
 Program (CompilationUnit)
-  | Definition*
+    Definition*
 ```
 
 ```
 Definition
-  | (Name, ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
-  | (Name, '(', (Name, (',', Name)*)?, ')', Statement)
+    (Name, ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
+    (Name, '(', (Name, (',', Name)*)?, ')', Statement)
 ```
 
 ```
 Ival
-  | Constant
-  | Name
+    Constant
+    Name
 ```
 
 ```
 Statement
-  | ('auto', Name, Constant?, (',', Name, Constant?)*, ';', Statement)
-  | ('extrn', Name, (',', Name)*, ';', Statement)
-  | (Name, ':', Statement)
-  | ('case', Constant, ':', Statement)
-  | ('{', Statement*, '}')
-  | ('if', '(', Rvalue, ')', Statement, ('else', Statement)?)
-  | ('while', '(', Rvalue, ')', Statement)
-  | ('switch', Rvalue, Statement)
-  | ('goto', Rvalue, ';')
-  | ('return', ('(', Rvalue, ')')?, ';')
-  | (Rvalue?, ';')
+    ('auto', Name, Constant?, (',', Name, Constant?)*, ';', Statement)
+    ('extrn', Name, (',', Name)*, ';', Statement)
+    (Name, ':', Statement)
+    ('case', Constant, ':', Statement)
+    ('{', Statement*, '}')
+    ('if', '(', Rvalue, ')', Statement, ('else', Statement)?)
+    ('while', '(', Rvalue, ')', Statement)
+    ('switch', Rvalue, Statement)
+    ('goto', Rvalue, ';')
+    ('return', ('(', Rvalue, ')')?, ';')
+    (Rvalue?, ';')
 ```
 
 
 ```
 Rvalue
-  | ('(', Rvalue, ')')
-  | Lvalue
-  | Constant
-  | (Lvalue, Assign, Rvalue)
-  | (IncDec, Lvalue)
-  | (Lvalue, IncDec)
-  | (Unary, Rvalue)
-  | ('&', Lvalue)
-  | (Rvalue, Binary, Rvalue)
-  | (Rvalue, '?', Rvalue, ':', Rvalue)
-  | (Rvalue, '(', (Rvalue, (',', Rvalue)*)?, ')')
+    ('(', Rvalue, ')')
+    Lvalue
+    Constant
+    (Lvalue, Assign, Rvalue)
+    (IncDec, Lvalue)
+    (Lvalue, IncDec)
+    (Unary, Rvalue)
+    ('&', Lvalue)
+    (Rvalue, Binary, Rvalue)
+    (Rvalue, '?', Rvalue, ':', Rvalue)
+    (Rvalue, '(', (Rvalue, (',', Rvalue)*)?, ')')
 ```
 
 ```
 Assign
-  | '=', Binary?
+    '=', Binary?
 ```
 
 ```
 IncDec
-  | '++'
-  | '--'
+    '++'
+    '--'
 ```
 
 ```
 Unary
-  | '-'
-  | '!'
+    '-'
+    '!'
 ```
 
 ```
 Binary
-  | '|' | '&'
-  | '==' | '!='
-  | '<' | '<=' | '>' | '>='
-  | '<<' | '>>'
-  | '-' | '+'
-  | '%' | '*' | '/'
+    '|' | '&'
+    '==' | '!='
+    '<' | '<=' | '>' | '>='
+    '<<' | '>>'
+    '-' | '+'
+    '%' | '*' | '/'
 ```
 
 ```
 Lvalue
-  | Name
-  | ('*', Rvalue)
-  | (Rvalue, '[', Rvalue, ']')
+    Name
+    ('*', Rvalue)
+    (Rvalue, '[', Rvalue, ']')
 ```
 
 ```
 Constant
-  | <digit>+
-  | ('\'', <char>[1-2], '\'')
-  | ('"', <char>*, '"')
+    <digit>+
+    ('\'', <char>[1-2], '\'')
+    ('"', <char>*, '"')
 ```
 
 ```
 Name
-  | <alpha>, (<alpha> | <digit>)[0-7]
+    <alpha>, (<alpha> | <digit>)[0-7]
 ```
