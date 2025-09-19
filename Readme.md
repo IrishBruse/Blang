@@ -12,10 +12,38 @@ Run an example
 
 ![bc](misc/screenshots/bc_run.png)
 
-Run the compiler tests
+### Help
+
+`❯ ./bc --help`
+
+```bash
+Description:
+  Compiler for the b programming lanaugage.
+
+Usage:
+  bc <file> [command] [options]
+
+Arguments:
+  <file>  RunFileArg Description
+
+Options:
+  --debug         DebugFlag Description
+  --tokens        TokensFlag Description
+  --symbols       SymbolsFlag Description
+  -?, -h, --help  Show help and usage information
+  --version       Show version information
+
+Commands:
+  run <file>   Run .b file
+  test <file>  Test compiler output
+```
+
+### Testing
+
+Run all the compiler tests
 
 ```shell
-./bt
+./bc test
 ```
 
 ![bt](misc/screenshots/bt.png)
