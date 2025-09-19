@@ -25,7 +25,7 @@
 ## Grammar
 
 ```
-Program (CompilationUnit)
+Program
     Definition*
 ```
 
@@ -55,7 +55,6 @@ Statement
     ('return', ('(', Rvalue, ')')?, ';')
     (Rvalue?, ';')
 ```
-
 
 ```
 Rvalue

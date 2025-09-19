@@ -8,35 +8,35 @@ public class Program
 {
     private static Option<bool> DebugFlag = new("--debug")
     {
-        Description = "Dump compiler debug information.",
+        Description = "Dump compiler debug information",
     };
 
     private static Option<bool> TokensFlag = new("--tokens")
     {
-        Description = "Print tokenizers tokens.",
+        Description = "Print tokenizers tokens",
     };
 
     private static Option<bool> SymbolsFlag = new("--symbols")
     {
-        Description = "Print symbol table.",
+        Description = "Print symbol table",
     };
 
     private static Argument<string> FileArg = new("file")
     {
-        Description = "Path to .b file.",
+        Description = "Path to b file",
     };
 
     // Test Flags
 
     private static Argument<string> TestFileArg = new("file")
     {
-        Description = "Path to .b test file.",
+        Description = "Path to b test file",
         DefaultValueFactory = (_) => ""
     };
 
     private static Option<bool> UpdateSnapshotFlag = new("--updateSnapshot", "-u")
     {
-        Description = "Update tests snapshot.",
+        Description = "Update tests snapshot",
     };
 
     public static int Main(string[] args)
@@ -52,7 +52,7 @@ public class Program
 
     private static RootCommand BuildCommand()
     {
-        RootCommand rootCommand = new("Compiler for the b programming lanaugage.");
+        RootCommand rootCommand = new("Compiler for the b programming lanaugage");
 
         rootCommand.Add(FileArg);
 
