@@ -145,10 +145,11 @@ public class Program
 
     private static void GlobalFlags(Command rootCommand)
     {
-        rootCommand.Add(DebugFlag);
-        rootCommand.Add(AstFlag);
         rootCommand.Add(TokensFlag);
         rootCommand.Add(SymbolsFlag);
+        rootCommand.Add(AstFlag);
+
+        rootCommand.Add(DebugFlag);
     }
 
     private static void ParseFlags(ParseResult parseResult)
