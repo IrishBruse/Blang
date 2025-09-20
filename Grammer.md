@@ -2,11 +2,11 @@
 
 ## Legend
 
-| Notation | Meaning
+| Notation | Meaning                             |
 | :------- | :---------------------------------- |
-| `foo?`     Zero or one occurrence of `foo`.
-| `foo*`     Zero or more occurrences of `foo`.
-| `foo+`     One or more occurrences of `foo`.
+| `foo?`   | Zero or one occurrence of `foo`.    |
+| `foo*`   | Zero or more occurrences of `foo`.  |
+| `foo+`   | One or more occurrences of `foo`.   |
 | `'text'` | Represents the literal text `text`. |
 
 ## Lexical Conventions
@@ -25,7 +25,7 @@
 ## Grammar
 
 ```
-Program
+Program (CompilationUnit)
     Definition*
 ```
 
