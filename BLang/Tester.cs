@@ -25,35 +25,20 @@ public class Tester
 
     public static void RunTestFile(string testFile)
     {
-        long ms = 0;
-
-        CompileOutput output = new();
-        try
+        CompileOutput output;
+        if (Options.UpdateSnapshots)
+        {
+            Options.Ast = true;
+            output = Compiler.Compile(testFile);
+            UpdateSnapshot(testFile, output);
+        }
+        else
         {
             Stopwatch sw = Stopwatch.StartNew();
             output = Compiler.Compile(testFile);
-            ms = sw.ElapsedMilliseconds;
-        }
-        catch (Exception e)
-        {
-            output.Errors = e.ToString();
-        }
+            long ms = sw.ElapsedMilliseconds;
 
-        try
-        {
-            if (Options.UpdateSnapshots)
-            {
-                UpdateSnapshot(testFile, output, ms);
-            }
-            else
-            {
-                CompareSnapshot(testFile, output, ms);
-            }
-        }
-        catch (Exception e)
-        {
-            Log($"{Red("E")} {testFile} {Gray(ms + "ms")}");
-            Error(e.ToString());
+            CompareSnapshot(testFile, output, ms);
         }
     }
 
@@ -62,7 +47,7 @@ public class Tester
     private const char IconUpdated = 'u';
     private const char IconSame = '~';
 
-    private static void UpdateSnapshot(string testFile, CompileOutput output, long ms)
+    private static void UpdateSnapshot(string testFile, CompileOutput output)
     {
         string astFile = Path.ChangeExtension(testFile, ".ast");
         string stdFile = Path.ChangeExtension(testFile, ".out");
@@ -88,8 +73,7 @@ public class Tester
 
         bool anyChanges = astChanged || stdChanged;
         string testIcon = anyChanges ? Green(IconUpdated) : Gray(IconSame);
-        string time = Gray($"({ms}ms)");
-        Log($"{testIcon} {testFile} {time}");
+        Log($"{testIcon} {testFile}");
         if (anyChanges)
         {
             Log($"  {astIcon} {astFile}");
