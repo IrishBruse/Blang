@@ -1,16 +1,18 @@
-# B Langauge implementation
+# B Compiler
 
-Implementing the B lang in C# with qbe backend
+Implementing B in C# with qbe backend
 
 ## Quickstart
 
-Run an example
+Run an example with some debug info
 
-```shell
-./bc run Examples/HelloWorld.b --debug
+`❯ ./bc run Examples/HelloWorld.b --debug`
+
 ```
-
-![bc](misc/screenshots/bc_run.png)
+[CMD] qbe Examples/obj/qbe/HelloWorld.ssa -o Examples/obj/qbe/HelloWorld.s
+[CMD] gcc Examples/obj/qbe/HelloWorld.s -o Examples/bin/qbe/HelloWorld
+Hello, World
+```
 
 ## Help
 
@@ -43,11 +45,23 @@ Commands:
 
 Run all the compiler tests
 
+`❯ ./bc test`
+
 ```shell
-./bc test
+✓ Tests/empty.b (66ms)
+✓ Tests/integer.b (24ms)
+✓ Tests/pointers.b (21ms)
+✓ Tests/ok/comments.b (17ms)
+✓ Tests/ok/helloworld.b (14ms)
+✓ Tests/ok/Statement/auto.b (15ms)
+✓ Tests/ok/Statement/extrn.b (15ms)
+✓ Tests/ok/Statement/function.b (15ms)
+✓ Tests/ok/Statement/functionCall.b (15ms)
+✓ Tests/ok/Statement/if.b (22ms)
+✓ Tests/ok/Statement/ifelse.b (15ms)
+✓ Tests/ok/Statement/while.b (17ms)
 ```
 
-![bt](misc/screenshots/bt.png)
 
 ## Currently Implemented
 
