@@ -6,6 +6,7 @@ public static class Options
 
     // Global Flags
     public static bool Debug { get; set; }
+    public static bool Ast { get; set; }
     public static bool Tokens { get; set; }
     public static bool Symbols { get; set; }
     public static CompilationTarget Target { get; set; } = CompilationTarget.Qbe;

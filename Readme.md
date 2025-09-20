@@ -18,18 +18,19 @@ Run an example
 
 ```
 Description:
-  Compiler for the b programming lanaugage.
+  Compiler for the b programming lanaugage
 
 Usage:
   bc <file> [command] [options]
 
 Arguments:
-  <file>  Path to .b file.
+  <file>  Path to b file
 
 Options:
-  --debug         Dump compiler debug information.
-  --tokens        Print tokenizers tokens.
-  --symbols       Print symbol table.
+  --debug         Print compiler debug information
+  --ast           Dump compiler ast information
+  --tokens        Print tokenizers tokens
+  --symbols       Print symbol table
   -?, -h, --help  Show help and usage information
   --version       Show version information
 

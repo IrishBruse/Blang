@@ -4,3 +4,6 @@
 *.exe
 *.pdb
 *.log
+
+profile.json
+profile.chromium.json

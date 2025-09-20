@@ -1,6 +1,7 @@
 namespace BLang;
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -14,6 +15,8 @@ public class Tester
     {
         string[] tests = Directory.GetFiles(path, "*.b", SearchOption.AllDirectories);
 
+        Options.Ast = true;
+
         foreach (string testFile in tests)
         {
             RunTestFile(testFile);
@@ -22,14 +25,14 @@ public class Tester
 
     public static void RunTestFile(string testFile)
     {
-        long time = 0;
+        long ms = 0;
 
         CompileOutput output = new();
         try
         {
-            long start = DateTime.Now.Millisecond;
+            Stopwatch sw = Stopwatch.StartNew();
             output = Compiler.Compile(testFile);
-            time = Math.Min(DateTime.Now.Millisecond - start, 0);
+            ms = sw.ElapsedMilliseconds;
         }
         catch (Exception e)
         {
@@ -40,16 +43,16 @@ public class Tester
         {
             if (Options.UpdateSnapshots)
             {
-                UpdateSnapshot(testFile, output, time);
+                UpdateSnapshot(testFile, output, ms);
             }
             else
             {
-                CompareSnapshot(testFile, output, time);
+                CompareSnapshot(testFile, output, ms);
             }
         }
         catch (Exception e)
         {
-            Log($"{Red("E")} {testFile} {Gray(time + "ms")}");
+            Log($"{Red("E")} {testFile} {Gray(ms + "ms")}");
             Error(e.ToString());
         }
     }
@@ -59,7 +62,7 @@ public class Tester
     private const char IconUpdated = 'u';
     private const char IconSame = '~';
 
-    private static void UpdateSnapshot(string testFile, CompileOutput output, long start)
+    private static void UpdateSnapshot(string testFile, CompileOutput output, long ms)
     {
         string astFile = Path.ChangeExtension(testFile, ".ast");
         string stdFile = Path.ChangeExtension(testFile, ".out");
@@ -85,8 +88,7 @@ public class Tester
 
         bool anyChanges = astChanged || stdChanged;
         string testIcon = anyChanges ? Green(IconUpdated) : Gray(IconSame);
-
-        string time = Gray(DateTime.Now.Millisecond - start + "ms");
+        string time = Gray($"({ms}ms)");
         Log($"{testIcon} {testFile} {time}");
         if (anyChanges)
         {
@@ -95,7 +97,7 @@ public class Tester
         }
     }
 
-    private static void CompareSnapshot(string testFile, CompileOutput output, long start)
+    private static void CompareSnapshot(string testFile, CompileOutput output, long ms)
     {
         (string astOutput, string stdOutput) = LoadTestContent(testFile);
 
@@ -140,8 +142,7 @@ public class Tester
         {
             success = true;
         }
-
-        string time = Gray("(" + (DateTime.Now.Millisecond - start) + "ms)");
+        string time = Gray($"({ms}ms)");
         string icon = success ? Green(IconPass) : Red(IconFail);
 
         Log($"{icon} {testFile} {time}");

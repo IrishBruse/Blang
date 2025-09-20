@@ -8,7 +8,12 @@ public class Program
 {
     private static Option<bool> DebugFlag = new("--debug")
     {
-        Description = "Dump compiler debug information",
+        Description = "Print compiler debug information",
+    };
+
+    private static Option<bool> AstFlag = new("--ast")
+    {
+        Description = "Dump compiler ast information",
     };
 
     private static Option<bool> TokensFlag = new("--tokens")
@@ -56,10 +61,7 @@ public class Program
 
         rootCommand.Add(FileArg);
 
-        // Global Flags
-        rootCommand.Add(DebugFlag);
-        rootCommand.Add(TokensFlag);
-        rootCommand.Add(SymbolsFlag);
+        GlobalFlags(rootCommand);
 
         rootCommand.SetAction(Build);
         return rootCommand;
@@ -82,10 +84,7 @@ public class Program
     {
         Command runCommand = new("run", "Run .b file");
 
-        // Global Flags
-        runCommand.Add(DebugFlag);
-        runCommand.Add(TokensFlag);
-        runCommand.Add(SymbolsFlag);
+        GlobalFlags(runCommand);
 
         // Args
         runCommand.Add(FileArg);
@@ -115,10 +114,7 @@ public class Program
     {
         Command testCommand = new("test", "Test compiler output");
 
-        // Global Flags
-        testCommand.Add(DebugFlag);
-        testCommand.Add(TokensFlag);
-        testCommand.Add(SymbolsFlag);
+        GlobalFlags(testCommand);
 
         // Args
         testCommand.Add(TestFileArg);
@@ -147,11 +143,18 @@ public class Program
         return 0;
     }
 
-
+    private static void GlobalFlags(Command rootCommand)
+    {
+        rootCommand.Add(DebugFlag);
+        rootCommand.Add(AstFlag);
+        rootCommand.Add(TokensFlag);
+        rootCommand.Add(SymbolsFlag);
+    }
 
     private static void ParseFlags(ParseResult parseResult)
     {
         Options.Debug = parseResult.GetValue(DebugFlag);
+        Options.Ast = parseResult.GetValue(AstFlag);
         Options.Tokens = parseResult.GetValue(TokensFlag);
         Options.Symbols = parseResult.GetValue(SymbolsFlag);
 

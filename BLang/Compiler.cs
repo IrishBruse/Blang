@@ -18,18 +18,17 @@ public static class Compiler
         CompileOutput output = new();
         CompilationData data = new(file);
 
-        IEnumerator<Token> tokens = LexFile(file, data);
-        CompilationUnit unit = ParseTokens(tokens, data);
+        IEnumerator<Token> tokens = Lex(file, data);
+        CompilationUnit unit = Parse(tokens, data);
 
         if (Options.Target == CompilationTarget.Qbe)
         {
             output = QbeTarget(file, data, unit);
         }
 
-        output.AstOutput = GenerateAstJson(unit);
-
-        if (Options.Debug)
+        if (Options.Ast)
         {
+            output.AstOutput = GenerateAstJson(unit);
             string astFile = Path.ChangeExtension(file, "ast");
             File.WriteAllText(astFile, output.AstOutput);
         }
@@ -75,13 +74,13 @@ public static class Compiler
         return true;
     }
 
-    private static IEnumerator<Token> LexFile(string file, CompilationData data)
+    private static IEnumerator<Token> Lex(string file, CompilationData data)
     {
         Lexer lexer = new(data);
         return lexer.Lex(File.OpenText(file), file);
     }
 
-    private static CompilationUnit ParseTokens(IEnumerator<Token> tokens, CompilationData data)
+    private static CompilationUnit Parse(IEnumerator<Token> tokens, CompilationData data)
     {
         Parser parser = new(data);
         return parser.Parse(tokens);
