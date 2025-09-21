@@ -7,7 +7,7 @@ public class CompilationData(string file)
     public SymbolTable Symbols { get; } = new();
     public List<int> Lines { get; } = [];
 
-    public string? File { get; set; } = file;
+    public string File { get; set; } = file;
 
     public (int Line, int Column) GetLineColumnFromIndex(int index)
     {

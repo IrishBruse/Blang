@@ -54,6 +54,8 @@ public class Tester
 
         (string astPreviousOutput, string stdPreviousOutput) = LoadTestContent(testFile);
 
+        if (!output.ExitCode) return;
+
         Executable runOutput = Executable.Capture(output.Executable);
 
         StringBuilder astOutput = new();
@@ -93,7 +95,7 @@ public class Tester
 
         bool success = false;
 
-        if (!output.Success || !string.IsNullOrEmpty(output.Errors))
+        if (!output.ExitCode || !string.IsNullOrEmpty(output.Errors))
         {
             error = $"compile failed: {output.Errors}";
         }

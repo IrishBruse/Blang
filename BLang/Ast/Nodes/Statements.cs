@@ -1,6 +1,7 @@
 namespace BLang.Ast.Nodes;
 
 using System.Text.Json.Serialization;
+using BLang.Ast;
 using BLang.Utility;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "_Type")]

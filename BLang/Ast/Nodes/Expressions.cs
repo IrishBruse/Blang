@@ -1,6 +1,7 @@
 namespace BLang.Ast.Nodes;
 
 using System.Text.Json.Serialization;
+using BLang.Ast;
 using BLang.Tokenizer;
 using BLang.Utility;
 

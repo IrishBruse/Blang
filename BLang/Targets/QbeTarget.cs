@@ -2,7 +2,7 @@ namespace BLang.Targets;
 
 using System;
 using System.Collections.Generic;
-
+using BLang.Ast;
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;

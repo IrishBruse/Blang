@@ -1,12 +1,12 @@
 namespace BLang;
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using BLang.Ast;
-using BLang.Ast.Nodes;
 using BLang.Targets;
 using BLang.Tokenizer;
 using BLang.Utility;
@@ -18,12 +18,21 @@ public static class Compiler
         CompileOutput output = new();
         CompilationData data = new(file);
 
-        IEnumerator<Token> tokens = Lex(file, data);
-        CompilationUnit unit = Parse(tokens, data);
+        IEnumerator<Token>? tokens = Lex(file, data);
+        if (tokens == null)
+        {
+            return output;
+        }
+
+        CompilationUnit? unit = Parse(tokens, data);
+        if (unit == null)
+        {
+            return output;
+        }
 
         if (Options.Target == CompilationTarget.Qbe)
         {
-            output = QbeTarget(file, data, unit);
+            output = QbeTarget(unit, data);
         }
 
         if (Options.Ast)
@@ -36,8 +45,10 @@ public static class Compiler
         return output;
     }
 
-    private static CompileOutput QbeTarget(string file, CompilationData data, CompilationUnit unit)
+    private static CompileOutput QbeTarget(CompilationUnit unit, CompilationData data)
     {
+        string file = data.File;
+
         CreateOutputDirectories(file, "qbe");
 
         (string objFile, string binFile) = GetOutputFile(file, Targets.QbeTarget.Target);
@@ -57,7 +68,7 @@ public static class Compiler
         }
 
         output.Executable = binFile;
-        output.Success = true;
+        output.ExitCode = true;
 
         return output;
     }
@@ -68,22 +79,42 @@ public static class Compiler
         if (!exe.Success())
         {
             Error(exe.StdError, "ERR");
-            output.Success = false;
+            output.ExitCode = false;
             return false;
         }
         return true;
     }
 
-    private static IEnumerator<Token> Lex(string file, CompilationData data)
+    private static IEnumerator<Token>? Lex(string file, CompilationData data)
     {
-        Lexer lexer = new(data);
-        return lexer.Lex(File.OpenText(file), file);
+        try
+        {
+            Lexer lexer = new(data);
+            return lexer.Lex(File.OpenText(file), file);
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine("Lex error: " + e);
+            return null;
+        }
     }
 
-    private static CompilationUnit Parse(IEnumerator<Token> tokens, CompilationData data)
+    private static CompilationUnit? Parse(IEnumerator<Token> tokens, CompilationData data)
     {
-        Parser parser = new(data);
-        return parser.Parse(tokens);
+        try
+        {
+            Parser parser = new(data);
+            return parser.Parse(tokens);
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(Colors.Red(e.Message));
+            if (Options.Debug)
+            {
+                Console.Error.WriteLine(Colors.Red(e.StackTrace));
+            }
+            return null;
+        }
     }
 
     private static string GenerateAstJson(CompilationUnit unit)

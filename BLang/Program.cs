@@ -75,7 +75,12 @@ public class Program
         string file = parseResult.GetValue(FileArg)!;
 
         CompileOutput output = Compiler.Compile(file);
-        Error(output.Errors);
+        // Error(output.Errors);
+
+        if (!output.Success)
+        {
+            return 1;
+        }
 
         return 0;
     }
@@ -102,7 +107,12 @@ public class Program
         string file = parseResult.GetValue(FileArg)!;
 
         CompileOutput output = Compiler.Compile(file);
-        Error(output.Errors);
+        // Error(output.Errors);
+
+        if (!output.Success)
+        {
+            return 1;
+        }
 
         _ = Process.Start(output.Executable);
 

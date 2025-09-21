@@ -68,7 +68,7 @@ public partial class Parser(CompilationData data)
             EatComments();
         }
 
-        return new(functions, globals)
+        return new(functions.ToArray(), globals.ToArray())
         {
             Range = start.Merge(previousTokenRange)
         };
