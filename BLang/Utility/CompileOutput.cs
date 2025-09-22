@@ -1,9 +1,10 @@
 namespace BLang.Utility;
 
-public struct CompileOutput()
+public class CompileOutput
 {
-    public int ExitCode { get; set; }
-    public string Executable { get; set; } = "";
-    // public string Errors { get; set; } = "";
-    // public string AstOutput { get; set; } = "";
+    public bool Success { get; set; }
+
+    public string? Executable { get; set; }
+    public string Errors { get; set; } = "";
+    public string AstOutput { get; set; } = "";
 }

@@ -25,20 +25,13 @@ public class Tester
 
     public static void RunTestFile(string testFile)
     {
-        CompileOutput output;
         if (Options.UpdateSnapshots)
         {
-            Options.Ast = true;
-            output = Compiler.Compile(testFile);
-            UpdateSnapshot(testFile, output);
+            UpdateSnapshot(testFile);
         }
         else
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            output = Compiler.Compile(testFile);
-            long ms = sw.ElapsedMilliseconds;
-
-            CompareSnapshot(testFile, output, ms);
+            CompareSnapshot(testFile);
         }
     }
 
@@ -47,19 +40,26 @@ public class Tester
     private const char IconUpdated = 'u';
     private const char IconSame = '~';
 
-    private static void UpdateSnapshot(string testFile, CompileOutput output)
+    private static void UpdateSnapshot(string testFile)
     {
+        Options.Ast = true;
+
+        if (!Compiler.TryCompile(testFile, out CompileOutput? output))
+        {
+            return;
+        }
+
         string astFile = Path.ChangeExtension(testFile, ".ast");
         string stdFile = Path.ChangeExtension(testFile, ".out");
 
         (string astPreviousOutput, string stdPreviousOutput) = LoadTestContent(testFile);
 
-        if (!output.ExitCode) return;
+        if (!output.Success) return;
 
         Executable runOutput = Executable.Capture(output.Executable);
 
         StringBuilder astOutput = new();
-        _ = astOutput.Append(output.AstOutput);
+        _ = astOutput.Append("output.AstOutput");
         if (astOutput.Length > 0) File.WriteAllText(astFile, astOutput.ToString());
 
         StringBuilder stdOutput = new();
@@ -83,8 +83,15 @@ public class Tester
         }
     }
 
-    private static void CompareSnapshot(string testFile, CompileOutput output, long ms)
+    private static void CompareSnapshot(string testFile)
     {
+        Stopwatch sw = Stopwatch.StartNew();
+        if (!Compiler.TryCompile(testFile, out CompileOutput? output))
+        {
+            return;
+        }
+        long ms = sw.ElapsedMilliseconds;
+
         (string astOutput, string stdOutput) = LoadTestContent(testFile);
 
         Executable runOutput = Executable.Capture(output.Executable);
@@ -95,7 +102,7 @@ public class Tester
 
         bool success = false;
 
-        if (!output.ExitCode || !string.IsNullOrEmpty(output.Errors))
+        if (!output.Success || !string.IsNullOrEmpty(output.Errors))
         {
             error = $"compile failed: {output.Errors}";
         }

@@ -2,6 +2,7 @@ namespace BLang;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -13,36 +14,44 @@ using BLang.Utility;
 
 public static class Compiler
 {
-    public static CompileOutput Compile(string file)
+    public static bool TryCompile(string file, [MaybeNullWhen(false)] out CompileOutput output)
     {
-        CompileOutput output = new();
+        // new Dictionary<string, string>().TryGetValue();
+
         CompilationData data = new(file);
 
         IEnumerator<Token>? tokens = Lex(file, data);
         if (tokens == null)
         {
-            return output;
+            output = null;
+            return false;
         }
 
         CompilationUnit? unit = Parse(tokens, data);
         if (unit == null)
         {
-            return output;
+            output = null;
+            return false;
         }
 
-        if (Options.Target == CompilationTarget.Qbe)
+        switch (Options.Target)
         {
-            output = QbeTarget(unit, data);
+            case CompilationTarget.Qbe:
+                output = QbeTarget(unit, data);
+                return true;
+
+            default:
+                output = null;
+                return false;
+
         }
 
-        if (Options.Ast)
-        {
-            output.AstOutput = GenerateAstJson(unit);
-            string astFile = Path.ChangeExtension(file, "ast");
-            File.WriteAllText(astFile, output.AstOutput);
-        }
-
-        return output;
+        // if (Options.Ast)
+        // {
+        //     output.AstOutput = GenerateAstJson(unit);
+        //     string astFile = Path.ChangeExtension(file, "ast");
+        //     File.WriteAllText(astFile, output.AstOutput);
+        // }
     }
 
     private static CompileOutput QbeTarget(CompilationUnit unit, CompilationData data)
@@ -68,7 +77,7 @@ public static class Compiler
         }
 
         output.Executable = binFile;
-        output.ExitCode = true;
+        output.Success = true;
 
         return output;
     }
@@ -79,7 +88,7 @@ public static class Compiler
         if (!exe.Success())
         {
             Error(exe.StdError, "ERR");
-            output.ExitCode = false;
+            output.Success = false;
             return false;
         }
         return true;

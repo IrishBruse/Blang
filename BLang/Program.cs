@@ -74,13 +74,12 @@ public class Program
 
         string file = parseResult.GetValue(FileArg)!;
 
-        CompileOutput output = Compiler.Compile(file);
-        // Error(output.Errors);
-
-        if (!output.Success)
+        if (!Compiler.TryCompile(file, out CompileOutput? output))
         {
-            return 1;
+            return -1;
         }
+
+        Error(output.Errors);
 
         return 0;
     }
@@ -106,10 +105,10 @@ public class Program
 
         string file = parseResult.GetValue(FileArg)!;
 
-        CompileOutput output = Compiler.Compile(file);
+        // CompileOutput output = ;
         // Error(output.Errors);
 
-        if (!output.Success)
+        if (!Compiler.TryCompile(file, out CompileOutput? output))
         {
             return 1;
         }
