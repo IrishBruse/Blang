@@ -11,6 +11,11 @@ using static BLang.Utility.Colors;
 
 public class Tester
 {
+    private const char IconPass = '✓';
+    private const char IconFail = '×';
+    private const char IconUpdated = 'u';
+    private const char IconSame = '~';
+
     public static void Test(string path)
     {
         string[] tests = Directory.GetFiles(path, "*.b", SearchOption.AllDirectories);
@@ -35,15 +40,8 @@ public class Tester
         }
     }
 
-    private const char IconPass = '✓';
-    private const char IconFail = '×';
-    private const char IconUpdated = 'u';
-    private const char IconSame = '~';
-
     private static void UpdateSnapshot(string testFile)
     {
-        Options.Ast = true;
-
         if (!Compiler.TryCompile(testFile, out CompileOutput? output))
         {
             return;
@@ -54,20 +52,16 @@ public class Tester
 
         (string astPreviousOutput, string stdPreviousOutput) = LoadTestContent(testFile);
 
-        if (!output.Success) return;
-
         Executable runOutput = Executable.Capture(output.Executable);
-
-        StringBuilder astOutput = new();
-        _ = astOutput.Append("output.AstOutput");
-        if (astOutput.Length > 0) File.WriteAllText(astFile, astOutput.ToString());
 
         StringBuilder stdOutput = new();
         _ = stdOutput.Append(runOutput.StdOut);
         _ = stdOutput.Append(runOutput.StdError);
         if (stdOutput.Length > 0) File.WriteAllText(stdFile, stdOutput.ToString());
 
-        bool astChanged = !astOutput.Equals(astPreviousOutput);
+        string astOutput = output.CompilationUnit.ToJson();
+
+        bool astChanged = !astOutput.Equals(astPreviousOutput, StringComparison.Ordinal);
         string astIcon = astChanged ? Green(IconUpdated) : Gray(IconSame);
 
         bool stdChanged = !stdOutput.Equals(stdPreviousOutput);
@@ -100,28 +94,22 @@ public class Tester
 
         string error = "";
 
-        bool success = false;
-
-        if (!output.Success || !string.IsNullOrEmpty(output.Errors))
-        {
-            error = $"compile failed: {output.Errors}";
-        }
-        else if (runOutput.ExitCode != 0)
+        if (runOutput.ExitCode != 0)
         {
             error = $"exitCode: {runOutput.ExitCode}";
         }
-        else if (astOutput != output.AstOutput)
-        {
-            (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, output.AstOutput);
-            // error = $"Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}\n{text}";
-            error = $"""
-            Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}
-            Expected:
-            {line1}
-            Recieved:
-            {line2}
-            """;
-        }
+        // else if (astOutput != output.AstOutput)
+        // {
+        //     (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, output.AstOutput);
+        //     // error = $"Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}\n{text}";
+        //     error = $"""
+        //     Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}
+        //     Expected:
+        //     {line1}
+        //     Recieved:
+        //     {line2}
+        //     """;
+        // }
         else if (stdOutput != runOutputStdErr)
         {
             error = $"""
@@ -131,12 +119,8 @@ public class Tester
             {runOutputStdErr}
             """;
         }
-        else
-        {
-            success = true;
-        }
         string time = Gray($"({ms}ms)");
-        string icon = success ? Green(IconPass) : Red(IconFail);
+        string icon = false ? Green(IconPass) : Red(IconFail);
 
         Log($"{icon} {testFile} {time}");
         if (error != null) Error(error);

@@ -8,7 +8,7 @@ using BLang.Exceptions;
 using BLang.Tokenizer;
 using BLang.Utility;
 
-public class QbeTarget(CompilationData data) : BaseTarget
+public class QbeTarget(CompilerContext data) : BaseTarget
 {
     public const string Target = "qbe";
     public override int Indention => 4;

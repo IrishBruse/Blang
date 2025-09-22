@@ -1,10 +1,18 @@
 namespace BLang.Utility;
 
-public class CompileOutput
-{
-    public bool Success { get; set; }
+using System.IO;
+using BLang.Ast;
 
-    public string? Executable { get; set; }
-    public string Errors { get; set; } = "";
-    public string AstOutput { get; set; } = "";
+public class CompileOutput(string sourceFile, string executable, CompilationUnit compilationUnit)
+{
+    public string SourceFile { get; set; } = sourceFile;
+    public string Executable { get; set; } = executable;
+    public CompilationUnit CompilationUnit { get; set; } = compilationUnit;
+
+    public void WriteAst()
+    {
+        string astOutput = CompilationUnit.ToJson();
+        string astFile = Path.ChangeExtension(SourceFile, "ast");
+        File.WriteAllText(astFile, astOutput);
+    }
 }

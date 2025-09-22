@@ -2,7 +2,7 @@ namespace BLang.Utility;
 
 using System.Collections.Generic;
 
-public class CompilationData(string file)
+public class CompilerContext(string file)
 {
     public SymbolTable Symbols { get; } = new();
     public List<int> Lines { get; } = [];

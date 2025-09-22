@@ -2,6 +2,7 @@ namespace BLang;
 
 using System.CommandLine;
 using System.Diagnostics;
+using System.IO;
 using BLang.Utility;
 
 public class Program
@@ -79,7 +80,10 @@ public class Program
             return -1;
         }
 
-        Error(output.Errors);
+        if (Options.Ast)
+        {
+            output.WriteAst();
+        }
 
         return 0;
     }
@@ -105,15 +109,16 @@ public class Program
 
         string file = parseResult.GetValue(FileArg)!;
 
-        // CompileOutput output = ;
-        // Error(output.Errors);
 
         if (!Compiler.TryCompile(file, out CompileOutput? output))
         {
             return 1;
         }
 
-        _ = Process.Start(output.Executable);
+        if (output.Executable != null)
+        {
+            _ = Process.Start(output.Executable);
+        }
 
         return 0;
     }

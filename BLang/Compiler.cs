@@ -4,9 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using BLang.Ast;
 using BLang.Targets;
 using BLang.Tokenizer;
@@ -16,9 +13,7 @@ public static class Compiler
 {
     public static bool TryCompile(string file, [MaybeNullWhen(false)] out CompileOutput output)
     {
-        // new Dictionary<string, string>().TryGetValue();
-
-        CompilationData data = new(file);
+        CompilerContext data = new(file);
 
         IEnumerator<Token>? tokens = Lex(file, data);
         if (tokens == null)
@@ -37,7 +32,15 @@ public static class Compiler
         switch (Options.Target)
         {
             case CompilationTarget.Qbe:
-                output = QbeTarget(unit, data);
+                string? exe = QbeTarget(unit, data);
+
+                if (exe == null)
+                {
+                    output = null;
+                    return false;
+                }
+
+                output = new(file, exe, unit);
                 return true;
 
             default:
@@ -45,56 +48,47 @@ public static class Compiler
                 return false;
 
         }
-
-        // if (Options.Ast)
-        // {
-        //     output.AstOutput = GenerateAstJson(unit);
-        //     string astFile = Path.ChangeExtension(file, "ast");
-        //     File.WriteAllText(astFile, output.AstOutput);
-        // }
     }
 
-    private static CompileOutput QbeTarget(CompilationUnit unit, CompilationData data)
+    private static string? QbeTarget(CompilationUnit unit, CompilerContext data)
     {
         string file = data.File;
 
         CreateOutputDirectories(file, "qbe");
 
         (string objFile, string binFile) = GetOutputFile(file, Targets.QbeTarget.Target);
-        CompileOutput output = new();
 
         string qbeIR = new QbeTarget(data).ToOutput(unit);
         File.WriteAllText(objFile + ".ssa", qbeIR);
 
-        if (!RunExecutable("qbe", $"{objFile}.ssa -o {objFile}.s", output))
+        if (!RunExecutable("qbe", $"{objFile}.ssa -o {objFile}.s"))
         {
-            return output;
+            // TODO: handle failure of target
+            return null;
         }
 
-        if (!RunExecutable("gcc", $"{objFile}.s -o {binFile}", output))
+        if (!RunExecutable("gcc", $"{objFile}.s -o {binFile}"))
         {
-            return output;
+            // TODO: handle failure of target
+            return null;
         }
 
-        output.Executable = binFile;
-        output.Success = true;
 
-        return output;
+        return binFile;
     }
 
-    private static bool RunExecutable(string command, string args, CompileOutput output)
+    private static bool RunExecutable(string command, string args)
     {
         Executable exe = Executable.Capture(command, args);
         if (!exe.Success())
         {
             Error(exe.StdError, "ERR");
-            output.Success = false;
             return false;
         }
         return true;
     }
 
-    private static IEnumerator<Token>? Lex(string file, CompilationData data)
+    private static IEnumerator<Token>? Lex(string file, CompilerContext data)
     {
         try
         {
@@ -108,7 +102,7 @@ public static class Compiler
         }
     }
 
-    private static CompilationUnit? Parse(IEnumerator<Token> tokens, CompilationData data)
+    private static CompilationUnit? Parse(IEnumerator<Token> tokens, CompilerContext data)
     {
         try
         {
@@ -124,12 +118,6 @@ public static class Compiler
             }
             return null;
         }
-    }
-
-    private static string GenerateAstJson(CompilationUnit unit)
-    {
-        JsonTypeInfo<CompilationUnit> jsonOptions = Options.Verb == Verb.Test ? CompilationUnitTestContext.Default.CompilationUnit : CompilationUnitContext.Default.CompilationUnit;
-        return JsonSerializer.Serialize(unit, jsonOptions);
     }
 
     private static (string, string) GetOutputFile(string inputFile, string target)
@@ -150,11 +138,3 @@ public static class Compiler
         _ = Directory.CreateDirectory(Path.Combine(projectDirectory, "bin", target));
     }
 }
-
-[JsonSourceGenerationOptions(WriteIndented = true)]
-[JsonSerializable(typeof(CompilationUnit))]
-public partial class CompilationUnitContext : JsonSerializerContext;
-
-[JsonSourceGenerationOptions(WriteIndented = true, IncludeFields = true)]
-[JsonSerializable(typeof(CompilationUnit))]
-public partial class CompilationUnitTestContext : JsonSerializerContext;

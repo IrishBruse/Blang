@@ -111,7 +111,7 @@ public partial class Parser
         };
     }
 
-    private Expression Unexpected(CompilationData data, [CallerMemberName] string callerName = "")
+    private Expression Unexpected(CompilerContext data, [CallerMemberName] string callerName = "")
     {
         throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {callerName} of type {Peek()}");
     }

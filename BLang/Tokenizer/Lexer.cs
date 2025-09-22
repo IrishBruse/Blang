@@ -6,7 +6,7 @@ using System.Text;
 
 using BLang.Utility;
 
-public class Lexer(CompilationData data)
+public class Lexer(CompilerContext data)
 {
     public StreamReader Source { get; set; } = null!;
     public string FilePath { get; set; } = "";

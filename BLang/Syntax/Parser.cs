@@ -8,7 +8,7 @@ using BLang.Exceptions;
 using BLang.Tokenizer;
 using BLang.Utility;
 
-public partial class Parser(CompilationData data)
+public partial class Parser(CompilerContext data)
 {
     private IEnumerator<Token> tokens = null!;
     private SourceRange previousTokenRange = SourceRange.Zero;
