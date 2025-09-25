@@ -44,6 +44,7 @@ public class Tester
     {
         if (!Compiler.TryCompile(testFile, out CompileOutput? output))
         {
+            Error("Failed to compile in UpdateSnapshot");
             return;
         }
 
@@ -80,51 +81,88 @@ public class Tester
     private static void CompareSnapshot(string testFile)
     {
         Stopwatch sw = Stopwatch.StartNew();
-        if (!Compiler.TryCompile(testFile, out CompileOutput? output))
-        {
-            return;
-        }
+        bool passed = Compiler.TryCompile(testFile, out CompileOutput? output);
         long ms = sw.ElapsedMilliseconds;
 
-        (string astOutput, string stdOutput) = LoadTestContent(testFile);
+        string folderType = testFile.Split("/")[1];
 
-        Executable runOutput = Executable.Capture(output.Executable);
+        string? error = null;
 
-        string runOutputStdErr = runOutput.StdOut + runOutput.StdError;
-
-        string error = "";
-
-        if (runOutput.ExitCode != 0)
+        if (passed)
         {
-            error = $"exitCode: {runOutput.ExitCode}";
+            string astJson = output!.CompilationUnit.ToJson();
+
+            (string astOutput, string stdOutput) = LoadTestContent(testFile);
+            Executable runOutput = Executable.Capture(output.Executable);
+
+            if (!passed && output.Errors.Length != 0)
+            {
+                error = string.Join(Environment.NewLine, output.Errors);
+            }
+            else if (folderType == "ok" && runOutput.ExitCode != 0)
+            {
+                passed = false;
+            }
+            else if (!astJson.Equals(astOutput, StringComparison.Ordinal))
+            {
+
+
+                passed = false;
+            }
+            else if (!astJson.Equals(astOutput, StringComparison.Ordinal))
+            {
+                (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, astJson);
+
+                error = $"""
+                {Path.ChangeExtension(testFile, ".ast")}:{line}
+                Expected:
+                {line1}
+                Recieved:
+                {line2}
+                """;
+                passed = false;
+            }
         }
-        // else if (astOutput != output.AstOutput)
-        // {
-        //     (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, output.AstOutput);
-        //     // error = $"Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}\n{text}";
-        //     error = $"""
-        //     Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}
-        //     Expected:
-        //     {line1}
-        //     Recieved:
-        //     {line2}
-        //     """;
-        // }
-        else if (stdOutput != runOutputStdErr)
-        {
-            error = $"""
-            Expected:
-            {stdOutput}
-            Recieved:
-            {runOutputStdErr}
-            """;
-        }
+
         string time = Gray($"({ms}ms)");
-        string icon = false ? Green(IconPass) : Red(IconFail);
-
+        string icon = passed ? Green(IconPass) : Red(IconFail);
         Log($"{icon} {testFile} {time}");
         if (error != null) Error(error);
     }
+    // string runOutputStdErr = runOutput.StdOut + runOutput.StdError;
+
+    // string error = "";
+
+    // if (runOutput.ExitCode != 0)
+    // {
+    //     error = $"exitCode: {runOutput.ExitCode}";
+    // }
+    // // else if (astOutput != output.AstOutput)
+    // // {
+    // //     (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, output.AstOutput);
+    // //     // error = $"Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}\n{text}";
+    // //     error = $"""
+    // //     Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}
+    // //     Expected:
+    // //     {line1}
+    // //     Recieved:
+    // //     {line2}
+    // //     """;
+    // // }
+    // else if (stdOutput != runOutputStdErr)
+    // {
+    //     error = $"""
+    //     Expected:
+    //     {stdOutput}
+    //     Recieved:
+    //     {runOutputStdErr}
+    //     """;
+    // }
+    // string time = Gray($"({ms}ms)");
+    // string icon = false ? Green(IconPass) : Red(IconFail);
+
+    // Log($"{icon} {testFile} {time}");
+    // if (error != null) Error(error);
 
     private static (string astOutput, string stdOutput) LoadTestContent(string testFile)
     {

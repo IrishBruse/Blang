@@ -2,7 +2,6 @@ namespace BLang;
 
 using System.CommandLine;
 using System.Diagnostics;
-using System.IO;
 using BLang.Utility;
 
 public class Program
@@ -27,9 +26,14 @@ public class Program
         Description = "Print symbol table",
     };
 
-    private static Argument<string> FileArg = new("file")
+    private static Argument<string> BuildFileArg = new("file")
     {
-        Description = "Path to b file",
+        Description = "Path to b file to build",
+    };
+
+    private static Argument<string> RunFileArg = new("file")
+    {
+        Description = "Path to b file to run",
     };
 
     // Test Flags
@@ -60,7 +64,7 @@ public class Program
     {
         RootCommand rootCommand = new("Compiler for the b programming lanaugage");
 
-        rootCommand.Add(FileArg);
+        rootCommand.Add(BuildFileArg);
 
         GlobalFlags(rootCommand);
 
@@ -73,7 +77,7 @@ public class Program
         Options.Verb = Verb.Build;
         ParseFlags(parseResult);
 
-        string file = parseResult.GetValue(FileArg)!;
+        string file = parseResult.GetValue(BuildFileArg)!;
 
         if (!Compiler.TryCompile(file, out CompileOutput? output))
         {
@@ -95,7 +99,7 @@ public class Program
         GlobalFlags(runCommand);
 
         // Args
-        runCommand.Add(FileArg);
+        runCommand.Add(RunFileArg);
 
         runCommand.SetAction(Run);
         return runCommand;
@@ -107,7 +111,7 @@ public class Program
         Options.Verb = Verb.Run;
         ParseFlags(parseResult);
 
-        string file = parseResult.GetValue(FileArg)!;
+        string file = parseResult.GetValue(RunFileArg)!;
 
 
         if (!Compiler.TryCompile(file, out CompileOutput? output))

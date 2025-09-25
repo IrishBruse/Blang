@@ -14,20 +14,26 @@ public static class Compiler
     public static bool TryCompile(string file, [MaybeNullWhen(false)] out CompileOutput output)
     {
         CompilerContext data = new(file);
+        output = null;
+        List<string> errors = new();
 
         IEnumerator<Token>? tokens = Lex(file, data);
-        if (tokens == null)
+        if (tokens == null) return false;
+
+        CompilationUnit unit;
+        try
         {
-            output = null;
+            Parser parser = new(data);
+            unit = parser.Parse(tokens);
+            if (unit == null) return false;
+        }
+        catch (Exception e)
+        {
+            errors.Add(e.Message);
+            if (Options.Debug) errors.Add(e.StackTrace!);
             return false;
         }
 
-        CompilationUnit? unit = Parse(tokens, data);
-        if (unit == null)
-        {
-            output = null;
-            return false;
-        }
 
         switch (Options.Target)
         {
@@ -40,7 +46,7 @@ public static class Compiler
                     return false;
                 }
 
-                output = new(file, exe, unit);
+                output = new(file, exe, unit, errors.ToArray());
                 return true;
 
             default:
@@ -82,7 +88,6 @@ public static class Compiler
         Executable exe = Executable.Capture(command, args);
         if (!exe.Success())
         {
-            Error(exe.StdError, "ERR");
             return false;
         }
         return true;
@@ -102,22 +107,10 @@ public static class Compiler
         }
     }
 
-    private static CompilationUnit? Parse(IEnumerator<Token> tokens, CompilerContext data)
+    private static CompilationUnit Parse(IEnumerator<Token> tokens, CompilerContext data)
     {
-        try
-        {
-            Parser parser = new(data);
-            return parser.Parse(tokens);
-        }
-        catch (Exception e)
-        {
-            Console.Error.WriteLine(Colors.Red(e.Message));
-            if (Options.Debug)
-            {
-                Console.Error.WriteLine(Colors.Red(e.StackTrace));
-            }
-            return null;
-        }
+        Parser parser = new(data);
+        return parser.Parse(tokens);
     }
 
     private static (string, string) GetOutputFile(string inputFile, string target)

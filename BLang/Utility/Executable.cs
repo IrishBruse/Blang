@@ -5,20 +5,6 @@ using System.Diagnostics;
 
 public record Executable(string? StdOut, string? StdError, int ExitCode)
 {
-    public static bool Run(string executable, string arguments = "")
-    {
-        Executable exe = Capture(executable, arguments);
-
-        if (!string.IsNullOrEmpty(exe.StdError))
-        {
-            Error(exe.StdError, "ERR");
-            return false;
-        }
-
-        Console.WriteLine(exe.StdOut);
-        return true;
-    }
-
     public static Executable Capture(string executable, string arguments = "")
     {
         if (Options.Debug) Info($"{executable} {arguments}", "CMD");
@@ -36,16 +22,6 @@ public record Executable(string? StdOut, string? StdError, int ExitCode)
         {
             return new("", e.ToString(), 1);
         }
-    }
-
-    public bool HasError()
-    {
-        return !string.IsNullOrEmpty(StdError);
-    }
-
-    public bool HasOutput()
-    {
-        return !string.IsNullOrEmpty(StdOut);
     }
 
     public bool Success()
