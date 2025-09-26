@@ -6,9 +6,14 @@ using BLang.Utility;
 
 public class Program
 {
-    private static Option<bool> DebugFlag = new("--debug")
+    private static Option<bool> VerboseFlag = new("--verbose", "-v")
     {
-        Description = "Print compiler debug information",
+        Description = "Verbose output",
+    };
+
+    private static Option<bool> VeryVerboseFlag = new("-vv")
+    {
+        Description = "Very Verbose output",
     };
 
     private static Option<bool> AstFlag = new("--ast")
@@ -79,14 +84,16 @@ public class Program
 
         string file = parseResult.GetValue(BuildFileArg)!;
 
-        if (!Compiler.TryCompile(file, out CompileOutput? output))
+        Result<CompileOutput> output = Compiler.Compile(file);
+
+        if (!output)
         {
             return -1;
         }
 
         if (Options.Ast)
         {
-            output.WriteAst();
+            output.Value.WriteAst();
         }
 
         return 0;
@@ -113,18 +120,19 @@ public class Program
 
         string file = parseResult.GetValue(RunFileArg)!;
 
+        Result<CompileOutput> output = Compiler.Compile(file);
 
-        if (!Compiler.TryCompile(file, out CompileOutput? output))
+        int code = 0;
+        output.Success((output) =>
         {
-            return 1;
-        }
-
-        if (output.Executable != null)
+            Process.Start(output.Executable).WaitForExit();
+        }).Failure((error) =>
         {
-            _ = Process.Start(output.Executable);
-        }
+            Error(error);
+            code = 1;
+        });
 
-        return 0;
+        return code;
     }
 
 
@@ -167,12 +175,18 @@ public class Program
         rootCommand.Add(SymbolsFlag);
         rootCommand.Add(AstFlag);
 
-        rootCommand.Add(DebugFlag);
+        rootCommand.Add(VerboseFlag);
+        rootCommand.Add(VeryVerboseFlag);
     }
 
     private static void ParseFlags(ParseResult parseResult)
     {
-        Options.Debug = parseResult.GetValue(DebugFlag);
+        int verboseLevel = 0;
+
+        verboseLevel = parseResult.GetValue(VerboseFlag) ? 1 : verboseLevel;
+        verboseLevel = parseResult.GetValue(VeryVerboseFlag) ? 2 : verboseLevel;
+
+        Options.Verbose = verboseLevel;
         Options.Ast = parseResult.GetValue(AstFlag);
         Options.Tokens = parseResult.GetValue(TokensFlag);
         Options.Symbols = parseResult.GetValue(SymbolsFlag);

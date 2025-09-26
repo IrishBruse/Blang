@@ -42,11 +42,15 @@ public class Tester
 
     private static void UpdateSnapshot(string testFile)
     {
-        if (!Compiler.TryCompile(testFile, out CompileOutput? output))
+        Result<CompileOutput> res = Compiler.Compile(testFile);
+
+        if (!res)
         {
             Error("Failed to compile in UpdateSnapshot");
             return;
         }
+
+        CompileOutput output = res.Value;
 
         string astFile = Path.ChangeExtension(testFile, ".ast");
         string stdFile = Path.ChangeExtension(testFile, ".out");
@@ -81,25 +85,30 @@ public class Tester
     private static void CompareSnapshot(string testFile)
     {
         Stopwatch sw = Stopwatch.StartNew();
-        bool passed = Compiler.TryCompile(testFile, out CompileOutput? output);
+        Result<CompileOutput> res = Compiler.Compile(testFile);
         long ms = sw.ElapsedMilliseconds;
 
-        string folderType = testFile.Split("/")[1];
-
         string? error = null;
+        bool passed = true;
 
-        if (passed)
+        if (!res)
         {
+            error = string.Join(Environment.NewLine, res.Error);
+            passed = false;
+        }
+        else
+        {
+            CompileOutput output = res.Value;
+
+            string folderType = testFile.Split("/")[1];
+
+
             string astJson = output!.CompilationUnit.ToJson();
 
             (string astOutput, string stdOutput) = LoadTestContent(testFile);
             Executable runOutput = Executable.Capture(output.Executable);
 
-            if (!passed && output.Errors.Length != 0)
-            {
-                error = string.Join(Environment.NewLine, output.Errors);
-            }
-            else if (folderType == "ok" && runOutput.ExitCode != 0)
+            if (folderType == "ok" && runOutput.ExitCode != 0)
             {
                 passed = false;
             }

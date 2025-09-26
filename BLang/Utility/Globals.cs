@@ -34,7 +34,7 @@ public class Globals
 
     public static void Debug(string? message, string? prefix = null, ConsoleColor? color = ConsoleColor.DarkGray)
     {
-        if (Options.Debug)
+        if (Options.Verbose > 1)
         {
             Print(message, prefix, color);
         }

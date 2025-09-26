@@ -2,7 +2,6 @@ namespace BLang;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using BLang.Ast;
 using BLang.Targets;
@@ -11,52 +10,33 @@ using BLang.Utility;
 
 public static class Compiler
 {
-    public static bool TryCompile(string file, [MaybeNullWhen(false)] out CompileOutput output)
+    public static Result<CompileOutput> Compile(string file)
     {
         CompilerContext data = new(file);
-        output = null;
-        List<string> errors = new();
 
-        IEnumerator<Token>? tokens = Lex(file, data);
-        if (tokens == null) return false;
+        Result<IEnumerator<Token>> tokens = Lex(file, data);
+        if (!tokens) return tokens.Error;
 
         CompilationUnit unit;
         try
         {
             Parser parser = new(data);
-            unit = parser.Parse(tokens);
-            if (unit == null) return false;
+            unit = parser.Parse(tokens.Value);
+            if (unit == null) return "Failed to parse " + file;
         }
         catch (Exception e)
         {
-            errors.Add(e.Message);
-            if (Options.Debug) errors.Add(e.StackTrace!);
-            return false;
+            return Options.Verbose > 0 ? e.ToString() : e.Message;
         }
 
-
-        switch (Options.Target)
+        return Options.Target switch
         {
-            case CompilationTarget.Qbe:
-                string? exe = QbeTarget(unit, data);
-
-                if (exe == null)
-                {
-                    output = null;
-                    return false;
-                }
-
-                output = new(file, exe, unit, errors.ToArray());
-                return true;
-
-            default:
-                output = null;
-                return false;
-
-        }
+            CompilationTarget.Qbe => QbeTarget(unit, data),
+            _ => $"Unknown Target {Options.Target}",
+        };
     }
 
-    private static string? QbeTarget(CompilationUnit unit, CompilerContext data)
+    private static Result<CompileOutput> QbeTarget(CompilationUnit unit, CompilerContext data)
     {
         string file = data.File;
 
@@ -69,18 +49,15 @@ public static class Compiler
 
         if (!RunExecutable("qbe", $"{objFile}.ssa -o {objFile}.s"))
         {
-            // TODO: handle failure of target
-            return null;
+            return "Failed to compile qbe ir to assembly";
         }
 
         if (!RunExecutable("gcc", $"{objFile}.s -o {binFile}"))
         {
-            // TODO: handle failure of target
-            return null;
+            return "Failed to compile converted assembly using gcc";
         }
 
-
-        return binFile;
+        return new CompileOutput(file, binFile, unit);
     }
 
     private static bool RunExecutable(string command, string args)
@@ -93,17 +70,17 @@ public static class Compiler
         return true;
     }
 
-    private static IEnumerator<Token>? Lex(string file, CompilerContext data)
+    private static Result<IEnumerator<Token>> Lex(string file, CompilerContext data)
     {
         try
         {
             Lexer lexer = new(data);
-            return lexer.Lex(File.OpenText(file), file);
+            IEnumerator<Token> test = lexer.Lex(File.OpenText(file), file);
+            return new Result<IEnumerator<Token>>(test);
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine("Lex error: " + e);
-            return null;
+            return Options.Verbose > 0 ? e.ToString() : e.Message;
         }
     }
 

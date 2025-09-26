@@ -6,11 +6,9 @@ Implementing B in C# with qbe backend
 
 Run an example with some debug info
 
-`❯ ./bc run Examples/HelloWorld.b --debug`
+`❯ ./bc run Examples/HelloWorld.b`
 
 ```
-[CMD] qbe Examples/obj/qbe/HelloWorld.ssa -o Examples/obj/qbe/HelloWorld.s
-[CMD] gcc Examples/obj/qbe/HelloWorld.s -o Examples/bin/qbe/HelloWorld
 Hello, World
 ```
 
@@ -26,19 +24,21 @@ Usage:
   bc <file> [command] [options]
 
 Arguments:
-  <file>  Path to b file
+  <file>  Path to b file to build
 
 Options:
-  --debug         Print compiler debug information
-  --ast           Dump compiler ast information
   --tokens        Print tokenizers tokens
   --symbols       Print symbol table
+  --ast           Dump compiler ast information
+  -v, --verbose   Verbose output
+  -vv             Very Verbose output
   -?, -h, --help  Show help and usage information
   --version       Show version information
 
 Commands:
   run <file>   Run .b file
   test <file>  Test compiler output
+
 ```
 
 ## Testing
@@ -48,18 +48,18 @@ Run all the compiler tests
 `❯ ./bc test`
 
 ```shell
-✓ Tests/empty.b (66ms)
-✓ Tests/integer.b (24ms)
-✓ Tests/pointers.b (21ms)
-✓ Tests/ok/comments.b (17ms)
-✓ Tests/ok/helloworld.b (14ms)
+✓ Tests/ok/comments.b (33ms)
+✓ Tests/ok/empty.b (15ms)
+✓ Tests/ok/helloworld.b (20ms)
+✓ Tests/ok/integer.b (18ms)
+✓ Tests/ok/pointers.b (18ms)
 ✓ Tests/ok/Statement/auto.b (15ms)
 ✓ Tests/ok/Statement/extrn.b (15ms)
-✓ Tests/ok/Statement/function.b (15ms)
-✓ Tests/ok/Statement/functionCall.b (15ms)
-✓ Tests/ok/Statement/if.b (22ms)
-✓ Tests/ok/Statement/ifelse.b (15ms)
-✓ Tests/ok/Statement/while.b (17ms)
+✓ Tests/ok/Statement/function.b (16ms)
+✓ Tests/ok/Statement/functionCall.b (16ms)
+✓ Tests/ok/Statement/if.b (20ms)
+✓ Tests/ok/Statement/ifelse.b (17ms)
+✓ Tests/ok/Statement/while.b (16ms)
 ```
 
 

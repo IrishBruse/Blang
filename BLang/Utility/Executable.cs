@@ -7,7 +7,7 @@ public record Executable(string? StdOut, string? StdError, int ExitCode)
 {
     public static Executable Capture(string executable, string arguments = "")
     {
-        if (Options.Debug) Info($"{executable} {arguments}", "CMD");
+        if (Options.Verbose > 1) Info($"{executable} {arguments}", "CMD");
 
         try
         {

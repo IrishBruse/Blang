@@ -5,7 +5,7 @@ public static class Options
     public static Verb Verb { get; set; }
 
     // Global Flags
-    public static bool Debug { get; set; }
+    public static int Verbose { get; set; }
     public static bool Ast { get; set; }
     public static bool Tokens { get; set; }
     public static bool Symbols { get; set; }
