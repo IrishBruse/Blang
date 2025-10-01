@@ -42,136 +42,128 @@ public class Tester
 
     private static void UpdateSnapshot(string testFile)
     {
+        string folderType = testFile.Split("/")[1];
+
+        Options.Verbose = 0; // Force readable messages and no traces
+
         Result<CompileOutput> res = Compiler.Compile(testFile);
 
-        if (!res)
+        if (folderType == "ok")
         {
-            Error("Failed to compile in UpdateSnapshot");
-            return;
+            CompileOutput output = res.Value;
+
+            string astFile = Path.ChangeExtension(testFile, ".ast");
+            string stdFile = Path.ChangeExtension(testFile, ".out");
+
+            (string astPreviousOutput, string stdPreviousOutput) = LoadTestContent(testFile);
+
+            Executable runOutput = Executable.Capture(output.Executable);
+
+            StringBuilder stdOutput = new();
+            _ = stdOutput.Append(runOutput.StdOut);
+            _ = stdOutput.Append(runOutput.StdError);
+            if (stdOutput.Length > 0) File.WriteAllText(stdFile, stdOutput.ToString());
+
+            string astOutput = output.CompilationUnit.ToJson();
+
+            bool astChanged = !astOutput.Equals(astPreviousOutput, StringComparison.Ordinal);
+            string astIcon = astChanged ? Green(IconUpdated) : Gray(IconSame);
+
+            bool stdChanged = !stdOutput.Equals(stdPreviousOutput);
+            string stdIcon = stdChanged ? Green(IconUpdated) : Gray(IconSame);
+
+            bool anyChanges = astChanged || stdChanged;
+            string testIcon = anyChanges ? Green(IconUpdated) : Gray(IconSame);
+            Log($"{testIcon} {testFile}");
+            if (anyChanges)
+            {
+                Log($"  {astIcon} {astFile}");
+                Log($"  {stdIcon} {stdFile}");
+            }
         }
-
-        CompileOutput output = res.Value;
-
-        string astFile = Path.ChangeExtension(testFile, ".ast");
-        string stdFile = Path.ChangeExtension(testFile, ".out");
-
-        (string astPreviousOutput, string stdPreviousOutput) = LoadTestContent(testFile);
-
-        Executable runOutput = Executable.Capture(output.Executable);
-
-        StringBuilder stdOutput = new();
-        _ = stdOutput.Append(runOutput.StdOut);
-        _ = stdOutput.Append(runOutput.StdError);
-        if (stdOutput.Length > 0) File.WriteAllText(stdFile, stdOutput.ToString());
-
-        string astOutput = output.CompilationUnit.ToJson();
-
-        bool astChanged = !astOutput.Equals(astPreviousOutput, StringComparison.Ordinal);
-        string astIcon = astChanged ? Green(IconUpdated) : Gray(IconSame);
-
-        bool stdChanged = !stdOutput.Equals(stdPreviousOutput);
-        string stdIcon = stdChanged ? Green(IconUpdated) : Gray(IconSame);
-
-        bool anyChanges = astChanged || stdChanged;
-        string testIcon = anyChanges ? Green(IconUpdated) : Gray(IconSame);
-        Log($"{testIcon} {testFile}");
-        if (anyChanges)
+        else if (folderType == "error")
         {
-            Log($"  {astIcon} {astFile}");
-            Log($"  {stdIcon} {stdFile}");
+            string error = res.Error;
+            Console.WriteLine(error);
+        }
+        else
+        {
+            Console.WriteLine("Unknown folderType");
         }
     }
 
     private static void CompareSnapshot(string testFile)
     {
+        string folderType = testFile.Split("/")[1];
+        (string astOutput, string stdOutput) = LoadTestContent(testFile);
+
         Stopwatch sw = Stopwatch.StartNew();
         Result<CompileOutput> res = Compiler.Compile(testFile);
         long ms = sw.ElapsedMilliseconds;
 
-        string? error = null;
-        bool passed = true;
+        string error = "";
 
-        if (!res)
-        {
-            error = string.Join(Environment.NewLine, res.Error);
-            passed = false;
-        }
-        else
+        if (folderType == "ok")
         {
             CompileOutput output = res.Value;
 
-            string folderType = testFile.Split("/")[1];
-
-
             string astJson = output!.CompilationUnit.ToJson();
 
-            (string astOutput, string stdOutput) = LoadTestContent(testFile);
             Executable runOutput = Executable.Capture(output.Executable);
 
-            if (folderType == "ok" && runOutput.ExitCode != 0)
+            if (runOutput.ExitCode != 0)
             {
-                passed = false;
+                error += $"ExitCode: {runOutput.ExitCode}\n";
+                error += "\n";
             }
-            else if (!astJson.Equals(astOutput, StringComparison.Ordinal))
-            {
 
-
-                passed = false;
-            }
-            else if (!astJson.Equals(astOutput, StringComparison.Ordinal))
+            if (!astJson.Equals(astOutput, StringComparison.Ordinal))
             {
                 (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, astJson);
 
-                error = $"""
+                error += $"""
                 {Path.ChangeExtension(testFile, ".ast")}:{line}
-                Expected:
+                Expected Ast:
                 {line1}
                 Recieved:
                 {line2}
-                """;
-                passed = false;
+                """.Trim();
+
+                error += "\n";
+                error += "\n";
+            }
+
+            if (!stdOutput.Equals(runOutput.StdOut, StringComparison.Ordinal))
+            {
+                (int line, string? line1, string? line2) = FindFirstDifferentLine(stdOutput, runOutput.StdOut!);
+
+                error += $"""
+                {Path.ChangeExtension(testFile, ".out")}:{line}
+                Expected Output:
+                {line1}
+                Recieved:
+                {line2}
+                """.Trim();
+
+                error += "\n";
+                error += "\n";
+            }
+        }
+        else if (folderType == "error")
+        {
+            string compileError = res.Error;
+
+            if (!stdOutput.Equals(compileError, StringComparison.Ordinal))
+            {
+                error += $"CompileError: {compileError}\n";
             }
         }
 
         string time = Gray($"({ms}ms)");
-        string icon = passed ? Green(IconPass) : Red(IconFail);
+        string icon = error == string.Empty ? Green(IconPass) : Red(IconFail);
         Log($"{icon} {testFile} {time}");
-        if (error != null) Error(error);
+        if (error != string.Empty) Error(error);
     }
-    // string runOutputStdErr = runOutput.StdOut + runOutput.StdError;
-
-    // string error = "";
-
-    // if (runOutput.ExitCode != 0)
-    // {
-    //     error = $"exitCode: {runOutput.ExitCode}";
-    // }
-    // // else if (astOutput != output.AstOutput)
-    // // {
-    // //     (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, output.AstOutput);
-    // //     // error = $"Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}\n{text}";
-    // //     error = $"""
-    // //     Mismatch at {Path.ChangeExtension(testFile, ".ast")}:{line}
-    // //     Expected:
-    // //     {line1}
-    // //     Recieved:
-    // //     {line2}
-    // //     """;
-    // // }
-    // else if (stdOutput != runOutputStdErr)
-    // {
-    //     error = $"""
-    //     Expected:
-    //     {stdOutput}
-    //     Recieved:
-    //     {runOutputStdErr}
-    //     """;
-    // }
-    // string time = Gray($"({ms}ms)");
-    // string icon = false ? Green(IconPass) : Red(IconFail);
-
-    // Log($"{icon} {testFile} {time}");
-    // if (error != null) Error(error);
 
     private static (string astOutput, string stdOutput) LoadTestContent(string testFile)
     {

@@ -38,7 +38,6 @@ Options:
 Commands:
   run <file>   Run .b file
   test <file>  Test compiler output
-
 ```
 
 ## Testing
