@@ -43,19 +43,18 @@ public class Tester
     private static void UpdateSnapshot(string testFile)
     {
         string folderType = testFile.Split("/")[1];
+        (string astPreviousOutput, string stdPreviousOutput) = LoadTestContent(testFile);
 
         Options.Verbose = 0; // Force readable messages and no traces
 
         Result<CompileOutput> res = Compiler.Compile(testFile);
 
+        string astFile = Path.ChangeExtension(testFile, ".ast");
+        string stdFile = Path.ChangeExtension(testFile, ".out");
+
         if (folderType == "ok")
         {
             CompileOutput output = res.Value;
-
-            string astFile = Path.ChangeExtension(testFile, ".ast");
-            string stdFile = Path.ChangeExtension(testFile, ".out");
-
-            (string astPreviousOutput, string stdPreviousOutput) = LoadTestContent(testFile);
 
             Executable runOutput = Executable.Capture(output.Executable);
 
@@ -65,6 +64,7 @@ public class Tester
             if (stdOutput.Length > 0) File.WriteAllText(stdFile, stdOutput.ToString());
 
             string astOutput = output.CompilationUnit.ToJson();
+            if (astOutput.Length > 0) File.WriteAllText(astFile, astOutput.ToString());
 
             bool astChanged = !astOutput.Equals(astPreviousOutput, StringComparison.Ordinal);
             string astIcon = astChanged ? Green(IconUpdated) : Gray(IconSame);
@@ -84,7 +84,19 @@ public class Tester
         else if (folderType == "error")
         {
             string error = res.Error;
-            Console.WriteLine(error);
+
+            if (error.Length > 0) File.WriteAllText(stdFile, error.ToString());
+
+            bool stdChanged = !error.Equals(stdPreviousOutput, StringComparison.Ordinal);
+            string stdIcon = stdChanged ? Green(IconUpdated) : Gray(IconSame);
+
+            bool anyChanges = stdChanged;
+            string testIcon = anyChanges ? Green(IconUpdated) : Gray(IconSame);
+            Log($"{testIcon} {testFile}");
+            if (anyChanges)
+            {
+                Log($"  {stdIcon} {stdFile}");
+            }
         }
         else
         {
