@@ -4,7 +4,7 @@ Implementing B in C# with qbe backend
 
 ## Quickstart
 
-Run an example with some debug info
+Run the HelloWorld example
 
 `❯ ./bc run Examples/HelloWorld.b`
 
