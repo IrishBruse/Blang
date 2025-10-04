@@ -2,16 +2,16 @@ namespace BLang.Targets;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using BLang.Ast;
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;
 using BLang.Utility;
 
-public class QbeTarget(CompilerContext data) : BaseTarget
+public class QbeTarget : ITarget
 {
     public const string Target = "qbe";
-    public override int Indention => 4;
 
     private readonly Dictionary<string, string> strings = [];
     private readonly HashSet<Symbol> externs = [];
@@ -21,6 +21,36 @@ public class QbeTarget(CompilerContext data) : BaseTarget
     private readonly Dictionary<Symbol, int> ssaVersionCounters = [];
 
     private int conditionIndex;
+    private QbeOutput output = new();
+    private CompilerContext? data;
+
+    public Result<CompileOutput> Emit(CompilationUnit unit, CompilerContext data)
+    {
+        this.data = data;
+
+        output.Clear();
+
+        string file = data.File;
+
+        // CreateOutputDirectories(file, "qbe");
+
+        (string objFile, string binFile) = GetOutputFile(file, Target);
+
+        string qbeIR = ToOutput(unit);
+        File.WriteAllText(objFile + ".ssa", qbeIR);
+
+        if (!Executable.Run("qbe", $"{objFile}.ssa -o {objFile}.s"))
+        {
+            return "Failed to compile qbe ir to assembly";
+        }
+
+        if (!Executable.Run("gcc", $"{objFile}.s -o {binFile}"))
+        {
+            return "Failed to compile converted assembly using gcc";
+        }
+
+        return new CompileOutput(file, binFile, unit);
+    }
 
     public string ToOutput(CompilationUnit node)
     {
@@ -31,7 +61,7 @@ public class QbeTarget(CompilerContext data) : BaseTarget
         _ = data;
 
         VisitCompilationUnit(node);
-        return Output.ToString();
+        return output.Text.ToString();
     }
 
     public void VisitCompilationUnit(CompilationUnit node)
@@ -41,8 +71,8 @@ public class QbeTarget(CompilerContext data) : BaseTarget
             Comment(variable.Symbol.Name);
             _ = CreateGlobalMemoryRegister(variable.Symbol);
             string value = variable.Value == null ? "z 4" : "w " + variable.Value;
-            Write($"data ${variable.Symbol.Name} = {{ {value} }}");
-            Write();
+            output.Write($"data ${variable.Symbol.Name} = {{ {value} }}");
+            output.Write();
         }
 
         foreach (FunctionDecleration funcDecl in node.FunctionDeclarations)
@@ -51,7 +81,7 @@ public class QbeTarget(CompilerContext data) : BaseTarget
         }
 
         GenerateDataSection();
-        Write();
+        output.Write();
         GenerateExternsSection();
     }
 
@@ -60,7 +90,7 @@ public class QbeTarget(CompilerContext data) : BaseTarget
         Comment("Data");
         foreach ((string value, string name) in strings)
         {
-            Write($"data ${name} = {{ b \"{value}\", b 0 }}");
+            output.Write($"data ${name} = {{ b \"{value}\", b 0 }}");
         }
     }
 
@@ -89,14 +119,14 @@ public class QbeTarget(CompilerContext data) : BaseTarget
 
     private void BeginScope()
     {
-        Write("{");
-        Indent();
+        output.Write("{");
+        output.Indent();
     }
 
     private void EndScope()
     {
-        Dedent();
-        Write("}");
+        output.Dedent();
+        output.Write("}");
     }
 
     // Statements
@@ -105,23 +135,22 @@ public class QbeTarget(CompilerContext data) : BaseTarget
     {
         string name = node.Symbol.Name;
 
-        string returnType = name == "main" ? "w " : "";
         if (name == "main")
         {
-            Write($"export function {returnType}${name}()");
+            output.Write($"export function w ${name}()");
         }
         else
         {
-            Write($"function w ${name}()");
+            output.Write($"function w ${name}()");
         }
 
         BeginScope();
-        WriteRaw("@start\n");
+        output.WriteRaw("@start\n");
         EmitBody(node.Body);
-        Write(name == "main" ? "ret 0" : "ret");
+        output.Write(name == "main" ? "ret 0" : "ret");
         EndScope();
 
-        Write();
+        output.Write();
     }
 
     private void EmitBody(Statement[] body)
@@ -144,40 +173,40 @@ public class QbeTarget(CompilerContext data) : BaseTarget
     {
         Comment("while " + node.Condition);
         string labelPrefix = $"@while_{++conditionIndex}_";
-        Write($"{labelPrefix}start");
+        output.Write($"{labelPrefix}start");
         string reg = GenerateBinaryExpressionIR(node.Condition, new("while_condition", SymbolKind.Load));
-        Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}end");
-        Write($"{labelPrefix}body");
-        Indent();
+        output.Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}end");
+        output.Write($"{labelPrefix}body");
+        output.Indent();
         {
             EmitBody(node.Body);
-            Write($"jmp {labelPrefix}start");
+            output.Write($"jmp {labelPrefix}start");
         }
-        Dedent();
-        Write($"{labelPrefix}end");
+        output.Dedent();
+        output.Write($"{labelPrefix}end");
     }
 
     public void VisitIfStatement(IfStatement node)
     {
         Comment("if " + node.Condition);
         string labelPrefix = $"@if_{++conditionIndex}_";
-        Write($"{labelPrefix}start");
+        output.Write($"{labelPrefix}start");
         string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + conditionIndex, SymbolKind.Load));
         string labelSuffix = node.ElseBody == null ? "end" : "else";
-        Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}{labelSuffix}");
-        Write($"{labelPrefix}body");
-        Indent();
+        output.Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}{labelSuffix}");
+        output.Write($"{labelPrefix}body");
+        output.Indent();
         {
             EmitBody(node.Body);
             if (node.ElseBody != null)
             {
-                Write($"jmp {labelPrefix}end");
-                Write($"{labelPrefix}else");
+                output.Write($"jmp {labelPrefix}end");
+                output.Write($"{labelPrefix}else");
                 EmitBody(node.ElseBody);
             }
         }
-        Dedent();
-        Write($"{labelPrefix}end");
+        output.Dedent();
+        output.Write($"{labelPrefix}end");
     }
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
@@ -185,18 +214,18 @@ public class QbeTarget(CompilerContext data) : BaseTarget
         foreach (Symbol variable in autoDeclaration.Variables)
         {
             string varName = CreateMemoryRegister(variable);
-            Write($"# auto {variable}");
-            Write($"{varName} =l alloc4 4");
-            Write($"storew 0, {varName}");
+            output.Write($"# auto {variable}");
+            output.Write($"{varName} =l alloc4 4");
+            output.Write($"storew 0, {varName}");
         }
     }
 
     public void VisitFunctionCall(FunctionCall node)
     {
-        Write($"# call {node.Symbol.Name}");
+        output.Write($"# call {node.Symbol.Name}");
 
         string parameters = PassParameterValue(node.Parameters);
-        Write($"call ${node.Symbol}({parameters})");
+        output.Write($"call ${node.Symbol}({parameters})");
     }
 
     private string PassParameterValue(Expression[] parameters)
@@ -218,7 +247,7 @@ public class QbeTarget(CompilerContext data) : BaseTarget
 
                 case Variable v:
                     reg = CreateTempRegister(v.Symbol);
-                    Write($"{reg} =w loadw {GetMemoryRegister(v.Symbol)}");
+                    output.Write($"{reg} =w loadw {GetMemoryRegister(v.Symbol)}");
                     registers.Add($"w {reg}");
                     break;
 
@@ -233,10 +262,10 @@ public class QbeTarget(CompilerContext data) : BaseTarget
     {
         Expression value = variableAssignment.Value;
 
-        Write($"# {variableAssignment.Symbol} = {value}");
+        output.Write($"# {variableAssignment.Symbol} = {value}");
         string result = GenerateBinaryExpressionIR(value, variableAssignment.Symbol);
         string reg = GetMemoryRegister(variableAssignment.Symbol);
-        Write($"storew {result}, {reg}");
+        output.Write($"storew {result}, {reg}");
     }
 
     // Expression
@@ -249,7 +278,7 @@ public class QbeTarget(CompilerContext data) : BaseTarget
                 {
                     string loadReg = CreateTempRegister(variable.Symbol);
                     string memReg = GetMemoryRegister(variable.Symbol);
-                    Write($"{loadReg} =w loadw {memReg}");
+                    output.Write($"{loadReg} =w loadw {memReg}");
                     return loadReg;
                 }
 
@@ -277,11 +306,11 @@ public class QbeTarget(CompilerContext data) : BaseTarget
 
                     string addressReg = CreateTempRegister(variable.Symbol);
                     string memReg = GetMemoryRegister(variable.Symbol);
-                    Write($"{addressReg} =l loadw {memReg}");
+                    output.Write($"{addressReg} =l loadw {memReg}");
 
-                    Write($"# test");
+                    output.Write($"# test");
                     string loadReg = NewTempReg();
-                    Write($"{loadReg} =w loadw {addressReg}");
+                    output.Write($"{loadReg} =w loadw {addressReg}");
                     return loadReg;
                 }
 
@@ -296,31 +325,31 @@ public class QbeTarget(CompilerContext data) : BaseTarget
 #pragma warning restore IDE0010
                     {
                         case TokenType.Addition:
-                            Write($"{reg} =w add {leftOp}, {rightOp}");
+                            output.Write($"{reg} =w add {leftOp}, {rightOp}");
                             break;
 
                         case TokenType.Multiplication:
-                            Write($"{reg} =w mul {leftOp}, {rightOp}");
+                            output.Write($"{reg} =w mul {leftOp}, {rightOp}");
                             break;
 
                         case TokenType.LessThan:
-                            Write($"{reg} =w csltw {leftOp}, {rightOp}");
+                            output.Write($"{reg} =w csltw {leftOp}, {rightOp}");
                             break;
 
                         case TokenType.LessThanEqual:
-                            Write($"{reg} =w cslew {leftOp}, {rightOp}");
+                            output.Write($"{reg} =w cslew {leftOp}, {rightOp}");
                             break;
 
                         case TokenType.Modulo:
-                            Write($"{reg} =w rem {leftOp}, {rightOp}");
+                            output.Write($"{reg} =w rem {leftOp}, {rightOp}");
                             break;
 
                         case TokenType.EqualEqual:
-                            Write($"{reg} =w ceqw {leftOp}, {rightOp}");
+                            output.Write($"{reg} =w ceqw {leftOp}, {rightOp}");
                             break;
 
                         case TokenType.BitwiseOr:
-                            Write($"{reg} =w or {leftOp}, {rightOp}");
+                            output.Write($"{reg} =w or {leftOp}, {rightOp}");
                             break;
 
                         default: throw new ParserException("Unknown operator " + binary.Operation);
@@ -413,6 +442,24 @@ public class QbeTarget(CompilerContext data) : BaseTarget
 
     public void Comment(string message)
     {
-        Write($"# {message}");
+        output.Write($"# {message}");
+    }
+
+    private static (string, string) GetOutputFile(string inputFile, string target)
+    {
+        string projectDirectory = Path.GetDirectoryName(inputFile)!;
+        string sourceFileName = Path.GetFileNameWithoutExtension(inputFile);
+        string objFile = Path.Combine(projectDirectory, "obj", target, sourceFileName);
+        string binFile = Path.Combine(projectDirectory, "bin", target, sourceFileName);
+
+        return (objFile, binFile);
+    }
+
+    private static void CreateOutputDirectories(string inputFile, string target)
+    {
+        string projectDirectory = Path.GetDirectoryName(inputFile)!;
+
+        _ = Directory.CreateDirectory(Path.Combine(projectDirectory, "obj", target));
+        _ = Directory.CreateDirectory(Path.Combine(projectDirectory, "bin", target));
     }
 }

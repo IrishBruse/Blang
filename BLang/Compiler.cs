@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using BLang.Ast;
+using BLang.Exceptions;
 using BLang.Targets;
 using BLang.Tokenizer;
 using BLang.Utility;
@@ -29,45 +30,13 @@ public static class Compiler
             return Options.Verbose > 0 ? e.ToString() : e.Message;
         }
 
-        return Options.Target switch
+        QbeTarget target = Options.Target switch
         {
-            CompilationTarget.Qbe => QbeTarget(unit, data),
-            _ => $"Unknown Target {Options.Target}",
+            CompilationTarget.Qbe => new QbeTarget(),
+            _ => throw new CompilerException($"Unknown Target {Options.Target}"),
         };
-    }
 
-    private static Result<CompileOutput> QbeTarget(CompilationUnit unit, CompilerContext data)
-    {
-        string file = data.File;
-
-        CreateOutputDirectories(file, "qbe");
-
-        (string objFile, string binFile) = GetOutputFile(file, Targets.QbeTarget.Target);
-
-        string qbeIR = new QbeTarget(data).ToOutput(unit);
-        File.WriteAllText(objFile + ".ssa", qbeIR);
-
-        if (!RunExecutable("qbe", $"{objFile}.ssa -o {objFile}.s"))
-        {
-            return "Failed to compile qbe ir to assembly";
-        }
-
-        if (!RunExecutable("gcc", $"{objFile}.s -o {binFile}"))
-        {
-            return "Failed to compile converted assembly using gcc";
-        }
-
-        return new CompileOutput(file, binFile, unit);
-    }
-
-    private static bool RunExecutable(string command, string args)
-    {
-        Executable exe = Executable.Capture(command, args);
-        if (!exe.Success())
-        {
-            return false;
-        }
-        return true;
+        return target.Emit(unit, data);
     }
 
     private static Result<IEnumerator<Token>> Lex(string file, CompilerContext data)
@@ -88,23 +57,5 @@ public static class Compiler
     {
         Parser parser = new(data);
         return parser.Parse(tokens);
-    }
-
-    private static (string, string) GetOutputFile(string inputFile, string target)
-    {
-        string projectDirectory = Path.GetDirectoryName(inputFile)!;
-        string sourceFileName = Path.GetFileNameWithoutExtension(inputFile);
-        string objFile = Path.Combine(projectDirectory, "obj", target, sourceFileName);
-        string binFile = Path.Combine(projectDirectory, "bin", target, sourceFileName);
-
-        return (objFile, binFile);
-    }
-
-    private static void CreateOutputDirectories(string inputFile, string target)
-    {
-        string projectDirectory = Path.GetDirectoryName(inputFile)!;
-
-        _ = Directory.CreateDirectory(Path.Combine(projectDirectory, "obj", target));
-        _ = Directory.CreateDirectory(Path.Combine(projectDirectory, "bin", target));
     }
 }

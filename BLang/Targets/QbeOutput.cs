@@ -2,11 +2,11 @@ namespace BLang.Targets;
 
 using System.Text;
 
-public class BaseTarget
+public class QbeOutput
 {
-    public virtual int Indention { get; } = 2;
+    public virtual int Indention { get; } = 4;
 
-    public StringBuilder Output { internal get; set; } = new();
+    public StringBuilder Text { get; set; } = new();
     private int Depth { get; set; }
 
     public void Indent(int? spaces = null)
@@ -23,11 +23,17 @@ public class BaseTarget
 
     public void WriteRaw(string? value)
     {
-        _ = Output.Append(value);
+        _ = Text.Append(value);
     }
 
     public void Write(string? value = "")
     {
-        _ = string.IsNullOrEmpty(value) ? Output.AppendLine() : Output.AppendLine(Space + value);
+        _ = string.IsNullOrEmpty(value) ? Text.AppendLine() : Text.AppendLine(Space + value);
+    }
+
+    public void Clear()
+    {
+        _ = Text.Clear();
+        Depth = 0;
     }
 }

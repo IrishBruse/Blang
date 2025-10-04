@@ -24,6 +24,16 @@ public record Executable(string? StdOut, string? StdError, int ExitCode)
         }
     }
 
+    public static bool Run(string executable, string arguments = "")
+    {
+        Executable exe = Capture(executable, arguments);
+        if (!exe.Success())
+        {
+            return false;
+        }
+        return true;
+    }
+
     public bool Success()
     {
         return ExitCode == 0;
