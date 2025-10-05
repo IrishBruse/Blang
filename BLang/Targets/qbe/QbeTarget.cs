@@ -1,8 +1,9 @@
-namespace BLang.Targets;
+namespace BLang.Targets.qbe;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using BLang.Ast;
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
@@ -29,65 +30,54 @@ public class QbeTarget : ITarget
         this.data = data;
 
         output.Clear();
-
-        string file = data.File;
-
-        // CreateOutputDirectories(file, "qbe");
-
-        (string objFile, string binFile) = GetOutputFile(file, Target);
-
-        string qbeIR = ToOutput(unit);
-        File.WriteAllText(objFile + ".ssa", qbeIR);
-
-        if (!Executable.Run("qbe", $"{objFile}.ssa -o {objFile}.s"))
-        {
-            return "Failed to compile qbe ir to assembly";
-        }
-
-        if (!Executable.Run("gcc", $"{objFile}.s -o {binFile}"))
-        {
-            return "Failed to compile converted assembly using gcc";
-        }
-
-        return new CompileOutput(file, binFile, unit);
-    }
-
-    public string ToOutput(CompilationUnit node)
-    {
         currentSsaRegisters.Clear();
         ssaVersionCounters.Clear();
         memoryAllocations.Clear();
 
-        _ = data;
+        string file = data.File;
 
-        VisitCompilationUnit(node);
-        return output.Text.ToString();
+        (string objFile, string binFile) = GetOutputFile(file, Target);
+
+        VisitCompilationUnit(unit);
+        string qbeIR = output.Text.ToString();
+        File.WriteAllText(objFile + ".ssa", qbeIR);
+
+        StringBuilder stdError = new();
+        Executable exe;
+
+        exe = Executable.Run("qbe", $"{objFile}.ssa -o {objFile}.s").PipeErrorTo(stdError);
+        if (!exe.Success) return "Failed to compile qbe ir to assembly\n" + stdError.ToString();
+
+        exe = Executable.Run("gcc", $"{objFile}.s -o {binFile}").PipeErrorTo(stdError);
+        if (!exe.Success) return "Failed to compile assembly using gcc\n" + stdError.ToString();
+
+        return new CompileOutput(file, binFile, unit);
     }
 
     public void VisitCompilationUnit(CompilationUnit node)
     {
-        foreach (VariableDecleration variable in node.GlobalVariables)
+        foreach (VariableDeclaration variable in node.GlobalVariables)
         {
-            Comment(variable.Symbol.Name);
+            output.Comment(variable.Symbol.Name);
             _ = CreateGlobalMemoryRegister(variable.Symbol);
-            string value = variable.Value == null ? "z 4" : "w " + variable.Value;
+            string value = variable.Value == null ? "w 0" : "w " + (variable.Value as IntValue)!.Value;
             output.Write($"data ${variable.Symbol.Name} = {{ {value} }}");
-            output.Write();
+            output.WriteLine();
         }
 
         foreach (FunctionDecleration funcDecl in node.FunctionDeclarations)
         {
-            VisitFunctionStatement(funcDecl);
+            VisitFunctionDecleration(funcDecl);
         }
 
         GenerateDataSection();
-        output.Write();
+        output.WriteLine();
         GenerateExternsSection();
     }
 
     private void GenerateDataSection()
     {
-        Comment("Data");
+        output.Comment("Data");
         foreach ((string value, string name) in strings)
         {
             output.Write($"data ${name} = {{ b \"{value}\", b 0 }}");
@@ -96,10 +86,10 @@ public class QbeTarget : ITarget
 
     private void GenerateExternsSection()
     {
-        Comment("Externs");
+        output.Comment("Externs");
         foreach (Symbol external in externs)
         {
-            Comment($"* {external.Name}");
+            output.Comment($"* {external.Name}");
         }
     }
 
@@ -131,7 +121,7 @@ public class QbeTarget : ITarget
 
     // Statements
 
-    public void VisitFunctionStatement(FunctionDecleration node)
+    public void VisitFunctionDecleration(FunctionDecleration node)
     {
         string name = node.Symbol.Name;
 
@@ -150,7 +140,7 @@ public class QbeTarget : ITarget
         output.Write(name == "main" ? "ret 0" : "ret");
         EndScope();
 
-        output.Write();
+        output.WriteLine();
     }
 
     private void EmitBody(Statement[] body)
@@ -171,7 +161,7 @@ public class QbeTarget : ITarget
 
     public void VisitWhileStatement(WhileStatement node)
     {
-        Comment("while " + node.Condition);
+        // Comment("while " + node.Condition);
         string labelPrefix = $"@while_{++conditionIndex}_";
         output.Write($"{labelPrefix}start");
         string reg = GenerateBinaryExpressionIR(node.Condition, new("while_condition", SymbolKind.Load));
@@ -188,7 +178,7 @@ public class QbeTarget : ITarget
 
     public void VisitIfStatement(IfStatement node)
     {
-        Comment("if " + node.Condition);
+        output.Comment("if " + node.Condition);
         string labelPrefix = $"@if_{++conditionIndex}_";
         output.Write($"{labelPrefix}start");
         string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + conditionIndex, SymbolKind.Load));
@@ -214,9 +204,9 @@ public class QbeTarget : ITarget
         foreach (Symbol variable in autoDeclaration.Variables)
         {
             string varName = CreateMemoryRegister(variable);
-            output.Write($"# auto {variable}");
+            output.Comment($"auto {variable}");
             output.Write($"{varName} =l alloc4 4");
-            output.Write($"storew 0, {varName}");
+            output.Storew(0, varName);
         }
     }
 
@@ -260,9 +250,9 @@ public class QbeTarget : ITarget
 
     public void VisitVariableAssignment(VariableDeclaration variableAssignment)
     {
-        Expression value = variableAssignment.Value;
+        Expression value = variableAssignment.Value!;// TODO: null
 
-        output.Write($"# {variableAssignment.Symbol} = {value}");
+        output.Write($"# {variableAssignment.Symbol} = ");
         string result = GenerateBinaryExpressionIR(value, variableAssignment.Symbol);
         string reg = GetMemoryRegister(variableAssignment.Symbol);
         output.Write($"storew {result}, {reg}");
@@ -290,9 +280,7 @@ public class QbeTarget : ITarget
             case AddressOfExpression address:
                 {
                     if (address.Expr is not Variable var)
-                    {
                         throw new ParserException("Address-of operator only supported for variables.");
-                    }
 
                     return GetMemoryRegister(var.Symbol);
                 }
@@ -300,9 +288,7 @@ public class QbeTarget : ITarget
             case PointerDereferenceExpression pointerDereference:
                 {
                     if (pointerDereference.Expr is not Variable variable)
-                    {
                         throw new ParserException("Pointer dereference operator only supported for variables.");
-                    }
 
                     string addressReg = CreateTempRegister(variable.Symbol);
                     string memReg = GetMemoryRegister(variable.Symbol);
@@ -399,18 +385,14 @@ public class QbeTarget : ITarget
     public string GetRegister(Symbol symbol)
     {
         if (currentSsaRegisters.TryGetValue(symbol, out string? value))
-        {
             return value;
-        }
         throw new InvalidOperationException($"Variable '{symbol.Name}' has no current SSA register.");
     }
 
     public string CreateMemoryRegister(Symbol symbol)
     {
         if (memoryAllocations.ContainsKey(symbol.Name))
-        {
             throw new InvalidOperationException($"Variable '{symbol.Name}' is already registered.");
-        }
 
         string qbeReg = $"%{symbol.Name}_ptr";
         memoryAllocations[symbol.Name] = qbeReg;
@@ -420,9 +402,7 @@ public class QbeTarget : ITarget
     public string CreateGlobalMemoryRegister(Symbol symbol)
     {
         if (memoryAllocations.ContainsKey(symbol.Name))
-        {
             throw new InvalidOperationException($"Variable '{symbol.Name}' is already registered.");
-        }
 
         string qbeReg = $"${symbol.Name}";
         memoryAllocations.Add(symbol.Name, qbeReg);
@@ -433,20 +413,15 @@ public class QbeTarget : ITarget
     public string GetMemoryRegister(Symbol symbol)
     {
         if (!memoryAllocations.TryGetValue(symbol.Name, out string? value))
-        {
             throw new InvalidOperationException($"Variable '{symbol.Name}' has no current SSA register.");
-        }
 
         return value;
     }
 
-    public void Comment(string message)
-    {
-        output.Write($"# {message}");
-    }
-
     private static (string, string) GetOutputFile(string inputFile, string target)
     {
+        CreateOutputDirectories(inputFile, Target);
+
         string projectDirectory = Path.GetDirectoryName(inputFile)!;
         string sourceFileName = Path.GetFileNameWithoutExtension(inputFile);
         string objFile = Path.Combine(projectDirectory, "obj", target, sourceFileName);

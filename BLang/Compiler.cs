@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using BLang.Ast;
 using BLang.Exceptions;
-using BLang.Targets;
+using BLang.Targets.qbe;
 using BLang.Tokenizer;
 using BLang.Utility;
 
@@ -28,6 +28,12 @@ public static class Compiler
         catch (Exception e)
         {
             return Options.Verbose > 0 ? e.ToString() : e.Message;
+        }
+
+        if (Options.Ast)
+        {
+            string astFile = Path.ChangeExtension(file, "ast.json");
+            File.WriteAllText(astFile, unit.ToJson());
         }
 
         QbeTarget target = Options.Target switch

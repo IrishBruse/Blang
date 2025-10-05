@@ -1,111 +1,111 @@
 {
-    "FunctionDeclarations": [
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
         {
-            "Symbol": {
-                "Name": "main",
-                "Kind": 0
-            },
-            "Parameters": [],
-            "Body": [
-                {
-                    "_Type": "ExternalStatement",
-                    "Externals": [
-                        {
-                            "Name": "printf",
-                            "Kind": 0
-                        }
-                    ],
-                    "Range": {
-                        "Start": 15,
-                        "End": 28
-                    }
-                },
-                {
-                    "_Type": "IfStatement",
-                    "Condition": {
-                        "Operation": 20,
-                        "Left": {
-                            "_Type": "IntValue",
-                            "Value": 1,
-                            "Range": {
-                                "Start": 38,
-                                "End": 39
-                            }
-                        },
-                        "Right": {
-                            "_Type": "IntValue",
-                            "Value": 0,
-                            "Range": {
-                                "Start": 40,
-                                "End": 41
-                            }
-                        },
-                        "Range": {
-                            "Start": 38,
-                            "End": 41
-                        }
-                    },
-                    "Body": [
-                        {
-                            "_Type": "FunctionCall",
-                            "Symbol": {
-                                "Name": "printf",
-                                "Kind": 0
-                            },
-                            "Parameters": [
-                                {
-                                    "_Type": "StringValue",
-                                    "Value": "Fail\\n",
-                                    "Range": {
-                                        "Start": 66,
-                                        "End": 74
-                                    }
-                                }
-                            ],
-                            "Range": {
-                                "Start": 59,
-                                "End": 65
-                            }
-                        }
-                    ],
-                    "ElseBody": [
-                        {
-                            "_Type": "FunctionCall",
-                            "Symbol": {
-                                "Name": "printf",
-                                "Kind": 0
-                            },
-                            "Parameters": [
-                                {
-                                    "_Type": "StringValue",
-                                    "Value": "Pass\\n",
-                                    "Range": {
-                                        "Start": 117,
-                                        "End": 125
-                                    }
-                                }
-                            ],
-                            "Range": {
-                                "Start": 110,
-                                "End": 116
-                            }
-                        }
-                    ],
-                    "Range": {
-                        "Start": 34,
-                        "End": 134
-                    }
-                }
-            ],
-            "Range": {
-                "Start": 0,
-                "End": 137
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
             }
+          ],
+          "Range": {
+            "Start": 15,
+            "End": 28
+          }
+        },
+        {
+          "_Type": "IfStatement",
+          "Condition": {
+            "Operation": 20,
+            "Left": {
+              "_Type": "IntValue",
+              "Value": 1,
+              "Range": {
+                "Start": 38,
+                "End": 39
+              }
+            },
+            "Right": {
+              "_Type": "IntValue",
+              "Value": 0,
+              "Range": {
+                "Start": 40,
+                "End": 41
+              }
+            },
+            "Range": {
+              "Start": 38,
+              "End": 41
+            }
+          },
+          "Body": [
+            {
+              "_Type": "FunctionCall",
+              "Symbol": {
+                "Name": "printf",
+                "Kind": 0
+              },
+              "Parameters": [
+                {
+                  "_Type": "StringValue",
+                  "Value": "Fail\\n",
+                  "Range": {
+                    "Start": 66,
+                    "End": 74
+                  }
+                }
+              ],
+              "Range": {
+                "Start": 59,
+                "End": 65
+              }
+            }
+          ],
+          "ElseBody": [
+            {
+              "_Type": "FunctionCall",
+              "Symbol": {
+                "Name": "printf",
+                "Kind": 0
+              },
+              "Parameters": [
+                {
+                  "_Type": "StringValue",
+                  "Value": "Pass\\n",
+                  "Range": {
+                    "Start": 117,
+                    "End": 125
+                  }
+                }
+              ],
+              "Range": {
+                "Start": 110,
+                "End": 116
+              }
+            }
+          ],
+          "Range": {
+            "Start": 34,
+            "End": 134
+          }
         }
-    ],
-    "GlobalVariables": [],
-    "Range": {
+      ],
+      "Range": {
         "Start": 0,
         "End": 137
+      }
     }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 137
+  }
 }

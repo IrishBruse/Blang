@@ -1,5 +1,5 @@
 {
     "explorer.fileNesting.patterns": {
-        "*.b": "${capture}.ast,${capture}.out"
+        "*.b": "${capture}.ast.json,${capture}.out"
     }
 }

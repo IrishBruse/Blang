@@ -20,8 +20,6 @@ public class Tester
     {
         string[] tests = Directory.GetFiles(path, "*.b", SearchOption.AllDirectories);
 
-        Options.Ast = true;
-
         foreach (string testFile in tests)
         {
             RunTestFile(testFile);
@@ -49,14 +47,19 @@ public class Tester
 
         Result<CompileOutput> res = Compiler.Compile(testFile);
 
-        string astFile = Path.ChangeExtension(testFile, ".ast");
+        string astFile = Path.ChangeExtension(testFile, ".ast.json");
         string stdFile = Path.ChangeExtension(testFile, ".out");
+
+        if (testFile.StartsWith("Examples/", StringComparison.Ordinal))
+        {
+            folderType = "example";
+        }
 
         if (folderType == "ok")
         {
             CompileOutput output = res.Value;
 
-            Executable runOutput = Executable.Capture(output.Executable);
+            Executable runOutput = Executable.Run(output.Executable);
 
             StringBuilder stdOutput = new();
             _ = stdOutput.Append(runOutput.StdOut);
@@ -98,9 +101,13 @@ public class Tester
                 Log($"  {stdIcon} {stdFile}");
             }
         }
+        else if (folderType == "example")
+        {
+            // Skip
+        }
         else
         {
-            Console.WriteLine("Unknown folderType");
+            Console.WriteLine("Unknown folderType " + folderType);
         }
     }
 
@@ -115,50 +122,63 @@ public class Tester
 
         string error = "";
 
-        if (folderType == "ok")
+        if (testFile.Contains("Examples/"))
         {
-            CompileOutput output = res.Value;
+            folderType = "example";
+        }
 
-            string astJson = output!.CompilationUnit.ToJson();
-
-            Executable runOutput = Executable.Capture(output.Executable);
-
-            if (runOutput.ExitCode != 0)
+        if (folderType == "ok" || folderType == "example")
+        {
+            if (!res.IsSuccess)
             {
-                error += $"ExitCode: {runOutput.ExitCode}\n";
-                error += "\n";
+                error = res.Error;
             }
-
-            if (!astJson.Equals(astOutput, StringComparison.Ordinal))
+            else
             {
-                (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, astJson);
+                CompileOutput output = res.Value;
 
-                error += $"""
-                {Path.ChangeExtension(testFile, ".ast")}:{line}
+                string astJson = output!.CompilationUnit.ToJson();
+
+                Executable runOutput = Executable.Run(output.Executable);
+
+                if (runOutput.ExitCode != 0)
+                {
+                    error += $"ExitCode: {runOutput.ExitCode}\n";
+                    error += "\n";
+                }
+
+                if (folderType != "example")
+                {
+                    if (!astJson.Equals(astOutput, StringComparison.Ordinal))
+                    {
+                        (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, astJson);
+
+                        error += $"""
+                {Path.ChangeExtension(testFile, ".ast.json")}:{line}
                 Expected Ast:
                 {line1}
                 Recieved:
                 {line2}
+
                 """.Trim();
+                        error += "\n";
+                    }
 
-                error += "\n";
-                error += "\n";
-            }
+                    if (!stdOutput.Equals(runOutput.StdOut, StringComparison.Ordinal))
+                    {
+                        (int line, string? line1, string? line2) = FindFirstDifferentLine(stdOutput, runOutput.StdOut!);
 
-            if (!stdOutput.Equals(runOutput.StdOut, StringComparison.Ordinal))
-            {
-                (int line, string? line1, string? line2) = FindFirstDifferentLine(stdOutput, runOutput.StdOut!);
-
-                error += $"""
+                        error += $"""
                 {Path.ChangeExtension(testFile, ".out")}:{line}
                 Expected Output:
                 {line1}
                 Recieved:
                 {line2}
-                """.Trim();
 
-                error += "\n";
-                error += "\n";
+                """.Trim();
+                        error += "\n";
+                    }
+                }
             }
         }
         else if (folderType == "error")
@@ -170,6 +190,11 @@ public class Tester
                 error += $"CompileError: {compileError}\n";
             }
         }
+        else
+        {
+
+            Console.WriteLine("Unkown folderType " + folderType);
+        }
 
         string time = Gray($"({ms}ms)");
         string icon = error == string.Empty ? Green(IconPass) : Red(IconFail);
@@ -179,7 +204,7 @@ public class Tester
 
     private static (string astOutput, string stdOutput) LoadTestContent(string testFile)
     {
-        string astFile = Path.ChangeExtension(testFile, ".ast");
+        string astFile = Path.ChangeExtension(testFile, ".ast.json");
         string stdFile = Path.ChangeExtension(testFile, ".out");
 
         string astOutput = File.Exists(astFile) ? File.ReadAllText(astFile) : "";

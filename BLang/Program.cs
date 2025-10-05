@@ -163,7 +163,11 @@ public class Program
         }
         else
         {
+            Options.Ast = true;
             Tester.Test("Tests/");
+
+            Options.Ast = false;
+            Tester.Test("Examples/");
         }
 
         return 0;

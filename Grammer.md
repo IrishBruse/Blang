@@ -11,7 +11,6 @@
 
 ## Lexical Conventions
 
--   **Comments**: Delimited by `/*` and `*/`, as in PL/I.
 -   **Identifiers (`name`)**: Start with an `<alpha>` character and can be followed by up to seven `<alpha_digit>` characters (for a total maximum length of 8).
 -   **Keywords**: All keywords (`auto`, `extrn`, `if`, `else`, etc.) are reserved and must be in lowercase.
 -   **Character Set**: The B language uses the ANSCII character set.

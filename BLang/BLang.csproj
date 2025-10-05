@@ -8,6 +8,7 @@
         <AssemblyName>bc</AssemblyName>
 
         <PublishAot>true</PublishAot>
+        <DisableDynamicCode>true</DisableDynamicCode>
     </PropertyGroup>
 
     <ItemGroup>

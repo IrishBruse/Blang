@@ -1,8 +1,8 @@
-namespace BLang.Targets;
+namespace BLang.Targets.qbe;
 
 using System.Text;
 
-public class QbeOutput
+public partial class QbeOutput
 {
     public virtual int Indention { get; } = 4;
 
@@ -26,9 +26,24 @@ public class QbeOutput
         _ = Text.Append(value);
     }
 
-    public void Write(string? value = "")
+    public void Label(string value)
     {
-        _ = string.IsNullOrEmpty(value) ? Text.AppendLine() : Text.AppendLine(Space + value);
+        _ = Text.AppendLine(Space + "@" + value);
+    }
+
+    public void Write(string value)
+    {
+        _ = Text.AppendLine(Space + value);
+    }
+
+    public void WriteLine()
+    {
+        _ = Text.AppendLine();
+    }
+
+    public void Comment(params string[] message)
+    {
+        _ = Text.AppendLine(Space + "# " + string.Join(' ', message));
     }
 
     public void Clear()

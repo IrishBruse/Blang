@@ -30,7 +30,7 @@ public partial class Parser(CompilerContext data)
     private CompilationUnit ParseTopLevel()
     {
         List<FunctionDecleration> functions = [];
-        List<VariableDecleration> globals = [];
+        List<VariableDeclaration> globals = [];
 
         SourceRange start = previousTokenRange;
 
@@ -56,7 +56,7 @@ public partial class Parser(CompilerContext data)
             {
                 Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
                 Token number = Eat(TokenType.IntegerLiteral);
-                globals.Add(new(symbol, number.ToInteger()));
+                globals.Add(new(symbol, new IntValue(number.ToInteger())));
                 _ = Eat(TokenType.Semicolon);
             }
             else

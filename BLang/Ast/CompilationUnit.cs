@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using BLang.Ast.Nodes;
 
-public record CompilationUnit(FunctionDecleration[] FunctionDeclarations, VariableDecleration[] GlobalVariables) : AstNode
+public record CompilationUnit(FunctionDecleration[] FunctionDeclarations, VariableDeclaration[] GlobalVariables) : AstNode
 {
     public string ToJson()
     {

@@ -2,10 +2,22 @@ namespace BLang.Utility;
 
 using System;
 using System.Diagnostics;
+using System.Text;
 
 public record Executable(string? StdOut, string? StdError, int ExitCode)
 {
-    public static Executable Capture(string executable, string arguments = "")
+    /// <summary>
+    /// Returns true when ExitCode is 0
+    /// </summary>
+    public bool Success
+    {
+        get
+        {
+            return ExitCode == 0;
+        }
+    }
+
+    public static Executable Run(string executable, string arguments = "")
     {
         if (Options.Verbose > 1) Info($"{executable} {arguments}", "CMD");
 
@@ -24,18 +36,29 @@ public record Executable(string? StdOut, string? StdError, int ExitCode)
         }
     }
 
-    public static bool Run(string executable, string arguments = "")
+    public Executable PipeErrorTo(StringBuilder target)
     {
-        Executable exe = Capture(executable, arguments);
-        if (!exe.Success())
+        _ = target.Clear();
+        if (StdError != null)
         {
-            return false;
+            _ = target.Append(StdError.Trim());
         }
-        return true;
+
+        return this;
     }
 
-    public bool Success()
+    public Executable PipeOutputTo(StringBuilder target)
     {
-        return ExitCode == 0;
+        if (StdOut != null)
+        {
+            _ = target.Append(StdOut);
+        }
+
+        return this;
+    }
+
+    public Executable PipeTo(StringBuilder target)
+    {
+        return PipeErrorTo(target).PipeOutputTo(target);
     }
 }
