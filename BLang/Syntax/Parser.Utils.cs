@@ -1,7 +1,7 @@
 namespace BLang.Ast;
 
 using System;
-
+using System.Diagnostics;
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;
@@ -36,6 +36,7 @@ public partial class Parser
         return token!;
     }
 
+    [StackTraceHidden]
     private Token Eat(TokenType type)
     {
         Token token = Next();
@@ -103,11 +104,23 @@ public partial class Parser
         };
     }
 
-    private IntValue ParseInteger()
+    private IntValue ParseInteger(TokenType? prefix = null)
     {
+        if (prefix != null)
+        {
+            _ = Next();
+        }
+
         Token integer = Eat(TokenType.IntegerLiteral);
 
-        if (!int.TryParse(integer.Content, out int number))
+        string numberText = integer.Content;
+
+        if (prefix == TokenType.Subtraction)
+        {
+            numberText = "-" + numberText;
+        }
+
+        if (!int.TryParse(numberText, out int number))
         {
             string loc = data.GetFileLocation(integer.Range.Start);
             throw new ParserException($"{loc} {integer} larger than 32bits");

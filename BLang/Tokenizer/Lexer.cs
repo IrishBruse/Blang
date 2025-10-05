@@ -39,7 +39,7 @@ public class Lexer(CompilerContext data)
             {
                 yield return LexIdentifier(c);
             }
-            else if (char.IsNumber(c) || ((c == '-' || c == '+') && char.IsNumber(Peek())))
+            else if (char.IsNumber(c))
             {
                 yield return LexNumber(c);
             }
@@ -289,7 +289,7 @@ public class Lexer(CompilerContext data)
     {
         StringBuilder number = new(c.ToString());
 
-        while (char.IsDigit(Peek()))
+        while (char.IsNumber(Peek()))
         {
             c = Next();
             _ = number.Append(c);
