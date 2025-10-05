@@ -18,11 +18,7 @@ public partial class Parser(CompilerContext data)
     {
         this.tokens = tokens;
 
-        _ = tokens.MoveNext();
-        if (Options.Tokens)
-        {
-            Console.WriteLine(tokens.Current);
-        }
+        _ = Next();
 
         return ParseTopLevel();
     }
@@ -48,21 +44,15 @@ public partial class Parser(CompilerContext data)
             }
             else if (Peek(TokenType.Semicolon))
             {
-                Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
-                globals.Add(new(symbol, null));
-                _ = Eat(TokenType.Semicolon);
+                globals.Add(ParseGlobalVariableDecleration(identifier));
             }
             else if (Peek(TokenType.IntegerLiteral))
             {
-                Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
-                Token number = Eat(TokenType.IntegerLiteral);
-                globals.Add(new(symbol, new IntValue(number.ToInteger())));
-                _ = Eat(TokenType.Semicolon);
+                globals.Add(ParseGlobalVariableDeclerationInitalizer(identifier));
             }
             else
             {
-                _ = Next();
-                break;
+                throw new NotImplementedException("Unexpected top level token of type " + Peek());
             }
 
             EatComments();
@@ -72,6 +62,23 @@ public partial class Parser(CompilerContext data)
         {
             Range = start.Merge(previousTokenRange)
         };
+    }
+
+    private VariableDeclaration ParseGlobalVariableDecleration(Token identifier)
+    {
+        Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
+        _ = Eat(TokenType.Semicolon);
+
+        return new(symbol, null);
+    }
+
+    private VariableDeclaration ParseGlobalVariableDeclerationInitalizer(Token identifier)
+    {
+        Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
+        Token number = Eat(TokenType.IntegerLiteral);
+        _ = Eat(TokenType.Semicolon);
+
+        return new(symbol, new IntValue(number.ToInteger()));
     }
 
     private FunctionDecleration ParseFunctionDecleration(Token identifier)

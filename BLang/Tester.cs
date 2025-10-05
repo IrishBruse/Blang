@@ -16,17 +16,17 @@ public class Tester
     private const char IconUpdated = 'u';
     private const char IconSame = '~';
 
-    public static void Test(string path)
+    public static void TestDirectory(string path)
     {
         string[] tests = Directory.GetFiles(path, "*.b", SearchOption.AllDirectories);
 
         foreach (string testFile in tests)
         {
-            RunTestFile(testFile);
+            TestFile(testFile);
         }
     }
 
-    public static void RunTestFile(string testFile)
+    public static void TestFile(string testFile)
     {
         if (Options.UpdateSnapshots)
         {
@@ -57,6 +57,13 @@ public class Tester
 
         if (folderType == "ok")
         {
+            if (!res.IsSuccess)
+            {
+                Log($"{Red(IconFail)} {testFile}");
+                Error(res.Error);
+                return;
+            }
+
             CompileOutput output = res.Value;
 
             Executable runOutput = Executable.Run(output.Executable);
@@ -86,6 +93,13 @@ public class Tester
         }
         else if (folderType == "error")
         {
+            if (res.IsSuccess)
+            {
+                Log($"{Red(IconFail)} {testFile}");
+                Error("Test did not produce a compile error as expected");
+                return;
+            }
+
             string error = res.Error;
 
             if (error.Length > 0) File.WriteAllText(stdFile, error.ToString());
@@ -103,7 +117,7 @@ public class Tester
         }
         else if (folderType == "example")
         {
-            // Skip
+            Log($"{Gray(IconSame)} {testFile}");
         }
         else
         {

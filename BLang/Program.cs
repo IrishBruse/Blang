@@ -1,5 +1,6 @@
 namespace BLang;
 
+using System;
 using System.CommandLine;
 using System.Diagnostics;
 using BLang.Utility;
@@ -159,15 +160,17 @@ public class Program
 
         if (file != null && file != "")
         {
-            Tester.RunTestFile(file);
+            Tester.TestFile(file);
         }
         else
         {
-            Options.Ast = true;
-            Tester.Test("Tests/");
-
             Options.Ast = false;
-            Tester.Test("Examples/");
+            Tester.TestDirectory("Examples/");
+
+            Console.WriteLine();
+
+            Options.Ast = true;
+            Tester.TestDirectory("Tests/");
         }
 
         return 0;

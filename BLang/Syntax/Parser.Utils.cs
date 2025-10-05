@@ -22,7 +22,10 @@ public partial class Parser
     private Token Next()
     {
         Token token = tokens.Current;
-        previousTokenRange = token.Range;
+        if (token != null)
+        {
+            previousTokenRange = token.Range;
+        }
 
         _ = tokens.MoveNext();
         if (Options.Tokens)
@@ -30,7 +33,7 @@ public partial class Parser
             Console.WriteLine(tokens.Current);
         }
 
-        return token;
+        return token!;
     }
 
     private Token Eat(TokenType type)

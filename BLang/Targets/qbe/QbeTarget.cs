@@ -46,10 +46,10 @@ public class QbeTarget : ITarget
         Executable exe;
 
         exe = Executable.Run("qbe", $"{objFile}.ssa -o {objFile}.s").PipeErrorTo(stdError);
-        if (!exe.Success) return "Failed to compile qbe ir to assembly\n" + stdError.ToString();
+        if (!exe.Success) return $"Failed to compile \"{objFile}.ssa\" to assembly\n" + stdError.ToString();
 
         exe = Executable.Run("gcc", $"{objFile}.s -o {binFile}").PipeErrorTo(stdError);
-        if (!exe.Success) return "Failed to compile assembly using gcc\n" + stdError.ToString();
+        if (!exe.Success) return $"Failed to compile \"{objFile}.s\" using gcc generated from \"{objFile}.ssa\"\n" + stdError.ToString();
 
         return new CompileOutput(file, binFile, unit);
     }
