@@ -52,7 +52,7 @@ public partial class Parser(CompilerContext data)
             }
             else
             {
-                throw new NotImplementedException("Unexpected top level token of type " + Peek());
+                throw new ParserException(data.GetFileLocation(previousTokenRange.End) + " Unexpected top level token of type " + Peek());
             }
 
             EatComments();

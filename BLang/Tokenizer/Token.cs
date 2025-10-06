@@ -20,7 +20,6 @@ public record Token(TokenType TokenType, string Content, SourceRange Range)
     }
 }
 
-
 public enum TokenType
 {
     // Misc
@@ -58,7 +57,7 @@ public enum TokenType
     Comma,
 
     // Arithmetic
-    Addition,
+    Addition = 15,
     Subtraction,
     Multiplication,
     Division,
@@ -77,13 +76,6 @@ public enum TokenType
     LogicalOr,
     LogicalNot,
 
-    // Assignment
-    Assignment,
-    AdditionAssignment,
-    SubtractionAssignment,
-    MultiplicationAssignment,
-    DivisionAssignment,
-    ModuloAssignment,
 
     /// <summary> ++ </summary>
     Increment,
@@ -98,6 +90,15 @@ public enum TokenType
     BitwiseShiftLeft,
     BitwiseShiftRight,
 
+
+    // Assignment
+    Assignment,
+    AdditionAssignment,
+    SubtractionAssignment,
+    MultiplicationAssignment,
+    DivisionAssignment,
+    ModuloAssignment,
+
     Semicolon,
 
     // Keywords
@@ -111,12 +112,47 @@ public enum TokenType
     CaseKeyword,
     BreakKeyword,
 
-    // Alias
+    ArrayIndexing = 52,
 
-    // Pointers
+    // Alias
     AddressOf = BitwiseAnd,
     PointerDereference = Multiplication,
-    ArrayIndexing = 52,
+}
+
+public enum BinaryOperator
+{
+    // Arithmetic
+    Addition = 15,
+    Subtraction,
+    Multiplication,
+    Division,
+    Modulo,
+
+    // Relational
+    LessThan,
+    GreaterThan,
+    LessThanEqual,
+    GreaterThanEqual,
+    EqualEqual,
+    NotEqual,
+
+    // Logical
+    LogicalAnd,
+    LogicalOr,
+    LogicalNot,
+
+    // Inline increment and decrement
+    Increment,
+    Decrement,
+
+    // Bitwise
+    BitwiseComplement,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXOr,
+    BitwiseShiftLeft,
+    BitwiseShiftRight,
+
 }
 
 public static class Extensions

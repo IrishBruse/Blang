@@ -17,21 +17,16 @@ public class QbeTarget : ITarget
     private readonly Dictionary<string, string> strings = [];
     private readonly HashSet<Symbol> externs = [];
 
-    private readonly Dictionary<Symbol, string> currentSsaRegisters = [];
     private readonly Dictionary<string, string> memoryAllocations = [];
-    private readonly Dictionary<Symbol, int> ssaVersionCounters = [];
 
     private int conditionIndex;
-    private QbeOutput output = new();
-    private CompilerContext? data;
+    private QbeOutput qbe = new();
 
     public Result<CompileOutput> Emit(CompilationUnit unit, CompilerContext data)
     {
-        this.data = data;
+        _ = data;
 
-        output.Clear();
-        currentSsaRegisters.Clear();
-        ssaVersionCounters.Clear();
+        qbe.Clear();
         memoryAllocations.Clear();
 
         string file = data.File;
@@ -39,17 +34,17 @@ public class QbeTarget : ITarget
         (string objFile, string binFile) = GetOutputFile(file, Target);
 
         VisitCompilationUnit(unit);
-        string qbeIR = output.Text.ToString();
+        string qbeIR = qbe.Text.ToString();
         File.WriteAllText(objFile + ".ssa", qbeIR);
 
         StringBuilder stdError = new();
         Executable exe;
 
         exe = Executable.Run("qbe", $"{objFile}.ssa -o {objFile}.s").PipeErrorTo(stdError);
-        if (!exe.Success) return $"Failed to compile \"{objFile}.ssa\" to assembly\n" + stdError.ToString();
+        if (!exe.Success) return $"Failed to compile \"{objFile}.ssa\" to assembly\n" + stdError.ToString().Replace("qbe:", "");
 
         exe = Executable.Run("gcc", $"{objFile}.s -o {binFile}").PipeErrorTo(stdError);
-        if (!exe.Success) return $"Failed to compile \"{objFile}.s\" using gcc generated from \"{objFile}.ssa\"\n" + stdError.ToString();
+        if (!exe.Success) return $"Failed to compile \"{objFile}.s\" using gcc generated from \"{objFile}.ssa\"\n" + stdError.ToString().Replace("qbe:", "");
 
         return new CompileOutput(file, binFile, unit);
     }
@@ -58,11 +53,11 @@ public class QbeTarget : ITarget
     {
         foreach (VariableDeclaration variable in node.GlobalVariables)
         {
-            output.Comment(variable.Symbol.Name);
+            qbe.Comment(variable.Symbol.Name);
             _ = CreateGlobalMemoryRegister(variable.Symbol);
             string value = variable.Value == null ? "w 0" : "w " + (variable.Value as IntValue)!.Value;
-            output.Write($"data ${variable.Symbol.Name} = {{ {value} }}");
-            output.WriteLine();
+            qbe.Write($"data ${variable.Symbol.Name} = {{ {value} }}");
+            qbe.WriteLine();
         }
 
         foreach (FunctionDecleration funcDecl in node.FunctionDeclarations)
@@ -71,25 +66,25 @@ public class QbeTarget : ITarget
         }
 
         GenerateDataSection();
-        output.WriteLine();
+        qbe.WriteLine();
         GenerateExternsSection();
     }
 
     private void GenerateDataSection()
     {
-        output.Comment("Data");
+        qbe.Comment("Data");
         foreach ((string value, string name) in strings)
         {
-            output.Write($"data ${name} = {{ b \"{value}\", b 0 }}");
+            qbe.Data(name, value);
         }
     }
 
     private void GenerateExternsSection()
     {
-        output.Comment("Externs");
+        qbe.Comment("Externs");
         foreach (Symbol external in externs)
         {
-            output.Comment($"* {external.Name}");
+            qbe.Comment($"- {external.Name}");
         }
     }
 
@@ -109,14 +104,12 @@ public class QbeTarget : ITarget
 
     private void BeginScope()
     {
-        output.Write("{");
-        output.Indent();
+        qbe.BeginScope();
     }
 
     private void EndScope()
     {
-        output.Dedent();
-        output.Write("}");
+        qbe.EndScope();
     }
 
     // Statements
@@ -127,20 +120,22 @@ public class QbeTarget : ITarget
 
         if (name == "main")
         {
-            output.Write($"export function w ${name}()");
+            qbe.ExportFunction(name);
         }
         else
         {
-            output.Write($"function w ${name}()");
+            qbe.Function(name);
         }
 
         BeginScope();
-        output.WriteRaw("@start\n");
-        EmitBody(node.Body);
-        output.Write(name == "main" ? "ret 0" : "ret");
+        {
+            qbe.WriteRaw("@start\n");
+            EmitBody(node.Body);
+            qbe.Ret(name == "main" ? 0 : null);
+        }
         EndScope();
 
-        output.WriteLine();
+        qbe.WriteLine();
     }
 
     private void EmitBody(Statement[] body)
@@ -163,40 +158,40 @@ public class QbeTarget : ITarget
     {
         // Comment("while " + node.Condition);
         string labelPrefix = $"@while_{++conditionIndex}_";
-        output.Write($"{labelPrefix}start");
+        qbe.Write($"{labelPrefix}start");
         string reg = GenerateBinaryExpressionIR(node.Condition, new("while_condition", SymbolKind.Load));
-        output.Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}end");
-        output.Write($"{labelPrefix}body");
-        output.Indent();
+        qbe.Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}end");
+        qbe.Write($"{labelPrefix}body");
+        qbe.Indent();
         {
             EmitBody(node.Body);
-            output.Write($"jmp {labelPrefix}start");
+            qbe.Write($"jmp {labelPrefix}start");
         }
-        output.Dedent();
-        output.Write($"{labelPrefix}end");
+        qbe.Unindent();
+        qbe.Write($"{labelPrefix}end");
     }
 
     public void VisitIfStatement(IfStatement node)
     {
-        output.Comment("if " + node.Condition);
+        qbe.Comment("if " + node.Condition);
         string labelPrefix = $"@if_{++conditionIndex}_";
-        output.Write($"{labelPrefix}start");
+        qbe.Write($"{labelPrefix}start");
         string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + conditionIndex, SymbolKind.Load));
         string labelSuffix = node.ElseBody == null ? "end" : "else";
-        output.Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}{labelSuffix}");
-        output.Write($"{labelPrefix}body");
-        output.Indent();
+        qbe.Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}{labelSuffix}");
+        qbe.Write($"{labelPrefix}body");
+        qbe.Indent();
         {
             EmitBody(node.Body);
             if (node.ElseBody != null)
             {
-                output.Write($"jmp {labelPrefix}end");
-                output.Write($"{labelPrefix}else");
+                qbe.Write($"jmp {labelPrefix}end");
+                qbe.Write($"{labelPrefix}else");
                 EmitBody(node.ElseBody);
             }
         }
-        output.Dedent();
-        output.Write($"{labelPrefix}end");
+        qbe.Unindent();
+        qbe.Write($"{labelPrefix}end");
     }
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
@@ -204,18 +199,19 @@ public class QbeTarget : ITarget
         foreach (Symbol variable in autoDeclaration.Variables)
         {
             string varName = CreateMemoryRegister(variable);
-            output.Comment($"auto {variable}");
-            output.Write($"{varName} =l alloc4 4");
-            output.Storew(0, varName);
+            qbe.Comment($"auto {variable}");
+            qbe.Write($"{varName} =l alloc4 4");
+            qbe.Storew(0, varName);
         }
     }
 
     public void VisitFunctionCall(FunctionCall node)
     {
-        output.Write($"# call {node.Symbol.Name}");
+        qbe.Comment("call", node.Symbol.Name);
 
         string parameters = PassParameterValue(node.Parameters);
-        output.Write($"call ${node.Symbol}({parameters})");
+        qbe.Call(node.Symbol.ToString(), parameters);
+        // qbe.Write($"call ${node.Symbol}({parameters})");
     }
 
     private string PassParameterValue(Expression[] parameters)
@@ -236,8 +232,8 @@ public class QbeTarget : ITarget
                     break;
 
                 case Variable v:
-                    reg = CreateTempRegister(v.Symbol);
-                    output.Write($"{reg} =w loadw {GetMemoryRegister(v.Symbol)}");
+                    reg = qbe.CreateTempRegister(v.Symbol);
+                    qbe.Write($"{reg} =w loadw {GetMemoryRegister(v.Symbol)}");
                     registers.Add($"w {reg}");
                     break;
 
@@ -252,10 +248,10 @@ public class QbeTarget : ITarget
     {
         Expression value = variableAssignment.Value!;// TODO: null
 
-        output.Write($"# {variableAssignment.Symbol} = ");
+        qbe.Comment($"{variableAssignment.Symbol} = {value}");
         string result = GenerateBinaryExpressionIR(value, variableAssignment.Symbol);
         string reg = GetMemoryRegister(variableAssignment.Symbol);
-        output.Write($"storew {result}, {reg}");
+        qbe.Storew(result, reg);
     }
 
     // Expression
@@ -266,9 +262,9 @@ public class QbeTarget : ITarget
         {
             case Variable variable:
                 {
-                    string loadReg = CreateTempRegister(variable.Symbol);
+                    string loadReg = qbe.CreateTempRegister(variable.Symbol);
                     string memReg = GetMemoryRegister(variable.Symbol);
-                    output.Write($"{loadReg} =w loadw {memReg}");
+                    qbe.Write($"{loadReg} =w loadw {memReg}");
                     return loadReg;
                 }
 
@@ -280,7 +276,9 @@ public class QbeTarget : ITarget
             case AddressOfExpression address:
                 {
                     if (address.Expr is not Variable var)
+                    {
                         throw new ParserException("Address-of operator only supported for variables.");
+                    }
 
                     return GetMemoryRegister(var.Symbol);
                 }
@@ -288,15 +286,16 @@ public class QbeTarget : ITarget
             case PointerDereferenceExpression pointerDereference:
                 {
                     if (pointerDereference.Expr is not Variable variable)
+                    {
                         throw new ParserException("Pointer dereference operator only supported for variables.");
+                    }
 
-                    string addressReg = CreateTempRegister(variable.Symbol);
                     string memReg = GetMemoryRegister(variable.Symbol);
-                    output.Write($"{addressReg} =l loadw {memReg}");
+                    string addressReg = qbe.GetTempReg();
+                    qbe.Write($"{addressReg} =l loadw {memReg}");
 
-                    output.Write($"# test");
-                    string loadReg = NewTempReg();
-                    output.Write($"{loadReg} =w loadw {addressReg}");
+                    string loadReg = qbe.GetTempReg();
+                    qbe.Write($"{loadReg} =w loadw {addressReg}");
                     return loadReg;
                 }
 
@@ -305,42 +304,35 @@ public class QbeTarget : ITarget
                     string leftOp = GenerateBinaryExpressionIR(binary.Left, targetSymbol);
                     string rightOp = GenerateBinaryExpressionIR(binary.Right, targetSymbol);
 
-                    string reg = CreateTempRegister(targetSymbol);
-#pragma warning disable IDE0010
-                    switch (binary.Operation)
-#pragma warning restore IDE0010
+                    BinaryOperator binOperator = (BinaryOperator)binary.Operation;
+                    return binOperator switch
                     {
-                        case TokenType.Addition:
-                            output.Write($"{reg} =w add {leftOp}, {rightOp}");
-                            break;
+                        BinaryOperator.Addition => qbe.Add(leftOp, rightOp),
+                        BinaryOperator.BitwiseOr => qbe.Or(leftOp, rightOp),
+                        BinaryOperator.EqualEqual => qbe.Ceqw(leftOp, rightOp),
+                        BinaryOperator.LessThan => qbe.Csltw(leftOp, rightOp),
+                        BinaryOperator.LessThanEqual => qbe.Cslew(leftOp, rightOp),
+                        BinaryOperator.Modulo => qbe.Rem(leftOp, rightOp),
+                        BinaryOperator.Multiplication => qbe.Mul(leftOp, rightOp),
 
-                        case TokenType.Multiplication:
-                            output.Write($"{reg} =w mul {leftOp}, {rightOp}");
-                            break;
+                        BinaryOperator.Subtraction => throw new NotImplementedException(),
+                        BinaryOperator.Division => throw new NotImplementedException(),
+                        BinaryOperator.GreaterThan => throw new NotImplementedException(),
+                        BinaryOperator.GreaterThanEqual => throw new NotImplementedException(),
+                        BinaryOperator.NotEqual => throw new NotImplementedException(),
+                        BinaryOperator.LogicalAnd => throw new NotImplementedException(),
+                        BinaryOperator.LogicalOr => throw new NotImplementedException(),
+                        BinaryOperator.LogicalNot => throw new NotImplementedException(),
+                        BinaryOperator.Increment => throw new NotImplementedException(),
+                        BinaryOperator.Decrement => throw new NotImplementedException(),
+                        BinaryOperator.BitwiseComplement => throw new NotImplementedException(),
+                        BinaryOperator.BitwiseAnd => throw new NotImplementedException(),
+                        BinaryOperator.BitwiseXOr => throw new NotImplementedException(),
+                        BinaryOperator.BitwiseShiftLeft => throw new NotImplementedException(),
+                        BinaryOperator.BitwiseShiftRight => throw new NotImplementedException(),
 
-                        case TokenType.LessThan:
-                            output.Write($"{reg} =w csltw {leftOp}, {rightOp}");
-                            break;
-
-                        case TokenType.LessThanEqual:
-                            output.Write($"{reg} =w cslew {leftOp}, {rightOp}");
-                            break;
-
-                        case TokenType.Modulo:
-                            output.Write($"{reg} =w rem {leftOp}, {rightOp}");
-                            break;
-
-                        case TokenType.EqualEqual:
-                            output.Write($"{reg} =w ceqw {leftOp}, {rightOp}");
-                            break;
-
-                        case TokenType.BitwiseOr:
-                            output.Write($"{reg} =w or {leftOp}, {rightOp}");
-                            break;
-
-                        default: throw new ParserException("Unknown operator " + binary.Operation);
-                    }
-                    return reg;
+                        _ => throw new ParserException("Unknown operator " + binary.Operation),
+                    };
                 }
 
             default: throw new ParserException("Unknown expression type " + expr);
@@ -365,34 +357,12 @@ public class QbeTarget : ITarget
 
     // Utility
 
-    public string CreateTempRegister(Symbol symbol)
-    {
-        ssaVersionCounters[symbol] = !ssaVersionCounters.TryGetValue(symbol, out int value) ? 0 : ++value;
-
-        string qbeReg = $"%{symbol.Name}_{ssaVersionCounters[symbol]}";
-        currentSsaRegisters[symbol] = qbeReg;
-        return qbeReg;
-    }
-
-    private int tempRegister;
-    public string NewTempReg()
-    {
-        string qbeReg = $"%temp_{tempRegister}";
-        tempRegister++;
-        return qbeReg;
-    }
-
-    public string GetRegister(Symbol symbol)
-    {
-        if (currentSsaRegisters.TryGetValue(symbol, out string? value))
-            return value;
-        throw new InvalidOperationException($"Variable '{symbol.Name}' has no current SSA register.");
-    }
-
     public string CreateMemoryRegister(Symbol symbol)
     {
         if (memoryAllocations.ContainsKey(symbol.Name))
+        {
             throw new InvalidOperationException($"Variable '{symbol.Name}' is already registered.");
+        }
 
         string qbeReg = $"%{symbol.Name}_ptr";
         memoryAllocations[symbol.Name] = qbeReg;
@@ -402,7 +372,9 @@ public class QbeTarget : ITarget
     public string CreateGlobalMemoryRegister(Symbol symbol)
     {
         if (memoryAllocations.ContainsKey(symbol.Name))
+        {
             throw new InvalidOperationException($"Variable '{symbol.Name}' is already registered.");
+        }
 
         string qbeReg = $"${symbol.Name}";
         memoryAllocations.Add(symbol.Name, qbeReg);
@@ -413,7 +385,9 @@ public class QbeTarget : ITarget
     public string GetMemoryRegister(Symbol symbol)
     {
         if (!memoryAllocations.TryGetValue(symbol.Name, out string? value))
+        {
             throw new InvalidOperationException($"Variable '{symbol.Name}' has no current SSA register.");
+        }
 
         return value;
     }
