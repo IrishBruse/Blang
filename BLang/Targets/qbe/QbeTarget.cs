@@ -197,12 +197,12 @@ public class QbeTarget : ITarget
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
     {
-        foreach (Symbol variable in autoDeclaration.Variables)
+        foreach (VariableAssignment variable in autoDeclaration.Variables)
         {
-            string varName = CreateMemoryRegister(variable);
+            string varName = CreateMemoryRegister(variable.Symbol);
             qbe.Comment($"auto {variable}");
             qbe.Write($"{varName} =l alloc4 4");
-            qbe.Storew(0, varName);
+            qbe.Storew(variable.Value, varName);
         }
     }
 

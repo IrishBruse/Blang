@@ -279,23 +279,54 @@ public partial class Parser(CompilerContext data)
         };
     }
 
+    // ('auto', Name, Constant?, (',', Name, Constant?)*, ';', Statement)
     private AutoStatement ParseAutoDefinition()
     {
-        Token start = Eat(TokenType.AutoKeyword);
+        List<VariableAssignment> variables = [];
+
+        // 'auto'
+        Token auto = Eat(TokenType.AutoKeyword);
+
+        // Name
         Token identifier = Eat(TokenType.Identifier);
 
-        List<Symbol> variables = [symbols.Add(identifier, SymbolKind.Define)];
+        int value = 0;
+        // Constant?
+        if (TryEat(TokenType.IntegerLiteral, out Token? token))
+        {
+            value = int.Parse(token!.Content);
+        }
+        Symbol sym = symbols.Add(identifier, SymbolKind.Define);
+        variables.Add(new(sym, value));
+
+        // (',', Name, Constant?)*
         while (Peek(TokenType.Comma))
         {
+            value = 0;
+
+            // ','
             _ = Eat(TokenType.Comma);
+
+            // Name
             identifier = Eat(TokenType.Identifier);
-            variables.Add(symbols.Add(identifier, SymbolKind.Define));
+
+            // Constant?
+            if (TryEat(TokenType.IntegerLiteral, out token))
+            {
+                value = int.Parse(token!.Content);
+            }
+
+            sym = symbols.Add(identifier, SymbolKind.Define);
+            variables.Add(new(sym, value));
         }
+
+        // ';'
         _ = Eat(TokenType.Semicolon);
 
+        // Statement (handled by parent)
         return new AutoStatement(variables.ToArray())
         {
-            Range = start.Range.Merge(previousTokenRange),
+            Range = auto.Range.Merge(previousTokenRange),
         };
     }
 
