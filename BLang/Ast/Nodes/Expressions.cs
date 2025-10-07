@@ -43,7 +43,7 @@ public record Variable(Symbol Symbol) : Expression
     }
 }
 
-public record BinaryExpression(TokenType Operation, Expression Left, Expression Right) : Expression
+public record BinaryExpression(BinaryOperator Operation, Expression Left, Expression Right) : Expression
 {
     public override string ToString()
     {
@@ -57,9 +57,9 @@ public record BinaryExpression(TokenType Operation, Expression Left, Expression 
             number++;
         }
 
-        if (Operation != TokenType.None)
+        if (Operation != BinaryOperator.None)
         {
-            ret += Operation.ToCharString() + " ";
+            ret += Operation.ToString() + " ";
             number++;
         }
 

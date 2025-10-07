@@ -303,7 +303,7 @@ public class QbeTarget : ITarget
                     string leftOp = GenerateBinaryExpressionIR(binary.Left, targetSymbol);
                     string rightOp = GenerateBinaryExpressionIR(binary.Right, targetSymbol);
 
-                    BinaryOperator binOperator = (BinaryOperator)binary.Operation;
+                    BinaryOperator binOperator = binary.Operation;
                     return binOperator switch
                     {
                         BinaryOperator.Addition => qbe.Add(leftOp, rightOp),
@@ -330,6 +330,8 @@ public class QbeTarget : ITarget
                         BinaryOperator.BitwiseShiftLeft => throw new NotImplementedException(),
                         BinaryOperator.BitwiseShiftRight => throw new NotImplementedException(),
 
+                        BinaryOperator.None => throw new NotImplementedException(),
+                        BinaryOperator.ArrayIndexing => throw new NotImplementedException(),
                         _ => throw new ParserException("Unknown operator " + binary.Operation),
                     };
                 }

@@ -469,7 +469,7 @@ public partial class Parser(CompilerContext data)
     {
         Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Assign);
 
-        Expression value = new BinaryExpression(TokenType.Addition, new Variable(symbol), shorthandValue);
+        Expression value = new BinaryExpression(BinaryOperator.Addition, new Variable(symbol), shorthandValue);
         _ = Eat(TokenType.Semicolon);
 
         return new VariableDeclaration(symbol, value)

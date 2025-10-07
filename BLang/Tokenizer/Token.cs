@@ -121,6 +121,8 @@ public enum TokenType
 
 public enum BinaryOperator
 {
+    None = 0,
+
     // Arithmetic
     Addition = 15,
     Subtraction,
@@ -153,6 +155,7 @@ public enum BinaryOperator
     BitwiseShiftLeft,
     BitwiseShiftRight,
 
+    ArrayIndexing = 52,
 }
 
 public static class Extensions
@@ -171,18 +174,13 @@ public static class Extensions
             TokenType.AutoKeyword;
     }
 
-    public static string ToCharString(this TokenType t)
+    public static string ToString(this TokenType t)
     {
         return t switch
         {
+
             TokenType.Semicolon => ";",
             TokenType.Comma => ",",
-
-            TokenType.Addition => "+",
-            TokenType.Subtraction => "-",
-            TokenType.Multiplication => "*",
-            TokenType.Division => "/",
-            TokenType.Modulo => "%",
 
             TokenType.OpenScope => "{",
             TokenType.CloseScope => "}",
@@ -193,49 +191,41 @@ public static class Extensions
             TokenType.OpenBracket => "[",
             TokenType.CloseBracket => "]",
 
-            TokenType.LessThan => "<",
-            TokenType.LessThanEqual => "<=",
-            TokenType.GreaterThan => ">",
-            TokenType.GreaterThanEqual => ">=",
-            TokenType.EqualEqual => "==",
-            TokenType.NotEqual => "!=",
+            _ => ((BinaryOperator)t).ToString(),
+        };
+    }
 
-            TokenType.BitwiseOr => "|",
-            TokenType.Eof => throw new System.NotImplementedException(),
-            TokenType.Garbage => throw new System.NotImplementedException(),
-            TokenType.None => throw new System.NotImplementedException(),
-            TokenType.Comment => throw new System.NotImplementedException(),
-            TokenType.Identifier => throw new System.NotImplementedException(),
-            TokenType.IntegerLiteral => throw new System.NotImplementedException(),
-            TokenType.FloatLiteral => throw new System.NotImplementedException(),
-            TokenType.StringLiteral => throw new System.NotImplementedException(),
-            TokenType.CharLiteral => throw new System.NotImplementedException(),
-            TokenType.Dot => throw new System.NotImplementedException(),
-            TokenType.LogicalAnd => throw new System.NotImplementedException(),
-            TokenType.LogicalOr => throw new System.NotImplementedException(),
-            TokenType.LogicalNot => throw new System.NotImplementedException(),
-            TokenType.Assignment => throw new System.NotImplementedException(),
-            TokenType.AdditionAssignment => throw new System.NotImplementedException(),
-            TokenType.SubtractionAssignment => throw new System.NotImplementedException(),
-            TokenType.MultiplicationAssignment => throw new System.NotImplementedException(),
-            TokenType.DivisionAssignment => throw new System.NotImplementedException(),
-            TokenType.ModuloAssignment => throw new System.NotImplementedException(),
-            TokenType.Increment => throw new System.NotImplementedException(),
-            TokenType.Decrement => throw new System.NotImplementedException(),
-            TokenType.BitwiseComplement => throw new System.NotImplementedException(),
-            TokenType.BitwiseAnd => throw new System.NotImplementedException(),
-            TokenType.BitwiseXOr => throw new System.NotImplementedException(),
-            TokenType.BitwiseShiftLeft => throw new System.NotImplementedException(),
-            TokenType.BitwiseShiftRight => throw new System.NotImplementedException(),
-            TokenType.ExternKeyword => throw new System.NotImplementedException(),
-            TokenType.IfKeyword => throw new System.NotImplementedException(),
-            TokenType.ElseKeyword => throw new System.NotImplementedException(),
-            TokenType.WhileKeyword => throw new System.NotImplementedException(),
-            TokenType.AutoKeyword => throw new System.NotImplementedException(),
-            TokenType.SwitchKeyword => throw new System.NotImplementedException(),
-            TokenType.CaseKeyword => throw new System.NotImplementedException(),
-            TokenType.BreakKeyword => throw new System.NotImplementedException(),
-            TokenType.ArrayIndexing => throw new System.NotImplementedException(),
+    public static string ToString(this BinaryOperator t)
+    {
+        return t switch
+        {
+            BinaryOperator.None => "None",
+
+            BinaryOperator.Addition => "+",
+            BinaryOperator.Subtraction => "-",
+            BinaryOperator.Multiplication => "*",
+            BinaryOperator.Division => "/",
+            BinaryOperator.Modulo => "%",
+
+            BinaryOperator.LessThan => "<",
+            BinaryOperator.LessThanEqual => "<=",
+            BinaryOperator.GreaterThan => ">",
+            BinaryOperator.GreaterThanEqual => ">=",
+            BinaryOperator.EqualEqual => "==",
+            BinaryOperator.NotEqual => "!=",
+
+            BinaryOperator.BitwiseOr => "|",
+            BinaryOperator.LogicalAnd => "&",
+            BinaryOperator.LogicalOr => "||",
+            BinaryOperator.LogicalNot => "!",
+            BinaryOperator.Increment => "++",
+            BinaryOperator.Decrement => "--",
+            BinaryOperator.BitwiseComplement => throw new System.NotImplementedException(),
+            BinaryOperator.BitwiseAnd => throw new System.NotImplementedException(),
+            BinaryOperator.BitwiseXOr => throw new System.NotImplementedException(),
+            BinaryOperator.BitwiseShiftLeft => throw new System.NotImplementedException(),
+            BinaryOperator.BitwiseShiftRight => throw new System.NotImplementedException(),
+            BinaryOperator.ArrayIndexing => throw new System.NotImplementedException(),
             _ => throw new ParserException("Unhandled tokentype " + t),
         };
     }

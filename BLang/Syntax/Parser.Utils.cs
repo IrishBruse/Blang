@@ -89,7 +89,7 @@ public partial class Parser
 
             // Create a pointer dereference expression
             return new BinaryExpression(
-                    TokenType.ArrayIndexing,
+                    BinaryOperator.ArrayIndexing,
                     new Variable(symbol) { Range = variable.Range },
                     index
             )
