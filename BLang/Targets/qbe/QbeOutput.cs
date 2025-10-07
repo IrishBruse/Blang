@@ -1,5 +1,6 @@
 namespace BLang.Targets.qbe;
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using BLang.Utility;
@@ -32,12 +33,7 @@ public partial class QbeOutput()
     public void Write(string value)
     {
         _ = Text.AppendLine(Space + value);
-        // throw new NotImplementedException();
-    }
-
-    public void WriteGen(string value)
-    {
-        _ = Text.AppendLine(Space + value);
+        labelLast = false;
     }
 
     public void BeginScope()
@@ -59,7 +55,10 @@ public partial class QbeOutput()
 
     public void Comment(params string[] message)
     {
-        WriteLine();
+        if (!labelLast)
+        {
+            WriteLine();
+        }
         Write("# " + string.Join(' ', message));
     }
 
@@ -69,32 +68,59 @@ public partial class QbeOutput()
         Depth = 0;
     }
 
+    public static char ToChar(Size type)
+    {
+        return type switch
+        {
+            Size.W => 'w', // 32-bit integer
+            Size.L => 'l', // 64-bit integer
+            Size.S => 's', // 32-bit float
+            Size.D => 'd', // 64-bit float
+            _ => throw new ArgumentOutOfRangeException(nameof(type), $"Invalid QBE type: {type}")
+        };
+    }
+
     // QBE
 
+    private bool labelLast;
     public void Label(string value)
     {
+        Unindent();
         Write("@" + value);
+        Indent();
+        labelLast = true;
     }
 
     public void Function(string name, string returnType = "w", params string[] args)
     {
-        WriteGen($"function {returnType} ${name}()");
+        Write($"function {returnType} ${name}()");
     }
 
     public void ExportFunction(string name, string returnType = "w", params string[] args)
     {
-        WriteGen($"export function {returnType} ${name}()");
+        Write($"export function {returnType} ${name}()");
     }
 
     public void Data(string name, string value)
     {
-        WriteGen($"data ${name} = {{ b \"{value}\", b 0 }}");
+        Write($"data ${name} = {{ b \"{value}\", b 0 }}");
     }
 
-    private int tempReg;
+    private string? tempRegName;
+    public void SetTempRegName(Symbol sym)
+    {
+        tempRegName = sym.Name;
+    }
+    public void SetTempRegName(string name)
+    {
+        tempRegName = name;
+    }
+
+    private int tempRegCounter;
     public string GetTempReg()
     {
-        return "%temp_" + tempReg++;
+        string name = tempRegName ?? "temp";
+        return "%" + name + "_" + tempRegCounter++;
     }
 
     public string CreateTempRegister(Symbol symbol)
@@ -109,4 +135,15 @@ public partial class QbeOutput()
     {
         Storew(value.ToString(), address);
     }
+
+
+
+}
+
+public enum Size
+{
+    W,
+    L,
+    S,
+    D
 }

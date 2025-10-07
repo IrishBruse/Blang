@@ -58,9 +58,13 @@ function GenGroup(groupName: string, group: any) {
 
         const args = Object.entries(instruction?.args ?? []);
 
-        const parameters = args
+        let parameters = args
             .map(([name, type]) => `${type} ${name}`)
             .join(", ");
+
+        if (instruction?.ret === "Reg") {
+            parameters += ", Size regType = Size.W";
+        }
 
         const returnType = instruction?.ret ?? "void";
 
@@ -92,11 +96,11 @@ writeFileSync("./QbeOutput.gen.cs", text);
 
 function writeInstruction(instr: string, args: any[], ret: string) {
     beginLine();
-    write("WriteGen(");
+    write("Write(");
     write('$"');
 
     if (ret === "Reg") {
-        write("{reg} =w ");
+        write("{reg} ={ToChar(regType)} ");
     }
 
     write(instr + " ");
@@ -114,6 +118,7 @@ function writeInstruction(instr: string, args: any[], ret: string) {
 
         first = false;
     }
+
     write('"');
     write(");");
     endLine();

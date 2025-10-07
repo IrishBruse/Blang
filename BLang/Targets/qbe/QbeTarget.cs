@@ -129,7 +129,7 @@ public class QbeTarget : ITarget
 
         BeginScope();
         {
-            qbe.WriteRaw("@start\n");
+            qbe.Label("start");
             EmitBody(node.Body);
             qbe.Ret(name == "main" ? 0 : null);
         }
@@ -156,42 +156,43 @@ public class QbeTarget : ITarget
 
     public void VisitWhileStatement(WhileStatement node)
     {
-        // Comment("while " + node.Condition);
-        string labelPrefix = $"@while_{++conditionIndex}_";
-        qbe.Write($"{labelPrefix}start");
+        qbe.Comment("while " + node.Condition);
+        string labelPrefix = $"while_{++conditionIndex}_";
+        qbe.Label($"{labelPrefix}condition");
         string reg = GenerateBinaryExpressionIR(node.Condition, new("while_condition", SymbolKind.Load));
-        qbe.Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}end");
-        qbe.Write($"{labelPrefix}body");
-        qbe.Indent();
-        {
-            EmitBody(node.Body);
-            qbe.Write($"jmp {labelPrefix}start");
-        }
-        qbe.Unindent();
-        qbe.Write($"{labelPrefix}end");
+        qbe.Write($"jnz {reg}, @{labelPrefix}body, @{labelPrefix}end");
+        qbe.Label($"{labelPrefix}body");
+        EmitBody(node.Body);
+        qbe.Write($"jmp @{labelPrefix}condition");
+        qbe.Label($"{labelPrefix}end");
     }
 
     public void VisitIfStatement(IfStatement node)
     {
         qbe.Comment("if " + node.Condition);
-        string labelPrefix = $"@if_{++conditionIndex}_";
-        qbe.Write($"{labelPrefix}start");
+        qbe.Indent();
+
+        // TODO: refactor incrementing into qbe.Label
+        string labelPrefix = $"if_{++conditionIndex}_";
+        qbe.Label($"{labelPrefix}condition");
+
         string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + conditionIndex, SymbolKind.Load));
         string labelSuffix = node.ElseBody == null ? "end" : "else";
-        qbe.Write($"jnz {reg}, {labelPrefix}body, {labelPrefix}{labelSuffix}");
-        qbe.Write($"{labelPrefix}body");
-        qbe.Indent();
+        qbe.Write($"jnz {reg}, @{labelPrefix}body, @{labelPrefix}{labelSuffix}");
+        qbe.Label($"{labelPrefix}body");
+
+        EmitBody(node.Body);
+
+        if (node.ElseBody != null)
         {
-            EmitBody(node.Body);
-            if (node.ElseBody != null)
-            {
-                qbe.Write($"jmp {labelPrefix}end");
-                qbe.Write($"{labelPrefix}else");
-                EmitBody(node.ElseBody);
-            }
+            qbe.Write($"jmp @{labelPrefix}end");
+            qbe.Label($"{labelPrefix}else");
+
+            EmitBody(node.ElseBody);
         }
+
+        qbe.Label($"{labelPrefix}end");
         qbe.Unindent();
-        qbe.Write($"{labelPrefix}end");
     }
 
     public void VisitAutoStatement(AutoStatement autoDeclaration)
@@ -290,13 +291,11 @@ public class QbeTarget : ITarget
                         throw new ParserException("Pointer dereference operator only supported for variables.");
                     }
 
+                    qbe.SetTempRegName(variable.Symbol);
+                    // TODO: encode above into the return type below to be passed along
                     string memReg = GetMemoryRegister(variable.Symbol);
-                    string addressReg = qbe.GetTempReg();
-                    qbe.Write($"{addressReg} =l loadw {memReg}");
-
-                    string loadReg = qbe.GetTempReg();
-                    qbe.Write($"{loadReg} =w loadw {addressReg}");
-                    return loadReg;
+                    string addressReg = qbe.Loadw(memReg, Size.L);
+                    return qbe.Loadw(addressReg);
                 }
 
             case BinaryExpression binary:

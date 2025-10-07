@@ -819,7 +819,7 @@ export default {
                 arguments: "params string[]",
             },
             overrideBody:
-                "WriteGen($\"call ${functionSymbol}({string.Join(',', arguments)})\");",
+                "Write($\"call ${functionSymbol}({string.Join(',', arguments)})\");",
         },
         vastart: {
             name: "VaStart",
