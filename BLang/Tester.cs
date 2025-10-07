@@ -30,6 +30,7 @@ public class Tester
     {
         if (Options.UpdateSnapshots)
         {
+            Options.Ast = true;
             UpdateSnapshot(testFile);
         }
         else

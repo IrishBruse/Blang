@@ -24,16 +24,25 @@
           "_Type": "AutoStatement",
           "Variables": [
             {
-              "Name": "a",
-              "Kind": 0
+              "Symbol": {
+                "Name": "a",
+                "Kind": 0
+              },
+              "Value": 0
             },
             {
-              "Name": "b",
-              "Kind": 0
+              "Symbol": {
+                "Name": "b",
+                "Kind": 0
+              },
+              "Value": 0
             },
             {
-              "Name": "c",
-              "Kind": 0
+              "Symbol": {
+                "Name": "c",
+                "Kind": 0
+              },
+              "Value": 0
             }
           ],
           "Range": {

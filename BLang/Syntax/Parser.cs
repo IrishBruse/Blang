@@ -283,6 +283,7 @@ public partial class Parser(CompilerContext data)
     private AutoStatement ParseAutoDefinition()
     {
         List<VariableAssignment> variables = [];
+        int value = 0;
 
         // 'auto'
         Token auto = Eat(TokenType.AutoKeyword);
@@ -290,7 +291,6 @@ public partial class Parser(CompilerContext data)
         // Name
         Token identifier = Eat(TokenType.Identifier);
 
-        int value = 0;
         // Constant?
         if (TryEat(TokenType.IntegerLiteral, out Token? token))
         {
@@ -323,7 +323,7 @@ public partial class Parser(CompilerContext data)
         // ';'
         _ = Eat(TokenType.Semicolon);
 
-        // Statement (handled by parent)
+        // Statement (handled by body)
         return new AutoStatement(variables.ToArray())
         {
             Range = auto.Range.Merge(previousTokenRange),

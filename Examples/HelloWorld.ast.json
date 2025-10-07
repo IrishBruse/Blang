@@ -16,24 +16,8 @@
             }
           ],
           "Range": {
-            "Start": 14,
-            "End": 27
-          }
-        },
-        {
-          "_Type": "AutoStatement",
-          "Variables": [
-            {
-              "Symbol": {
-                "Name": "y",
-                "Kind": 0
-              },
-              "Value": 5
-            }
-          ],
-          "Range": {
-            "Start": 33,
-            "End": 42
+            "Start": 13,
+            "End": 26
           }
         },
         {
@@ -45,39 +29,28 @@
           "Parameters": [
             {
               "_Type": "StringValue",
-              "Value": "%d\\n",
+              "Value": "Hello, World\\n",
               "Range": {
-                "Start": 55,
-                "End": 61
-              }
-            },
-            {
-              "_Type": "Variable",
-              "Symbol": {
-                "Name": "y",
-                "Kind": 0
-              },
-              "Range": {
-                "Start": 63,
-                "End": 64
+                "Start": 38,
+                "End": 54
               }
             }
           ],
           "Range": {
-            "Start": 48,
-            "End": 54
+            "Start": 31,
+            "End": 37
           }
         }
       ],
       "Range": {
         "Start": 0,
-        "End": 69
+        "End": 58
       }
     }
   ],
   "GlobalVariables": [],
   "Range": {
     "Start": 0,
-    "End": 69
+    "End": 58
   }
 }

@@ -1,0 +1,156 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "val",
+                "Kind": 0
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 32,
+            "End": 41
+          }
+        },
+        {
+          "_Type": "VariableDeclaration",
+          "Symbol": {
+            "Name": "val",
+            "Kind": 0
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 1,
+            "Range": {
+              "Start": 53,
+              "End": 54
+            }
+          },
+          "Range": {
+            "Start": 47,
+            "End": 50
+          }
+        },
+        {
+          "_Type": "VariableDeclaration",
+          "Symbol": {
+            "Name": "val",
+            "Kind": 0
+          },
+          "Value": {
+            "_Type": "BinaryExpression",
+            "Operation": 100,
+            "Left": {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "val",
+                "Kind": 0
+              },
+              "Range": {
+                "Start": 66,
+                "End": 69
+              }
+            },
+            "Right": {
+              "_Type": "BinaryExpression",
+              "Operation": 102,
+              "Left": {
+                "_Type": "IntValue",
+                "Value": 2,
+                "Range": {
+                  "Start": 72,
+                  "End": 73
+                }
+              },
+              "Right": {
+                "_Type": "IntValue",
+                "Value": 3,
+                "Range": {
+                  "Start": 76,
+                  "End": 77
+                }
+              },
+              "Range": {
+                "Start": 72,
+                "End": 77
+              }
+            },
+            "Range": {
+              "Start": 66,
+              "End": 77
+            }
+          },
+          "Range": {
+            "Start": 60,
+            "End": 63
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "%d",
+              "Range": {
+                "Start": 91,
+                "End": 95
+              }
+            },
+            {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "val",
+                "Kind": 0
+              },
+              "Range": {
+                "Start": 97,
+                "End": 100
+              }
+            }
+          ],
+          "Range": {
+            "Start": 84,
+            "End": 90
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 104
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 104
+  }
+}

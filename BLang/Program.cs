@@ -164,12 +164,8 @@ public class Program
         }
         else
         {
-            Options.Ast = false;
             Tester.TestDirectory("Examples/");
-
             Console.WriteLine();
-
-            Options.Ast = true;
             Tester.TestDirectory("Tests/");
         }
 

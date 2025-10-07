@@ -52,13 +52,15 @@ public partial class Parser
 
     private bool TryEat(TokenType type, out Token? token)
     {
-        token = Next();
+        TokenType peek = Peek();
 
-        if (token.TokenType != type)
+        if (peek != type)
         {
+            token = null;
             return false;
         }
 
+        token = Next();
         return true;
     }
 
