@@ -56,40 +56,6 @@ public enum TokenType
     Dot,
     Comma,
 
-    // Arithmetic
-    Addition = 15,
-    Subtraction,
-    Multiplication,
-    Division,
-    Modulo,
-
-    // Relational
-    LessThan,
-    GreaterThan,
-    LessThanEqual,
-    GreaterThanEqual,
-    EqualEqual,
-    NotEqual,
-
-    // Logical
-    LogicalAnd,
-    LogicalOr,
-    LogicalNot,
-
-
-    /// <summary> ++ </summary>
-    Increment,
-    /// <summary> -- </summary>
-    Decrement,
-
-    // Bitwise
-    BitwiseComplement,
-    BitwiseAnd,
-    BitwiseOr,
-    BitwiseXOr,
-    BitwiseShiftLeft,
-    BitwiseShiftRight,
-
 
     // Assignment
     Assignment,
@@ -112,19 +78,10 @@ public enum TokenType
     CaseKeyword,
     BreakKeyword,
 
-    ArrayIndexing = 52,
-
-    // Alias
-    AddressOf = BitwiseAnd,
-    PointerDereference = Multiplication,
-}
-
-public enum BinaryOperator
-{
-    None = 0,
+    // Binary Operator mirror
 
     // Arithmetic
-    Addition = 15,
+    Addition = 100,
     Subtraction,
     Multiplication,
     Division,
@@ -156,6 +113,53 @@ public enum BinaryOperator
     BitwiseShiftRight,
 
     ArrayIndexing = 52,
+
+    // Alias
+    AddressOf = BitwiseAnd,
+    PointerDereference = Multiplication,
+}
+
+public enum BinaryOperator
+{
+    None = 0,
+
+    // Arithmetic
+    Addition = 100,
+    Subtraction,
+    Multiplication,
+    Division,
+    Modulo,
+
+    // Relational
+    LessThan,
+    GreaterThan,
+    LessThanEqual,
+    GreaterThanEqual,
+    EqualEqual,
+    NotEqual,
+
+    // Logical
+    LogicalAnd,
+    LogicalOr,
+    LogicalNot,
+
+    // Inline increment and decrement
+    Increment,
+    Decrement,
+
+    // Bitwise
+    BitwiseComplement,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXOr,
+    BitwiseShiftLeft,
+    BitwiseShiftRight,
+
+    ArrayIndexing = 52,
+
+    // Alias
+    AddressOf = BitwiseAnd,
+    PointerDereference = Multiplication,
 }
 
 public static class Extensions
@@ -176,9 +180,10 @@ public static class Extensions
 
     public static string ToString(this TokenType t)
     {
+#pragma warning disable IDE0072
         return t switch
+#pragma warning restore IDE0072
         {
-
             TokenType.Semicolon => ";",
             TokenType.Comma => ",",
 
@@ -214,18 +219,22 @@ public static class Extensions
             BinaryOperator.EqualEqual => "==",
             BinaryOperator.NotEqual => "!=",
 
-            BinaryOperator.BitwiseOr => "|",
             BinaryOperator.LogicalAnd => "&",
             BinaryOperator.LogicalOr => "||",
             BinaryOperator.LogicalNot => "!",
+
             BinaryOperator.Increment => "++",
             BinaryOperator.Decrement => "--",
+
+            BinaryOperator.BitwiseOr => "|",
             BinaryOperator.BitwiseComplement => throw new System.NotImplementedException(),
             BinaryOperator.BitwiseAnd => throw new System.NotImplementedException(),
             BinaryOperator.BitwiseXOr => throw new System.NotImplementedException(),
             BinaryOperator.BitwiseShiftLeft => throw new System.NotImplementedException(),
             BinaryOperator.BitwiseShiftRight => throw new System.NotImplementedException(),
+
             BinaryOperator.ArrayIndexing => throw new System.NotImplementedException(),
+
             _ => throw new ParserException("Unhandled tokentype " + t),
         };
     }

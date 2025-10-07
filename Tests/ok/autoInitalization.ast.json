@@ -1,0 +1,80 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 14,
+            "End": 27
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Name": "y",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 33,
+            "End": 42
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "%d\\n",
+              "Range": {
+                "Start": 55,
+                "End": 61
+              }
+            },
+            {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "y",
+                "Kind": 0
+              },
+              "Range": {
+                "Start": 63,
+                "End": 64
+              }
+            }
+          ],
+          "Range": {
+            "Start": 48,
+            "End": 54
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 69
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 69
+  }
+}

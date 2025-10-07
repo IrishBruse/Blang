@@ -55,7 +55,7 @@
         {
           "_Type": "WhileStatement",
           "Condition": {
-            "Operation": 20,
+            "Operation": 105,
             "Left": {
               "_Type": "Variable",
               "Symbol": {
@@ -121,7 +121,7 @@
               },
               "Value": {
                 "_Type": "BinaryExpression",
-                "Operation": 15,
+                "Operation": 100,
                 "Left": {
                   "_Type": "Variable",
                   "Symbol": {

@@ -23,7 +23,7 @@
         {
           "_Type": "IfStatement",
           "Condition": {
-            "Operation": 20,
+            "Operation": 105,
             "Left": {
               "_Type": "IntValue",
               "Value": 1,

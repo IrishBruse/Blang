@@ -55,10 +55,10 @@
         {
           "_Type": "IfStatement",
           "Condition": {
-            "Operation": 20,
+            "Operation": 105,
             "Left": {
               "_Type": "BinaryExpression",
-              "Operation": 15,
+              "Operation": 100,
               "Left": {
                 "_Type": "Variable",
                 "Symbol": {
@@ -85,7 +85,7 @@
             },
             "Right": {
               "_Type": "BinaryExpression",
-              "Operation": 17,
+              "Operation": 102,
               "Left": {
                 "_Type": "IntValue",
                 "Value": 100,
