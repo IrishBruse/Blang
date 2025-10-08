@@ -54,9 +54,9 @@ public class QbeTarget : ITarget
         foreach (VariableDeclaration variable in node.GlobalVariables)
         {
             qbe.Comment(variable.Symbol.Name);
-            _ = CreateGlobalMemoryRegister(variable.Symbol);
+            _ = CreateGlobalMemoryRegister(variable.Symbol);// TODO: remove
             string value = variable.Value == null ? "w 0" : "w " + (variable.Value as IntValue)!.Value;
-            qbe.Write($"data ${variable.Symbol.Name} = {{ {value} }}");
+            qbe.Data(variable.Symbol.Name, value);
             qbe.WriteLine();
         }
 
@@ -160,10 +160,10 @@ public class QbeTarget : ITarget
         string labelPrefix = $"while_{++conditionIndex}_";
         qbe.Label($"{labelPrefix}condition");
         string reg = GenerateBinaryExpressionIR(node.Condition, new("while_condition", SymbolKind.Load));
-        qbe.Write($"jnz {reg}, @{labelPrefix}body, @{labelPrefix}end");
+        qbe.Jnz(reg, $"{labelPrefix}body", $"{labelPrefix}end");
         qbe.Label($"{labelPrefix}body");
         EmitBody(node.Body);
-        qbe.Write($"jmp @{labelPrefix}condition");
+        qbe.Jmp($"{labelPrefix}condition");
         qbe.Label($"{labelPrefix}end");
     }
 
@@ -178,14 +178,14 @@ public class QbeTarget : ITarget
 
         string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + conditionIndex, SymbolKind.Load));
         string labelSuffix = node.ElseBody == null ? "end" : "else";
-        qbe.Write($"jnz {reg}, @{labelPrefix}body, @{labelPrefix}{labelSuffix}");
+        qbe.Jnz(reg, $"{labelPrefix}body", $"{labelPrefix}{labelSuffix}");
         qbe.Label($"{labelPrefix}body");
 
         EmitBody(node.Body);
 
         if (node.ElseBody != null)
         {
-            qbe.Write($"jmp @{labelPrefix}end");
+            qbe.Jmp(labelPrefix + "end");
             qbe.Label($"{labelPrefix}else");
 
             EmitBody(node.ElseBody);
@@ -199,9 +199,9 @@ public class QbeTarget : ITarget
     {
         foreach (VariableAssignment variable in autoDeclaration.Variables)
         {
-            string varName = CreateMemoryRegister(variable.Symbol);
             qbe.Comment($"auto {variable}");
-            qbe.Write($"{varName} =l alloc4 4");
+            string varName = qbe.Alloc4(4, Size.L);
+            memoryAllocations[variable.Symbol.Name] = varName;// TODO:
             qbe.Storew(variable.Value, varName);
         }
     }
@@ -212,7 +212,6 @@ public class QbeTarget : ITarget
 
         string parameters = PassParameterValue(node.Parameters);
         qbe.Call(node.Symbol.ToString(), parameters);
-        // qbe.Write($"call ${node.Symbol}({parameters})");
     }
 
     private string PassParameterValue(Expression[] parameters)
@@ -233,8 +232,7 @@ public class QbeTarget : ITarget
                     break;
 
                 case Variable v:
-                    reg = qbe.CreateTempRegister(v.Symbol);
-                    qbe.Write($"{reg} =w loadw {GetMemoryRegister(v.Symbol)}");
+                    reg = qbe.Loadw(GetMemoryRegister(v.Symbol));
                     registers.Add($"w {reg}");
                     break;
 
@@ -263,10 +261,8 @@ public class QbeTarget : ITarget
         {
             case Variable variable:
                 {
-                    string loadReg = qbe.CreateTempRegister(variable.Symbol);
                     string memReg = GetMemoryRegister(variable.Symbol);
-                    qbe.Write($"{loadReg} =w loadw {memReg}");
-                    return loadReg;
+                    return qbe.Loadw(memReg);
                 }
 
             case IntValue number:
@@ -332,6 +328,7 @@ public class QbeTarget : ITarget
 
                         BinaryOperator.None => throw new NotImplementedException(),
                         BinaryOperator.ArrayIndexing => throw new NotImplementedException(),
+
                         _ => throw new ParserException("Unknown operator " + binary.Operation),
                     };
                 }
@@ -357,18 +354,6 @@ public class QbeTarget : ITarget
     }
 
     // Utility
-
-    public string CreateMemoryRegister(Symbol symbol)
-    {
-        if (memoryAllocations.ContainsKey(symbol.Name))
-        {
-            throw new InvalidOperationException($"Variable '{symbol.Name}' is already registered.");
-        }
-
-        string qbeReg = $"%{symbol.Name}_ptr";
-        memoryAllocations[symbol.Name] = qbeReg;
-        return qbeReg;
-    }
 
     public string CreateGlobalMemoryRegister(Symbol symbol)
     {

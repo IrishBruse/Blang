@@ -30,7 +30,7 @@ public partial class QbeOutput()
         _ = Text.Append(value);
     }
 
-    public void Write(string value)
+    private void Write(string value)
     {
         _ = Text.AppendLine(Space + value);
         labelLast = false;
@@ -72,10 +72,10 @@ public partial class QbeOutput()
     {
         return type switch
         {
-            Size.W => 'w', // 32-bit integer
-            Size.L => 'l', // 64-bit integer
-            Size.S => 's', // 32-bit float
-            Size.D => 'd', // 64-bit float
+            Size.W => 'w',
+            Size.L => 'l',
+            Size.S => 's',
+            Size.D => 'd',
             _ => throw new ArgumentOutOfRangeException(nameof(type), $"Invalid QBE type: {type}")
         };
     }

@@ -42,7 +42,19 @@ public static class Compiler
             _ => throw new CompilerException($"Unknown Target {Options.Target}"),
         };
 
-        return target.Emit(unit, data);
+        Result<CompileOutput> result;
+
+        try
+        {
+            result = target.Emit(unit, data);
+            if (!result.IsSuccess) return "Failed to emit qbe ir " + file;
+        }
+        catch (Exception e)
+        {
+            return Options.Verbose > 0 ? e.ToString() : e.Message;
+        }
+
+        return result;
     }
 
     private static Result<IEnumerator<Token>> Lex(string file, CompilerContext data)

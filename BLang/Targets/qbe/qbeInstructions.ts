@@ -290,7 +290,7 @@ export default {
             name: "Alloc4",
             description: "Allocates memory on the stack with 4-byte alignment.",
             args: {
-                sizeInBytes: "Val",
+                sizeInBytes: "int",
             },
             ret: "Reg",
         },
@@ -298,7 +298,7 @@ export default {
             name: "Alloc8",
             description: "Allocates memory on the stack with 8-byte alignment.",
             args: {
-                sizeInBytes: "Val",
+                sizeInBytes: "int",
             },
             ret: "Reg",
         },
@@ -307,7 +307,7 @@ export default {
             description:
                 "Allocates memory on the stack with 16-byte alignment.",
             args: {
-                sizeInBytes: "Val",
+                sizeInBytes: "int",
             },
             ret: "Reg",
         },

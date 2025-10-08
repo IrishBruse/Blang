@@ -258,7 +258,7 @@ public partial class QbeOutput
     }
 
     /// <summary> Allocates memory on the stack with 4-byte alignment. </summary>
-    public Reg Alloc4(Val sizeInBytes, Size regType = Size.W)
+    public Reg Alloc4(int sizeInBytes, Size regType = Size.W)
     {
         Reg reg = GetTempReg();
         Write($"{reg} ={ToChar(regType)} alloc4 {sizeInBytes}");
@@ -266,7 +266,7 @@ public partial class QbeOutput
     }
 
     /// <summary> Allocates memory on the stack with 8-byte alignment. </summary>
-    public Reg Alloc8(Val sizeInBytes, Size regType = Size.W)
+    public Reg Alloc8(int sizeInBytes, Size regType = Size.W)
     {
         Reg reg = GetTempReg();
         Write($"{reg} ={ToChar(regType)} alloc8 {sizeInBytes}");
@@ -274,7 +274,7 @@ public partial class QbeOutput
     }
 
     /// <summary> Allocates memory on the stack with 16-byte alignment. </summary>
-    public Reg Alloc16(Val sizeInBytes, Size regType = Size.W)
+    public Reg Alloc16(int sizeInBytes, Size regType = Size.W)
     {
         Reg reg = GetTempReg();
         Write($"{reg} ={ToChar(regType)} alloc16 {sizeInBytes}");
@@ -714,13 +714,13 @@ public partial class QbeOutput
     /// <summary> Jumps unconditionally to another block within the same function. </summary>
     public void Jmp(Label targetLabel)
     {
-        Write($"jmp {targetLabel}");
+        Write($"jmp @{targetLabel}");
     }
 
     /// <summary> Jumps conditionally to one of two blocks based on whether a value is non-zero. </summary>
     public void Jnz(Val conditionVal, Label trueLabel, Label falseLabel)
     {
-        Write($"jnz {conditionVal}, {trueLabel}, {falseLabel}");
+        Write($"jnz {conditionVal}, @{trueLabel}, @{falseLabel}");
     }
 
     /// <summary> Returns from the current function, optionally passing a value to the caller. </summary>

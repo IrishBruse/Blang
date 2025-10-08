@@ -29,7 +29,10 @@ public class Globals
 
     public static void Error(string? message, string? prefix = null)
     {
-        Print(message, prefix, ConsoleColor.Red);
+        if (!string.IsNullOrEmpty(message))
+        {
+            Console.Error.WriteLine(Colors.Red(message));
+        }
     }
 
     public static void Debug(string? message, string? prefix = null, ConsoleColor? color = ConsoleColor.DarkGray)

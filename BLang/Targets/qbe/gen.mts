@@ -112,6 +112,8 @@ function writeInstruction(instr: string, args: any[], ret: string) {
         const [name, type] = arg;
         if (type === "FunctionSymbol") {
             write("${" + name + "}");
+        } else if (type === "Label") {
+            write("@{" + name + "}");
         } else {
             write("{" + name + "}");
         }
