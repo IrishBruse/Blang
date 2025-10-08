@@ -9,6 +9,8 @@
 
         <PublishAot>true</PublishAot>
         <DisableDynamicCode>true</DisableDynamicCode>
+
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     </PropertyGroup>
 
     <ItemGroup>

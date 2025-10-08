@@ -14,13 +14,6 @@ public class Lexer(CompilerContext data)
     private int endIndex;
     private int startIndex;
 
-    public IEnumerator<Token> Lex(string text)
-    {
-        MemoryStream stream = new(Encoding.UTF8.GetBytes(text));
-        StreamReader reader = new(stream);
-        return Lex(reader, "");
-    }
-
     public IEnumerator<Token> Lex(StreamReader fileStream, string path)
     {
         Source = fileStream;

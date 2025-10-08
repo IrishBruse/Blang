@@ -49,27 +49,27 @@ public record BinaryExpression(BinaryOperator Operation, Expression Left, Expres
     {
         string ret = "";
 
-        int number = 0;
+        int parts = 0;
 
         if (Left != null)
         {
-            ret += Left + " ";
-            number++;
+            ret += Left.ToString() + " ";
+            parts++;
         }
 
         if (Operation != BinaryOperator.None)
         {
-            ret += Operation.ToString() + " ";
-            number++;
+            ret += Operation.ToText() + " ";
+            parts++;
         }
 
         if (Right != null)
         {
-            ret += Right;
-            number++;
+            ret += Right.ToString();
+            parts++;
         }
 
-        if (number == 1)
+        if (parts == 1)
         {
             return ret.Trim();
         }

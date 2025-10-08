@@ -1,0 +1,98 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 27,
+            "End": 40
+          }
+        },
+        {
+          "_Type": "VariableDeclaration",
+          "Symbol": {
+            "Name": "variable",
+            "Kind": 0
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 6,
+            "Range": {
+              "Start": 55,
+              "End": 56
+            }
+          },
+          "Range": {
+            "Start": 46,
+            "End": 54
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "variable %d\\n",
+              "Range": {
+                "Start": 70,
+                "End": 85
+              }
+            },
+            {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "variable",
+                "Kind": 0
+              },
+              "Range": {
+                "Start": 87,
+                "End": 95
+              }
+            }
+          ],
+          "Range": {
+            "Start": 63,
+            "End": 69
+          }
+        }
+      ],
+      "Range": {
+        "Start": 13,
+        "End": 100
+      }
+    }
+  ],
+  "GlobalVariables": [
+    {
+      "Symbol": {
+        "Name": "variable",
+        "Kind": 0
+      },
+      "Value": null,
+      "Range": {
+        "Start": 0,
+        "End": 0
+      }
+    }
+  ],
+  "Range": {
+    "Start": 0,
+    "End": 100
+  }
+}

@@ -49,15 +49,13 @@ public class QbeTarget : ITarget
         return new CompileOutput(file, binFile, unit);
     }
 
+    // Program (CompilationUnit)
+    //     Definition*
     public void VisitCompilationUnit(CompilationUnit node)
     {
         foreach (VariableDeclaration variable in node.GlobalVariables)
         {
-            qbe.Comment(variable.Symbol.Name);
-            _ = CreateGlobalMemoryRegister(variable.Symbol);// TODO: remove
-            string value = variable.Value == null ? "w 0" : "w " + (variable.Value as IntValue)!.Value;
-            qbe.Data(variable.Symbol.Name, value);
-            qbe.WriteLine();
+            VisitGlobalVariable(variable);
         }
 
         foreach (FunctionDecleration funcDecl in node.FunctionDeclarations)
@@ -68,6 +66,15 @@ public class QbeTarget : ITarget
         GenerateDataSection();
         qbe.WriteLine();
         GenerateExternsSection();
+    }
+
+    private void VisitGlobalVariable(VariableDeclaration variable)
+    {
+        qbe.Comment(variable.Symbol.Name);
+        _ = CreateGlobalMemoryRegister(variable.Symbol);// TODO: remove
+        string value = variable.Value == null ? "w 0" : "w " + (variable.Value as IntValue)!.Value;
+        qbe.Data(variable.Symbol.Name, value);
+        qbe.WriteLine();
     }
 
     private void GenerateDataSection()

@@ -178,7 +178,7 @@ public static class Extensions
             TokenType.AutoKeyword;
     }
 
-    public static string ToString(this TokenType t)
+    public static string ToText(this TokenType t)
     {
 #pragma warning disable IDE0072
         return t switch
@@ -200,7 +200,7 @@ public static class Extensions
         };
     }
 
-    public static string ToString(this BinaryOperator t)
+    public static string ToText(this BinaryOperator t)
     {
         return t switch
         {

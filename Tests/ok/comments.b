@@ -1,3 +1,4 @@
+// test
 /* comment1 */
 main() {
     /* comment2 */

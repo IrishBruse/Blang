@@ -93,3 +93,4 @@ Run all the compiler tests
 
 -   [QBE Docs](https://c9x.me/compile/doc/il.html)
 -   [tsoding/b](https://github.com/tsoding/b)
+-   [kbman](https://www.nokia.com/bell-labs/about/dennis-m-ritchie/kbman.html)

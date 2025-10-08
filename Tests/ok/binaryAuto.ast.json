@@ -1,0 +1,118 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf",
+              "Kind": 0
+            }
+          ],
+          "Range": {
+            "Start": 14,
+            "End": 27
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "result",
+                "Kind": 0
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 33,
+            "End": 45
+          }
+        },
+        {
+          "_Type": "VariableDeclaration",
+          "Symbol": {
+            "Name": "result",
+            "Kind": 0
+          },
+          "Value": {
+            "_Type": "BinaryExpression",
+            "Operation": 105,
+            "Left": {
+              "_Type": "IntValue",
+              "Value": 10,
+              "Range": {
+                "Start": 60,
+                "End": 62
+              }
+            },
+            "Right": {
+              "_Type": "IntValue",
+              "Value": 20,
+              "Range": {
+                "Start": 65,
+                "End": 67
+              }
+            },
+            "Range": {
+              "Start": 60,
+              "End": 67
+            }
+          },
+          "Range": {
+            "Start": 51,
+            "End": 57
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "Kind": 0
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "%d\\n",
+              "Range": {
+                "Start": 115,
+                "End": 121
+              }
+            },
+            {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "result",
+                "Kind": 0
+              },
+              "Range": {
+                "Start": 123,
+                "End": 129
+              }
+            }
+          ],
+          "Range": {
+            "Start": 108,
+            "End": 114
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 134
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 134
+  }
+}

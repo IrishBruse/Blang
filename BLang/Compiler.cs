@@ -13,22 +13,28 @@ public static class Compiler
 {
     public static Result<CompileOutput> Compile(string file)
     {
-        CompilerContext data = new(file);
-
-        Result<IEnumerator<Token>> tokens = Lex(file, data);
-        if (!tokens) return tokens.Error;
-
-        CompilationUnit unit;
         try
         {
-            Parser parser = new(data);
-            unit = parser.Parse(tokens.Value);
-            if (unit == null) return "Failed to parse " + file;
+            return CompileFile(file);
         }
         catch (Exception e)
         {
             return Options.Verbose > 0 ? e.ToString() : e.Message;
         }
+    }
+
+    private static Result<CompileOutput> CompileFile(string file)
+    {
+        CompilerContext data = new(file);
+
+        Lexer lexer = new(data);
+        IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
+
+        CompilationUnit unit;
+
+        Parser parser = new(data);
+        unit = parser.Parse(tokens);
+        if (unit == null) return "Failed to parse " + file;
 
         if (Options.Ast)
         {
@@ -44,36 +50,10 @@ public static class Compiler
 
         Result<CompileOutput> result;
 
-        try
-        {
-            result = target.Emit(unit, data);
-            if (!result.IsSuccess) return "Failed to emit qbe ir " + file;
-        }
-        catch (Exception e)
-        {
-            return Options.Verbose > 0 ? e.ToString() : e.Message;
-        }
+
+        result = target.Emit(unit, data);
+        if (!result.IsSuccess) return "Failed to emit qbe ir " + file;
 
         return result;
-    }
-
-    private static Result<IEnumerator<Token>> Lex(string file, CompilerContext data)
-    {
-        try
-        {
-            Lexer lexer = new(data);
-            IEnumerator<Token> test = lexer.Lex(File.OpenText(file), file);
-            return new Result<IEnumerator<Token>>(test);
-        }
-        catch (Exception e)
-        {
-            return Options.Verbose > 0 ? e.ToString() : e.Message;
-        }
-    }
-
-    private static CompilationUnit Parse(IEnumerator<Token> tokens, CompilerContext data)
-    {
-        Parser parser = new(data);
-        return parser.Parse(tokens);
     }
 }
