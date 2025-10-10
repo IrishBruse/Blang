@@ -12,6 +12,7 @@ using BLang.Utility;
 [JsonDerivedType(typeof(BinaryExpression), nameof(BinaryExpression))]
 [JsonDerivedType(typeof(AddressOfExpression), nameof(AddressOfExpression))]
 [JsonDerivedType(typeof(PointerDereferenceExpression), nameof(PointerDereferenceExpression))]
+[JsonDerivedType(typeof(ArrayIndexExpression), nameof(ArrayIndexExpression))]
 public abstract record Expression() : AstNode;
 
 public record StringValue(string Value) : Expression
@@ -95,3 +96,12 @@ public record PointerDereferenceExpression(Expression Expr) : Expression
         return "*" + Expr.ToString();
     }
 }
+
+public record ArrayIndexExpression(Variable Variable, int Index) : Expression
+{
+    public override string ToString()
+    {
+        return Variable.ToString() + $"[{Index}]";
+    }
+}
+

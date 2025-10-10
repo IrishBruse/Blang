@@ -50,9 +50,8 @@ public static class Compiler
 
         Result<CompileOutput> result;
 
-
         result = target.Emit(unit, data);
-        if (!result.IsSuccess) return "Failed to emit qbe ir " + file;
+        if (!result.IsSuccess) return file + " Failed to emit\n" + result.Error;
 
         return result;
     }

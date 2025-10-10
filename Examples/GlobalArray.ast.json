@@ -16,27 +16,8 @@
             }
           ],
           "Range": {
-            "Start": 27,
-            "End": 40
-          }
-        },
-        {
-          "_Type": "VariableDeclaration",
-          "Symbol": {
-            "Name": "variable",
-            "Kind": 0
-          },
-          "Value": {
-            "_Type": "IntValue",
-            "Value": 6,
-            "Range": {
-              "Start": 55,
-              "End": 56
-            }
-          },
-          "Range": {
-            "Start": 46,
-            "End": 54
+            "Start": 28,
+            "End": 41
           }
         },
         {
@@ -48,44 +29,56 @@
           "Parameters": [
             {
               "_Type": "StringValue",
-              "Value": "variable %d\\n",
+              "Value": "arr[0] = %d\\n",
               "Range": {
-                "Start": 70,
-                "End": 85
+                "Start": 54,
+                "End": 69
               }
             },
             {
-              "_Type": "Variable",
-              "Symbol": {
-                "Name": "variable",
-                "Kind": 0
+              "_Type": "ArrayIndexExpression",
+              "Variable": {
+                "Symbol": {
+                  "Name": "arr",
+                  "Kind": 0
+                },
+                "Range": {
+                  "Start": 71,
+                  "End": 74
+                }
               },
+              "Index": 0,
               "Range": {
-                "Start": 87,
-                "End": 95
+                "Start": 71,
+                "End": 74
               }
             }
           ],
           "Range": {
-            "Start": 63,
-            "End": 69
+            "Start": 47,
+            "End": 53
           }
         }
       ],
       "Range": {
-        "Start": 13,
-        "End": 100
+        "Start": 15,
+        "End": 81
       }
     }
   ],
   "GlobalVariables": [
     {
-      "$type": "VariableDeclaration",
+      "$type": "ArrayDeclaration",
       "Symbol": {
-        "Name": "variable",
+        "Name": "arr",
         "Kind": 0
       },
-      "Value": null,
+      "Size": 5,
+      "Values": [
+        1,
+        2,
+        3
+      ],
       "Range": {
         "Start": 0,
         "End": 0
@@ -94,6 +87,6 @@
   ],
   "Range": {
     "Start": 0,
-    "End": 100
+    "End": 81
   }
 }

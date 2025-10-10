@@ -5,6 +5,8 @@ using BLang.Utility;
 
 public record Token(TokenType TokenType, string Content, SourceRange Range)
 {
+    public int Number => int.Parse(Content);
+
     public override string ToString()
     {
         return $"{TokenType,-18} {Content}";
@@ -233,7 +235,7 @@ public static class Extensions
             BinaryOperator.BitwiseShiftLeft => throw new System.NotImplementedException(),
             BinaryOperator.BitwiseShiftRight => throw new System.NotImplementedException(),
 
-            BinaryOperator.ArrayIndexing => throw new System.NotImplementedException(),
+            BinaryOperator.ArrayIndexing => "[?]",
 
             _ => throw new ParserException("Unhandled tokentype " + t),
         };

@@ -101,9 +101,19 @@ public partial class QbeOutput()
         Write($"export function {returnType} ${name}()");
     }
 
-    public void Data(string name, string value)
+    public void DataString(string name, string value)
     {
         Write($"data ${name} = {{ b \"{value}\", b 0 }}");
+    }
+
+    public void Data(string name, string data)
+    {
+        Write($"data ${name} = {{ {data} }}");
+    }
+
+    public void DataArray(string name, string value)
+    {
+        Write($"data ${name} = {{ {value}, b 0 }}");
     }
 
     private string? tempRegName;

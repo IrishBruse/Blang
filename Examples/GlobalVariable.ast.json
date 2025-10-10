@@ -112,6 +112,7 @@
   ],
   "GlobalVariables": [
     {
+      "$type": "VariableDeclaration",
       "Symbol": {
         "Name": "foo",
         "Kind": 0
@@ -123,6 +124,7 @@
       }
     },
     {
+      "$type": "VariableDeclaration",
       "Symbol": {
         "Name": "bar",
         "Kind": 0

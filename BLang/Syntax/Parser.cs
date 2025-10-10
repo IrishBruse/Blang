@@ -26,7 +26,7 @@ public partial class Parser(CompilerContext data)
     private CompilationUnit ParseTopLevel()
     {
         List<FunctionDecleration> functions = [];
-        List<VariableDeclaration> globals = [];
+        List<GlobalVariable> globals = [];
 
         SourceRange start = previousTokenRange;
 
@@ -62,6 +62,11 @@ public partial class Parser(CompilerContext data)
             EatComments();
         }
 
+        if (Peek(TokenType.Garbage))
+        {
+            throw new InvalidTokenException(data.GetFileLocation(previousTokenRange.End) + " Garbage token encountered");
+        }
+
         return new(functions.ToArray(), globals.ToArray())
         {
             Range = start.Merge(previousTokenRange)
@@ -76,12 +81,33 @@ public partial class Parser(CompilerContext data)
         return new(symbol, null);
     }
 
-    private VariableDeclaration ParseGlobalArrayDecleration(Token identifier)
+    // ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
+    private ArrayDeclaration ParseGlobalArrayDecleration(Token identifier)
     {
+        List<int> values = [];
+
+        _ = Eat(TokenType.OpenBracket); // '['
+        Token arraySize = Eat(TokenType.IntegerLiteral); // TODO: Constant?
+        _ = Eat(TokenType.CloseBracket); // ']'
+
         Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
+
+        // (Ival, (',', Ival)*)?, ';')
+        if (Peek(TokenType.IntegerLiteral))
+        {
+            Token number = Eat(TokenType.IntegerLiteral);
+            values.Add(number.Number);
+
+            while (Peek(TokenType.Comma))
+            {
+                _ = Eat(TokenType.Comma);
+                number = Eat(TokenType.IntegerLiteral);
+                values.Add(number.Number);
+            }
+        }
         _ = Eat(TokenType.Semicolon);
 
-        return new(symbol, null);
+        return new(symbol, arraySize.Number, values.ToArray());
     }
 
     private VariableDeclaration ParseGlobalVariableDeclerationInitalizer(Token identifier)

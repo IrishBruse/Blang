@@ -12,9 +12,15 @@ using BLang.Utility;
 [JsonDerivedType(typeof(IfStatement), nameof(IfStatement))]
 [JsonDerivedType(typeof(AutoStatement), nameof(AutoStatement))]
 [JsonDerivedType(typeof(FunctionCall), nameof(FunctionCall))]
+[JsonDerivedType(typeof(GlobalVariable), nameof(GlobalVariable))]
 public abstract record Statement() : AstNode;
 
-public record VariableDeclaration(Symbol Symbol, Expression? Value) : Statement;
+[JsonDerivedType(typeof(VariableDeclaration), nameof(VariableDeclaration))]
+[JsonDerivedType(typeof(ArrayDeclaration), nameof(ArrayDeclaration))]
+public record GlobalVariable : Statement;
+
+public record VariableDeclaration(Symbol Symbol, Expression? Value) : GlobalVariable;
+public record ArrayDeclaration(Symbol Symbol, int Size, int[] Values) : GlobalVariable;
 
 public record ExternalStatement(Symbol[] Externals) : Statement;
 

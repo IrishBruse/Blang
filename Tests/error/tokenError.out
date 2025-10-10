@@ -1,1 +1,1 @@
-Failed to emit qbe ir Tests/error/tokenError.b
+Tests/error/tokenError.b:1:0 Garbage token encountered

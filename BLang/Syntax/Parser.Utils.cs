@@ -86,14 +86,12 @@ public partial class Parser
         if (Peek(TokenType.OpenBracket))
         {
             _ = Eat(TokenType.OpenBracket);
-            Expression index = ParseIdentifier();
+            Token index = Eat(TokenType.IntegerLiteral);
             _ = Eat(TokenType.CloseBracket);
 
             // Create a pointer dereference expression
-            return new BinaryExpression(
-                    BinaryOperator.ArrayIndexing,
-                    new Variable(symbol) { Range = variable.Range },
-                    index
+            return new ArrayIndexExpression(
+                    new Variable(symbol) { Range = variable.Range }, index.Number
             )
             {
                 Range = variable.Range

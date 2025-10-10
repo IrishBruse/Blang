@@ -75,7 +75,7 @@ Run all the compiler tests
 -   [x] else
 -   [x] while
 -   [x] pointers \* &
--   [ ] Array index [i]
+-   [x] Array index [i]
 -   [ ] switch
 
 ## Targets

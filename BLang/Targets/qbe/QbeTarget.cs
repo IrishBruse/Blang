@@ -33,9 +33,24 @@ public class QbeTarget : ITarget
 
         (string objFile, string binFile) = GetOutputFile(file, Target);
 
-        VisitCompilationUnit(unit);
+        string error = "";
+
+        try
+        {
+            VisitCompilationUnit(unit);
+        }
+        catch (Exception e)
+        {
+            error = Options.Verbose > 0 ? e.ToString() : e.Message;
+        }
         string qbeIR = qbe.Text.ToString();
         File.WriteAllText(objFile + ".ssa", qbeIR);
+
+
+        if (error != "")
+        {
+            return error;
+        }
 
         StringBuilder stdError = new();
         Executable exe;
@@ -44,7 +59,7 @@ public class QbeTarget : ITarget
         if (!exe.Success) return $"Failed to compile \"{objFile}.ssa\" to assembly\n" + stdError.ToString().Replace("qbe:", "");
 
         exe = Executable.Run("gcc", $"{objFile}.s -o {binFile}").PipeErrorTo(stdError);
-        if (!exe.Success) return $"Failed to compile \"{objFile}.s\" using gcc generated from \"{objFile}.ssa\"\n" + stdError.ToString().Replace("qbe:", "");
+        if (!exe.Success) return $"Failed to compile \"{objFile}.ssa\" into valid \"{objFile}.s\"\n" + stdError.ToString().Replace("qbe:", "");
 
         return new CompileOutput(file, binFile, unit);
     }
@@ -53,9 +68,20 @@ public class QbeTarget : ITarget
     //     Definition*
     public void VisitCompilationUnit(CompilationUnit node)
     {
-        foreach (VariableDeclaration variable in node.GlobalVariables)
+        foreach (GlobalVariable variable in node.GlobalVariables)
         {
-            VisitGlobalVariable(variable);
+            switch (variable)
+            {
+                case VariableDeclaration varDecl:
+                    VisitGlobalVariable(varDecl);
+                    break;
+
+                case ArrayDeclaration arrayDecl:
+                    VisitGlobalArray(arrayDecl);
+                    break;
+
+                default: break;
+            }
         }
 
         foreach (FunctionDecleration funcDecl in node.FunctionDeclarations)
@@ -77,12 +103,26 @@ public class QbeTarget : ITarget
         qbe.WriteLine();
     }
 
+    private void VisitGlobalArray(ArrayDeclaration array)
+    {
+        qbe.Comment($"{array.Symbol.Name}[{array.Size}]");
+        _ = CreateGlobalMemoryRegister(array.Symbol);// TODO: remove
+        int[] values = array.Values;
+        string data = "w";
+        for (int i = 0; i < array.Size; i++)
+        {
+            data += " " + (i < values.Length ? values[i] : 0);
+        }
+        qbe.Data(array.Symbol.Name, data);
+        qbe.WriteLine();
+    }
+
     private void GenerateDataSection()
     {
         qbe.Comment("Data");
         foreach ((string value, string name) in strings)
         {
-            qbe.Data(name, value);
+            qbe.DataString(name, value);
         }
     }
 
@@ -243,6 +283,18 @@ public class QbeTarget : ITarget
                     registers.Add($"w {reg}");
                     break;
 
+                case ArrayIndexExpression array:
+                    qbe.Comment(array.ToString());
+
+                    string memReg = GetMemoryRegister(array.Variable.Symbol);
+                    string arg = qbe.Loadw(memReg, Size.L);
+                    if (array.Index != 0)
+                    {
+                        arg = qbe.Add(arg, array.Index.ToString());
+                    }
+                    registers.Add($"w {arg}");
+                    break;
+
                 default: throw new ParserException($"Unknown parameter {expr.GetType()}({expr})");
             }
         }
@@ -287,9 +339,9 @@ public class QbeTarget : ITarget
                     return GetMemoryRegister(var.Symbol);
                 }
 
-            case PointerDereferenceExpression pointerDereference:
+            case PointerDereferenceExpression pointer:
                 {
-                    if (pointerDereference.Expr is not Variable variable)
+                    if (pointer.Expr is not Variable variable)
                     {
                         throw new ParserException("Pointer dereference operator only supported for variables.");
                     }
