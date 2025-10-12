@@ -131,9 +131,7 @@ public class Tester
         string folderType = testFile.Split("/")[1];
         (string astOutput, string stdOutput) = LoadTestContent(testFile);
 
-        Stopwatch sw = Stopwatch.StartNew();
         Result<CompileOutput> res = Compiler.Compile(testFile);
-        long ms = sw.ElapsedMilliseconds;
 
         string error = "";
 
@@ -210,6 +208,8 @@ public class Tester
 
             Console.WriteLine("Unkown folderType " + folderType);
         }
+
+        long ms = res.IsSuccess ? res.Value.CompileTime : 0;
 
         string time = Gray($"({ms}ms)");
         string icon = error == string.Empty ? Green(IconPass) : Red(IconFail);

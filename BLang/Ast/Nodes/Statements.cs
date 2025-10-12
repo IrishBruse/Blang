@@ -28,7 +28,7 @@ public record WhileStatement(BinaryExpression Condition, Statement[] Body) : Sta
 
 public record SwitchStatement(BinaryExpression Condition, Statement[] Body) : Statement;
 
-public record IfStatement(BinaryExpression Condition, Statement[] Body, Statement[]? ElseBody) : Statement;
+public record IfStatement(Expression Condition, Statement[] Body, Statement[]? ElseBody) : Statement;
 
 public record AutoStatement(VariableAssignment[] Variables) : Statement;
 public record VariableAssignment(Symbol Symbol, int Value);

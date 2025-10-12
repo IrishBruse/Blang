@@ -24,7 +24,7 @@ public class Program
 
     private static Option<bool> TokensFlag = new("--tokens")
     {
-        Description = "Print tokenizers tokens",
+        Description = "Print tokens as they are consumed",
     };
 
     private static Option<bool> SymbolsFlag = new("--symbols")

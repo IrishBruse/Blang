@@ -18,8 +18,7 @@ next(base, n) {
     state = base[0] | base[1] << 1;
     i  = 2;
     while (i < n) {
-        /* TODO: restore  state <<= 1; */
-        state = state << 1;
+        state <<= 1;
         state  |= base[i];
         state  &= 7;
         base[i - 1] = (110>>state)&1;

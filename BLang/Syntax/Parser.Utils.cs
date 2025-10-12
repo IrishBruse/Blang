@@ -27,13 +27,59 @@ public partial class Parser
             previousTokenRange = token.Range;
         }
 
-        _ = tokens.MoveNext();
-        if (Options.Tokens)
+        if (Options.Tokens && token != null)
         {
-            Console.WriteLine(tokens.Current);
+            LogToken(token);
         }
 
+        _ = tokens.MoveNext();
+
         return token!;
+    }
+
+    private static void LogToken(Token token)
+    {
+        string type = token.TokenType.ToString();
+        string content = token.Content;
+
+        if (token.TokenType == TokenType.IntegerLiteral)
+        {
+            content = Colors.Yellow(content);
+        }
+        else if (token.TokenType == TokenType.StringLiteral)
+        {
+            content = Colors.Green('"' + content + '"');
+        }
+        else if (token.TokenType.IsKeyword())
+        {
+            content = Colors.Magenta(content);
+        }
+        else if (token.TokenType == TokenType.Identifier)
+        {
+            // content = content;
+        }
+        else if (token.TokenType == TokenType.OpenBracket || token.TokenType == TokenType.CloseBracket)
+        {
+            content = Colors.Cyan(content);
+        }
+        else if (token.TokenType == TokenType.OpenParenthesis || token.TokenType == TokenType.CloseParenthesis)
+        {
+            content = Colors.Cyan(content);
+        }
+        else if (token.TokenType == TokenType.OpenScope || token.TokenType == TokenType.CloseScope)
+        {
+            content = Colors.Cyan(content);
+        }
+        else if (token.TokenType == TokenType.Garbage)
+        {
+            content = Colors.Red(content);
+        }
+        else
+        {
+            content = Colors.Gray(content);
+        }
+
+        Console.WriteLine($"{type,-20} {content}");
     }
 
     [StackTraceHidden]
@@ -43,8 +89,8 @@ public partial class Parser
 
         if (token.TokenType != type)
         {
-            int lastEnd = previousTokenRange.End;
-            throw new ParserException(data.GetFileLocation(lastEnd) + $" Expected {type} but got {token.TokenType}");
+            int start = previousTokenRange.Start;
+            throw new ParserException(data.GetFileLocation(start) + $" Expected {type} but got {token.TokenType}");
         }
 
         return token;
@@ -70,38 +116,6 @@ public partial class Parser
         {
             _ = Eat(TokenType.Comment);
         }
-    }
-
-    private Expression ParseIdentifier()
-    {
-        Token variable = Eat(TokenType.Identifier);
-        Symbol? symbol = symbols.GetOrAdd(variable, SymbolKind.Load);
-        if (symbol == null)
-        {
-            string loc = data.GetFileLocation(variable.Range.Start);
-            throw new ParserException($"{loc}  {variable}");
-        }
-
-        // array[index] -> * (array + index)
-        if (Peek(TokenType.OpenBracket))
-        {
-            _ = Eat(TokenType.OpenBracket);
-            Token index = Eat(TokenType.IntegerLiteral);
-            _ = Eat(TokenType.CloseBracket);
-
-            // Create a pointer dereference expression
-            return new ArrayIndexExpression(
-                    new Variable(symbol) { Range = variable.Range }, index.Number
-            )
-            {
-                Range = variable.Range
-            };
-        }
-
-        return new Variable(symbol)
-        {
-            Range = variable.Range
-        };
     }
 
     private IntValue ParseInteger(TokenType? prefix = null)

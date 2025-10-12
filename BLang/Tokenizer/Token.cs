@@ -66,6 +66,9 @@ public enum TokenType
     MultiplicationAssignment,
     DivisionAssignment,
     ModuloAssignment,
+    BitwiseShiftLeftAssignment,
+    BitwiseShiftRightAssignment,
+    BitwiseOrAssignment,
 
     Semicolon,
 
@@ -114,7 +117,7 @@ public enum TokenType
     BitwiseShiftLeft,
     BitwiseShiftRight,
 
-    ArrayIndexing = 52,
+    ArrayIndexing,
 
     // Alias
     AddressOf = BitwiseAnd,
@@ -157,7 +160,7 @@ public enum BinaryOperator
     BitwiseShiftLeft,
     BitwiseShiftRight,
 
-    ArrayIndexing = 52,
+    ArrayIndexing,
 
     // Alias
     AddressOf = BitwiseAnd,

@@ -87,7 +87,7 @@ public partial class Parser(CompilerContext data)
         List<int> values = [];
 
         _ = Eat(TokenType.OpenBracket); // '['
-        Token arraySize = Eat(TokenType.IntegerLiteral); // TODO: Constant?
+        Token arraySize = Eat(TokenType.IntegerLiteral); // Constant?
         _ = Eat(TokenType.CloseBracket); // ']'
 
         Symbol symbol = symbols.Add(identifier.Content, SymbolKind.Define);
@@ -183,7 +183,7 @@ public partial class Parser(CompilerContext data)
             TokenType.WhileKeyword => ParseWhileDefinition(),
             TokenType.SwitchKeyword => ParseWhileDefinition(),
             TokenType.IfKeyword => ParseIfDefinition(),
-            TokenType.AutoKeyword => ParseAutoDefinition(),
+            TokenType.AutoKeyword => ParseAutoStatement(),
             TokenType.Identifier => ParseIdentifierStatement(),
             TokenType.Eof => throw new NotImplementedException(),
             TokenType.Garbage => throw new NotImplementedException(),
@@ -277,10 +277,10 @@ public partial class Parser(CompilerContext data)
         Token start = Eat(TokenType.IfKeyword);
 
         Expression condition = ParseBinaryExpression();
-        if (condition is not BinaryExpression)
-        {
-            throw new ParserException("ParseWhileDefinition condition: " + condition);
-        }
+        // if (condition is not BinaryExpression)
+        // {
+        //     throw new ParserException("ParseWhileDefinition condition: " + condition);
+        // }
 
         Statement[] body = !Peek(TokenType.OpenScope) ? [ParseStatement()] : ParseBlock();
         Statement[]? elseBody = null;
@@ -290,7 +290,7 @@ public partial class Parser(CompilerContext data)
             elseBody = ParseBlock();
         }
 
-        return new((BinaryExpression)condition, body, elseBody)
+        return new(condition, body, elseBody)
         {
             Range = start.Range.Merge(previousTokenRange),
         };
@@ -318,7 +318,7 @@ public partial class Parser(CompilerContext data)
     }
 
     // ('auto', Name, Constant?, (',', Name, Constant?)*, ';', Statement)
-    private AutoStatement ParseAutoDefinition()
+    private AutoStatement ParseAutoStatement()
     {
         List<VariableAssignment> variables = [];
         int value = 0;
@@ -374,22 +374,19 @@ public partial class Parser(CompilerContext data)
 
         List<Expression> parameters = [];
 
-        TokenType token = Peek();
-        _ = Eat(token);
-
-        if (token == TokenType.OpenParenthesis)
+        if (TryEat(TokenType.OpenParenthesis, out _))
         {
             return ParseFunctionCall(identifier, parameters);
         }
-        else if (token == TokenType.Assignment)
+        else if (TryEat(TokenType.Assignment, out _))
         {
             return ParseVariableAssignment(identifier);
         }
-        else if (token == TokenType.Increment)
+        else if (TryEat(TokenType.Increment, out _))
         {
             return ParseVariableAssignmentShorthand(identifier, new IntValue(1));
         }
-        else if (token == TokenType.AdditionAssignment)
+        else if (TryEat(TokenType.AdditionAssignment, out _))
         {
             return ParseVariableAssignmentShorthand(identifier, ParseBinaryExpression());
         }
@@ -478,6 +475,36 @@ public partial class Parser(CompilerContext data)
             TokenType.BreakKeyword => throw new NotImplementedException("TokenType.BreakKeyword"),
             TokenType.ArrayIndexing => throw new NotImplementedException("TokenType.ArrayIndexing"),
             _ => throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} ParseExpression: {Peek()}"),
+        };
+    }
+
+    private Expression ParseIdentifier()
+    {
+        Token variable = Eat(TokenType.Identifier);
+        Symbol? symbol = symbols.GetOrAdd(variable, SymbolKind.Load);
+        if (symbol == null)
+        {
+            string loc = data.GetFileLocation(variable.Range.Start);
+            throw new ParserException($"{loc}  {variable}");
+        }
+
+        // TODO: match b better (Rvalue, '[', Rvalue, ']')
+        if (Peek(TokenType.OpenBracket))
+        {
+            _ = Eat(TokenType.OpenBracket);
+            Expression rval = ParsePrimary();
+            _ = Eat(TokenType.CloseBracket);
+
+            // Create a pointer dereference expression
+            return new ArrayIndexExpression(new Variable(symbol) { Range = variable.Range }, rval)
+            {
+                Range = variable.Range
+            };
+        }
+
+        return new Variable(symbol)
+        {
+            Range = variable.Range
         };
     }
 

@@ -8,6 +8,7 @@ public class CompileOutput(string sourceFile, string executable, CompilationUnit
     public string SourceFile { get; set; } = sourceFile;
     public string Executable { get; set; } = executable;
     public CompilationUnit CompilationUnit { get; set; } = compilationUnit;
+    public long CompileTime { get; set; }
 
     public void WriteAst()
     {

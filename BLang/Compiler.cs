@@ -2,6 +2,7 @@ namespace BLang;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using BLang.Ast;
 using BLang.Exceptions;
@@ -25,10 +26,12 @@ public static class Compiler
 
     private static Result<CompileOutput> CompileFile(string file)
     {
+        Stopwatch sw = Stopwatch.StartNew();
+
         CompilerContext data = new(file);
 
         Lexer lexer = new(data);
-        IEnumerator<Token> tokens = lexer.Lex(File.OpenText(file), file);
+        IEnumerator<Token> tokens = lexer.Lex(File.OpenRead(file), file);
 
         CompilationUnit unit;
 
@@ -52,6 +55,8 @@ public static class Compiler
 
         result = target.Emit(unit, data);
         if (!result.IsSuccess) return file + " Failed to emit\n" + result.Error;
+
+        result.Value.CompileTime = sw.ElapsedMilliseconds;
 
         return result;
     }

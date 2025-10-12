@@ -97,7 +97,7 @@ public record PointerDereferenceExpression(Expression Expr) : Expression
     }
 }
 
-public record ArrayIndexExpression(Variable Variable, int Index) : Expression
+public record ArrayIndexExpression(Variable Variable, Expression Index) : Expression
 {
     public override string ToString()
     {

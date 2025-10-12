@@ -1,5 +1,6 @@
 namespace BLang.Tokenizer;
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -8,21 +9,22 @@ using BLang.Utility;
 
 public class Lexer(CompilerContext data)
 {
-    public StreamReader Source { get; set; } = null!;
+    public PeekableStream Source { get; set; } = null!;
     public string FilePath { get; set; } = "";
 
     private int endIndex;
     private int startIndex;
 
-    public IEnumerator<Token> Lex(StreamReader fileStream, string path)
+    public IEnumerator<Token> Lex(Stream fileStream, string path)
     {
-        Source = fileStream;
+        Source = new(fileStream);
         FilePath = path;
         while (!Source.EndOfStream)
         {
             StartTokenRange();
 
             char c = Next();
+            char p = Peek();
 
             if (char.IsWhiteSpace(c))
             {
@@ -36,52 +38,23 @@ public class Lexer(CompilerContext data)
             {
                 yield return LexNumber(c);
             }
+            else if (c == '/' && p == '/')
+            {
+                _ = LexSingleLineComment();
+                continue;
+            }
+            else if (c == '/' && p == '*')
+            {
+                _ = LexMultiLineComment();
+                continue;
+            }
+            else if (c == '"')
+            {
+                yield return LexString();
+            }
             else
             {
-                char p = Peek();
-
-                if (c == '/' && p == '/')
-                {
-                    _ = LexSingleLineComment();
-                    continue;
-                }
-                else if (c == '/' && p == '*')
-                {
-                    _ = LexMultiLineComment();
-                    continue;
-                }
-
-                yield return c switch
-                {
-                    '"' => LexString(),
-
-                    '[' => LexBracket(c, TokenType.OpenBracket),
-                    ']' => LexBracket(c, TokenType.CloseBracket),
-
-                    '(' => LexBracket(c, TokenType.OpenParenthesis),
-                    ')' => LexBracket(c, TokenType.CloseParenthesis),
-
-                    '{' => LexBracket(c, TokenType.OpenScope),
-                    '}' => LexBracket(c, TokenType.CloseScope),
-
-                    '<' => LexOperator(c, TokenType.LessThan),
-                    '>' => LexOperator(c, TokenType.GreaterThan),
-
-                    '+' => LexOperator(c, TokenType.Addition),
-                    '-' => LexOperator(c, TokenType.Subtraction),
-                    '*' => LexOperator(c, TokenType.Multiplication),
-                    '/' => LexOperator(c, TokenType.Division),
-                    '&' => LexOperator(c, TokenType.BitwiseAnd),
-                    '|' => LexOperator(c, TokenType.BitwiseOr),
-                    '%' => LexOperator(c, TokenType.Modulo),
-                    '!' => LexOperator(c, TokenType.LogicalNot),
-                    '=' => LexOperator(c, TokenType.Assignment),
-
-                    ';' => LexOperator(c, TokenType.Semicolon),
-                    ',' => LexOperator(c, TokenType.Comma),
-
-                    _ => new Token(TokenType.Garbage, c.ToString(), EndTokenRange())
-                };
+                yield return LexOperator(c);
             }
         }
 
@@ -108,89 +81,90 @@ public class Lexer(CompilerContext data)
         _ = EndTokenRange();
     }
 
-    private Token LexOperator(char c, TokenType type)
+    private static readonly Dictionary<string, TokenType> OperatorMap = new()
     {
-        char p = Peek();
+        ["<<="] = TokenType.BitwiseShiftLeftAssignment,
+        [">>="] = TokenType.BitwiseShiftRightAssignment,
 
-        string op = c.ToString();
+        ["-="] = TokenType.SubtractionAssignment,
+        ["=-"] = TokenType.SubtractionAssignment,
 
-        if (c == '<' && p == '=')
+        ["+="] = TokenType.AdditionAssignment,
+        ["=+"] = TokenType.AdditionAssignment,
+
+        ["*="] = TokenType.MultiplicationAssignment,
+        ["/="] = TokenType.DivisionAssignment,
+        ["%="] = TokenType.ModuloAssignment,
+        ["|="] = TokenType.BitwiseOrAssignment,
+
+        ["<<"] = TokenType.BitwiseShiftLeft,
+        [">>"] = TokenType.BitwiseShiftRight,
+        ["<="] = TokenType.LessThanEqual,
+        [">="] = TokenType.GreaterThanEqual,
+        ["=="] = TokenType.EqualEqual,
+        ["!="] = TokenType.NotEqual,
+        ["&&"] = TokenType.LogicalAnd,
+        ["||"] = TokenType.LogicalOr,
+
+        ["++"] = TokenType.Increment,
+        ["--"] = TokenType.Decrement,
+
+        ["<"] = TokenType.LessThan,
+        [">"] = TokenType.GreaterThan,
+        ["+"] = TokenType.Addition,
+        ["-"] = TokenType.Subtraction,
+        ["*"] = TokenType.Multiplication,
+        ["/"] = TokenType.Division,
+        ["&"] = TokenType.BitwiseAnd,
+        ["|"] = TokenType.BitwiseOr,
+        ["%"] = TokenType.Modulo,
+        ["!"] = TokenType.LogicalNot,
+
+        ["="] = TokenType.Assignment,
+        [";"] = TokenType.Semicolon,
+        [","] = TokenType.Comma,
+
+        ["["] = TokenType.OpenBracket,
+        ["]"] = TokenType.CloseBracket,
+
+        ["("] = TokenType.OpenParenthesis,
+        [")"] = TokenType.CloseParenthesis,
+
+        ["{"] = TokenType.OpenScope,
+        ["}"] = TokenType.CloseScope,
+    };
+
+    private Token LexOperator(char c)
+    {
+        // Look ahead up to 2 more characters without consuming the stream
+        char p1 = Peek();
+        char p2 = Peek(1);
+
+        string threeCharOp = $"{c}{p1}{p2}";
+
+        if (OperatorMap.TryGetValue(threeCharOp, out TokenType type3))
         {
-            type = TokenType.LessThanEqual;
-            op += Next();
-        }
-        else if (c == '>' && p == '=')
-        {
-            type = TokenType.GreaterThanEqual;
-            op += Next();
-        }
-        else if (c == '=' && p == '=')
-        {
-            type = TokenType.EqualEqual;
-            op += Next();
-        }
-        else if (c == '!' && p == '=')
-        {
-            type = TokenType.NotEqual;
-            op += Next();
-        }
-        else if (c == '&' && p == '&')
-        {
-            type = TokenType.LogicalAnd;
-            op += Next();
-        }
-        else if (c == '|' && p == '|')
-        {
-            type = TokenType.LogicalOr;
-            op += Next();
-        }
-        else if ((c == '+' && p == '=') || (c == '=' && p == '+'))
-        {
-            type = TokenType.AdditionAssignment;
-            op += Next();
-        }
-        else if (c == '+' && p == '+')
-        {
-            type = TokenType.Increment;
-            op += Next();
-        }
-        else if ((c == '-' && p == '=') || (c == '=' && p == '-'))
-        {
-            type = TokenType.SubtractionAssignment;
-            op += Next();
-        }
-        else if (c == '-' && p == '-')
-        {
-            type = TokenType.Decrement;
-            op += Next();
-        }
-        else if ((c == '*' && p == '=') || (c == '=' && p == '*'))
-        {
-            type = TokenType.MultiplicationAssignment;
-            op += Next();
-        }
-        else if ((c == '/' && p == '=') || (c == '=' && p == '/'))
-        {
-            type = TokenType.DivisionAssignment;
-            op += Next();
-        }
-        else if ((c == '%' && p == '=') || (c == '=' && p == '%'))
-        {
-            type = TokenType.ModuloAssignment;
-            op += Next();
-        }
-        else if (c == '<' && p == '<')
-        {
-            type = TokenType.BitwiseShiftLeft;
-            op += Next();
-        }
-        else if (c == '>' && p == '>')
-        {
-            type = TokenType.BitwiseShiftRight;
-            op += Next();
+            _ = Next(); // consume p1
+            _ = Next(); // consume p2
+            return new Token(type3, threeCharOp, EndTokenRange());
         }
 
-        return new Token(type, op, EndTokenRange());
+        // Try two-character operator
+        string twoCharOp = $"{c}{p1}";
+        if (OperatorMap.TryGetValue(twoCharOp, out TokenType type2))
+        {
+            _ = Next(); // consume p1
+            return new Token(type2, twoCharOp, EndTokenRange());
+        }
+
+        // Try single-character operator
+        string oneCharOp = c.ToString();
+        if (OperatorMap.TryGetValue(oneCharOp, out TokenType type1))
+        {
+            return new Token(type1, oneCharOp, EndTokenRange());
+        }
+
+        return new Token(TokenType.Garbage, oneCharOp, EndTokenRange());
     }
 
     private Token LexSingleLineComment()
@@ -273,9 +247,9 @@ public class Lexer(CompilerContext data)
         };
     }
 
-    private char Peek()
+    private char Peek(int offset = 0)
     {
-        return (char)Source.Peek();
+        return (char)Source.PeekChar(offset);
     }
 
     private Token LexNumber(char c)
@@ -298,7 +272,7 @@ public class Lexer(CompilerContext data)
 
     private char Next()
     {
-        char c = (char)Source.Read();
+        char c = (char)Source.ReadChar();
 
         endIndex++;
 

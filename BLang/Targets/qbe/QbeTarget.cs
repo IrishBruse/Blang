@@ -288,7 +288,7 @@ public class QbeTarget : ITarget
 
                     string memReg = GetMemoryRegister(array.Variable.Symbol);
                     string arg = qbe.Loadw(memReg, Size.L);
-                    if (array.Index != 0)
+                    if (array.Index is IntValue i && i.Value != 0)
                     {
                         arg = qbe.Add(arg, array.Index.ToString());
                     }
