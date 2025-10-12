@@ -58,6 +58,7 @@
         {
           "_Type": "IfStatement",
           "Condition": {
+            "_Type": "BinaryExpression",
             "Operation": 105,
             "Left": {
               "_Type": "BinaryExpression",
