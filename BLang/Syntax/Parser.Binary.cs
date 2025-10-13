@@ -106,7 +106,7 @@ public partial class Parser
             TokenType.SwitchKeyword => Unexpected(data),
             TokenType.CaseKeyword => Unexpected(data),
             TokenType.BreakKeyword => Unexpected(data),
-            TokenType.ArrayIndexing => throw new System.NotImplementedException(),
+            TokenType.ArrayIndexing => Unexpected(data),
             _ => Unexpected(data),
         };
     }

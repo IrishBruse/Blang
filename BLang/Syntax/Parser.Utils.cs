@@ -110,6 +110,19 @@ public partial class Parser
         return true;
     }
 
+    private bool TryEat(TokenType type)
+    {
+        TokenType peek = Peek();
+
+        if (peek != type)
+        {
+            return false;
+        }
+
+        _ = Next();
+        return true;
+    }
+
     private void EatComments()
     {
         while (Peek(TokenType.Comment))
