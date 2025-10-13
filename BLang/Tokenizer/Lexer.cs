@@ -84,26 +84,27 @@ public class Lexer(CompilerContext data)
     {
         ["<<="] = TokenType.BitwiseShiftLeftAssignment,
         [">>="] = TokenType.BitwiseShiftRightAssignment,
-
         ["-="] = TokenType.SubtractionAssignment,
         ["=-"] = TokenType.SubtractionAssignment,
-
         ["+="] = TokenType.AdditionAssignment,
         ["=+"] = TokenType.AdditionAssignment,
-
         ["*="] = TokenType.MultiplicationAssignment,
         ["/="] = TokenType.DivisionAssignment,
         ["%="] = TokenType.ModuloAssignment,
         ["|="] = TokenType.BitwiseOrAssignment,
 
+        ["="] = TokenType.Assignment,
+
         ["<<"] = TokenType.BitwiseShiftLeft,
         [">>"] = TokenType.BitwiseShiftRight,
+
         ["<="] = TokenType.LessThanEqual,
         [">="] = TokenType.GreaterThanEqual,
         ["=="] = TokenType.EqualEqual,
         ["!="] = TokenType.NotEqual,
         ["&&"] = TokenType.LogicalAnd,
         ["||"] = TokenType.LogicalOr,
+        ["!"] = TokenType.LogicalNot,
 
         ["++"] = TokenType.Increment,
         ["--"] = TokenType.Decrement,
@@ -117,9 +118,7 @@ public class Lexer(CompilerContext data)
         ["&"] = TokenType.BitwiseAnd,
         ["|"] = TokenType.BitwiseOr,
         ["%"] = TokenType.Modulo,
-        ["!"] = TokenType.LogicalNot,
 
-        ["="] = TokenType.Assignment,
         [";"] = TokenType.Semicolon,
         [","] = TokenType.Comma,
 
