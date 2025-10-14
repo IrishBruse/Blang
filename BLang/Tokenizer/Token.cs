@@ -60,14 +60,23 @@ public enum TokenType
 
 
     // Assignment
+    /// <summary> = </summary>
     Assignment,
+    /// <summary> += </summary>
     AdditionAssignment,
+    /// <summary> -= </summary>
     SubtractionAssignment,
+    /// <summary> *= </summary>
     MultiplicationAssignment,
+    /// <summary> /= </summary>
     DivisionAssignment,
+    /// <summary> %= </summary>
     ModuloAssignment,
+    /// <summary> <<= </summary>
     BitwiseShiftLeftAssignment,
+    /// <summary> >>= </summary>
     BitwiseShiftRightAssignment,
+    /// <summary> |= </summary>
     BitwiseOrAssignment,
 
     Semicolon,

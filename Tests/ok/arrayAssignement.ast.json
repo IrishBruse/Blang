@@ -1,0 +1,124 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main",
+        "Kind": 0
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "i",
+                "Kind": 0
+              },
+              "Value": 0
+            },
+            {
+              "Symbol": {
+                "Name": "arr",
+                "Kind": 0
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 22,
+            "End": 33
+          }
+        },
+        {
+          "_Type": "VariableDeclaration",
+          "Symbol": {
+            "Name": "i",
+            "Kind": 0
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 0,
+            "Range": {
+              "Start": 42,
+              "End": 43
+            }
+          },
+          "Range": {
+            "Start": 38,
+            "End": 39
+          }
+        },
+        {
+          "_Type": "ArrayAssignmentStatement",
+          "Symbol": {
+            "Name": "arr",
+            "Kind": 0
+          },
+          "Index": {
+            "_Type": "BinaryExpression",
+            "Operation": 100,
+            "Left": {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "i",
+                "Kind": 0
+              },
+              "Range": {
+                "Start": 54,
+                "End": 55
+              }
+            },
+            "Right": {
+              "_Type": "IntValue",
+              "Value": 1,
+              "Range": {
+                "Start": 56,
+                "End": 57
+              }
+            },
+            "Range": {
+              "Start": 54,
+              "End": 57
+            }
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 2,
+            "Range": {
+              "Start": 61,
+              "End": 62
+            }
+          },
+          "Range": {
+            "Start": 50,
+            "End": 53
+          }
+        }
+      ],
+      "Range": {
+        "Start": 9,
+        "End": 66
+      }
+    }
+  ],
+  "GlobalVariables": [
+    {
+      "$type": "ArrayDeclaration",
+      "Symbol": {
+        "Name": "arr",
+        "Kind": 0
+      },
+      "Size": 4,
+      "Values": [],
+      "Range": {
+        "Start": 0,
+        "End": 0
+      }
+    }
+  ],
+  "Range": {
+    "Start": 0,
+    "End": 66
+  }
+}
