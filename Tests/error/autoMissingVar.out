@@ -1,1 +1,1 @@
-Tests/error/autoMissingVar.b:4:2 Expected Identifier but got CloseScope
+Tests/error/autoMissingVar.b:5:2 Expected Identifier but got CloseScope

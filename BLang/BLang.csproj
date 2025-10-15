@@ -11,6 +11,7 @@
         <DisableDynamicCode>true</DisableDynamicCode>
 
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>

@@ -24,7 +24,7 @@
 ## Grammar
 
 ```
-Program (CompilationUnit)
+CompilationUnit
     Definition*
 ```
 
