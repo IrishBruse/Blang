@@ -1,5 +1,6 @@
 namespace BLang.Ast;
 
+using System;
 using System.Collections.Generic;
 
 using BLang.Ast.Nodes;
@@ -11,17 +12,27 @@ using BLang.Utility;
 
 public partial class Parser(CompilerContext data)
 {
+    public int Position { get; set; }
+
     private IEnumerator<Token> tokens = null!;
     private SourceRange previousTokenRange = SourceRange.Zero;
     private readonly SymbolTable symbols = data.Symbols;
 
-    public CompilationUnit Parse(IEnumerator<Token> tokens)
+    public Result<CompilationUnit> Parse(IEnumerator<Token> tokens)
     {
         this.tokens = tokens;
 
         _ = Next();
 
-        return ParseTopLevel();
+        try
+        {
+            return ParseTopLevel();
+        }
+        catch (Exception e)
+        {
+            string error = Options.Verbose > 0 ? e.ToString() : e.Message;
+            return data.GetFileLocation(Position) + " " + error.Trim();
+        }
     }
 
     private CompilationUnit ParseTopLevel()
@@ -65,7 +76,7 @@ public partial class Parser(CompilerContext data)
 
         if (Peek(TokenType.Garbage))
         {
-            throw new InvalidTokenException(data.GetFileLocation(previousTokenRange.End) + " Garbage token encountered");
+            throw new InvalidTokenException("Garbage token encountered");
         }
 
         return new(functions.ToArray(), globals.ToArray())
@@ -330,20 +341,36 @@ public partial class Parser(CompilerContext data)
         {
             return ParseFunctionCall(identifier, parameters);
         }
-        else if (TryEat(TokenType.Assignment))
+        else if (TryEat(TokenType.OpenBracket))
         {
-            return ParseVariableAssignment(identifier);
+            // Parse array index expression: arr[expr] = value;
+            Expression indexExpr = ParseBinaryExpression();
+            _ = Eat(TokenType.CloseBracket);
+
+            // Support assignment to array index: arr[expr] = value;
+
+            Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Assign);
+            Expression value;
+
+
+            value = ParseRValue(symbol);
+
+            _ = Eat(TokenType.Semicolon);
+
+            // Return an ArrayAssignmentStatement for the array index assignment
+            return new ArrayAssignmentStatement(
+                symbol,
+                indexExpr,
+                value
+            )
+            { Range = identifier.Range };
         }
-        else if (TryEat(TokenType.Increment))
+        else
         {
-            return ParseVariableAssignmentShorthand(identifier, new IntValue(1));
-        }
-        else if (TryEat(TokenType.AdditionAssignment))
-        {
-            return ParseVariableAssignmentShorthand(identifier, ParseBinaryExpression());
+            return ParseAssignment(identifier);
         }
 
-        throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParseIdentifierStatement)} of type {Peek()}");
+        throw new ParserException($"Unexpected token in {nameof(ParseIdentifierStatement)} of type {Peek()}");
     }
 
     private FunctionCall ParseFunctionCall(Token identifier, List<Expression> parameters)
@@ -373,7 +400,7 @@ public partial class Parser(CompilerContext data)
             TokenType.Subtraction => ParseInteger(TokenType.Subtraction),
             TokenType.Addition => ParseInteger(TokenType.Addition),
             TokenType.Identifier => ParseIdentifier(),
-            _ => throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} ParseExpression: {Peek()}"),
+            _ => throw new ParserException(Peek().ToString()),
         };
     }
 
@@ -407,29 +434,55 @@ public partial class Parser(CompilerContext data)
         };
     }
 
-    private VariableDeclaration ParseVariableAssignment(Token identifier)
+    private VariableDeclaration ParseAssignment(Token identifier)
     {
-        Expression value = ParseBinaryExpression();
+        Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Assign);
+        Expression value = ParseRValue(symbol);
+
         _ = Eat(TokenType.Semicolon);
 
-        Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Assign);
-
-        return new VariableDeclaration(symbol, value)
-        {
-            Range = identifier.Range,
-        };
+        return new VariableDeclaration(symbol, value) { Range = identifier.Range };
     }
 
-    private VariableDeclaration ParseVariableAssignmentShorthand(Token identifier, Expression shorthandValue)
+    private Expression ParseRValue(Symbol symbol)
     {
-        Symbol symbol = symbols.GetOrAdd(identifier, SymbolKind.Assign);
+        TokenType assignmentType = Peek();
+        _ = Eat(assignmentType);
 
-        Expression value = new BinaryExpression(BinaryOperator.Addition, new Variable(symbol), shorthandValue);
-        _ = Eat(TokenType.Semicolon);
-
-        return new VariableDeclaration(symbol, value)
+        Expression value;
+        Expression rhs;
+        switch (assignmentType)
         {
-            Range = identifier.Range,
-        };
+            case TokenType.Assignment:
+                value = ParseBinaryExpression();
+                break;
+
+            case TokenType.AdditionAssignment:
+                value = new BinaryExpression(BinaryOperator.Addition, new Variable(symbol), ParseBinaryExpression());
+                break;
+
+            case TokenType.BitwiseShiftLeftAssignment:
+                rhs = ParseBinaryExpression();
+                value = new BinaryExpression(BinaryOperator.BitwiseShiftLeft, new Variable(symbol), rhs);
+                break;
+
+            case TokenType.BitwiseOrAssignment:
+                rhs = ParseBinaryExpression();
+                value = new BinaryExpression(BinaryOperator.BitwiseOr, new Variable(symbol), rhs);
+                break;
+
+            case TokenType.BitwiseAnd:
+                rhs = ParseBinaryExpression();
+                value = new BinaryExpression(BinaryOperator.BitwiseAnd, new Variable(symbol), rhs);
+                break;
+
+            case TokenType.Increment:
+                value = new BinaryExpression(BinaryOperator.Addition, new Variable(symbol), new IntValue(1));
+                break;
+
+            default: throw new ParserException("Unknown assignment type " + assignmentType);
+        }
+
+        return value;
     }
 }

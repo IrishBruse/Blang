@@ -30,33 +30,52 @@ public static class Compiler
 
         CompilerContext data = new(file);
 
+        IEnumerator<Token> tokens = Lex(file, data);
+
+        Result<CompilationUnit> parseResult = Parse(tokens, data);
+        if (parseResult.IsFailure) return parseResult.Error;
+
+        long elapsedTime = sw.ElapsedMilliseconds;
+
+        Result<CompileOutput> emitResult = Emit(parseResult.Value, data);
+        if (emitResult.IsFailure) return emitResult.Error;
+
+        emitResult.Value.CompileTime = elapsedTime;
+        return emitResult.Value;
+    }
+
+    private static IEnumerator<Token> Lex(string file, CompilerContext data)
+    {
         Lexer lexer = new(data);
         IEnumerator<Token> tokens = lexer.Lex(File.OpenRead(file), file);
+        return tokens;
+    }
 
-        CompilationUnit unit;
-
+    private static Result<CompilationUnit> Parse(IEnumerator<Token> tokens, CompilerContext data)
+    {
         Parser parser = new(data);
-        unit = parser.Parse(tokens);
-        if (unit == null) return "Failed to parse " + file;
+        Result<CompilationUnit> parseResult = parser.Parse(tokens);
+        if (parseResult.IsFailure) return parseResult.Error;
 
         if (Options.Ast)
         {
-            string astFile = Path.ChangeExtension(file, "ast.json");
-            File.WriteAllText(astFile, unit.ToJson());
+            string astFile = Path.ChangeExtension(data.File, "ast.json");
+            File.WriteAllText(astFile, parseResult.Value.ToJson());
         }
 
+        return parseResult;
+    }
+
+    private static Result<CompileOutput> Emit(CompilationUnit unit, CompilerContext data)
+    {
         QbeTarget target = Options.Target switch
         {
             CompilationTarget.Qbe => new QbeTarget(),
             _ => throw new CompilerException($"Unknown Target {Options.Target}"),
         };
 
-        Result<CompileOutput> result;
-
-        result = target.Emit(unit, data);
-        if (!result.IsSuccess) return file + " Failed to emit\n" + result.Error;
-
-        result.Value.CompileTime = sw.ElapsedMilliseconds;
+        Result<CompileOutput> result = target.Emit(unit, data);
+        if (result.IsFailure) return data.File + " Failed to emit " + result.Error;
 
         return result;
     }

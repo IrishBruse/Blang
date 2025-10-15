@@ -13,6 +13,7 @@ using BLang.Utility;
 [JsonDerivedType(typeof(AutoStatement), nameof(AutoStatement))]
 [JsonDerivedType(typeof(FunctionCall), nameof(FunctionCall))]
 [JsonDerivedType(typeof(GlobalVariable), nameof(GlobalVariable))]
+[JsonDerivedType(typeof(ArrayAssignmentStatement), nameof(ArrayAssignmentStatement))]
 public abstract record Statement() : AstNode;
 
 [JsonDerivedType(typeof(VariableDeclaration), nameof(VariableDeclaration))]

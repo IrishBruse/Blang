@@ -1,6 +1,7 @@
 namespace BLang;
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -15,26 +16,34 @@ public class Tester
     private const char IconUpdated = 'u';
     private const char IconSame = '~';
 
-    public static void TestDirectory(string path)
+    public static void TestFiles(string[] tests)
     {
-        string[] tests = Directory.GetFiles(path, "*.b", SearchOption.AllDirectories);
-
+        Stopwatch sw = Stopwatch.StartNew();
+        int passed = 0;
         foreach (string testFile in tests)
         {
-            TestFile(testFile);
+            if (TestFile(testFile))
+            {
+                passed++;
+            }
         }
+        Console.WriteLine();
+        Console.WriteLine("Tests finished in " + sw.Elapsed.TotalSeconds.ToString("0.00") + "s");
+        Console.WriteLine($"{passed}/{tests.Length} Passed");
+        Console.WriteLine();
     }
 
-    public static void TestFile(string testFile)
+    public static bool TestFile(string testFile)
     {
         if (Options.UpdateSnapshots)
         {
             Options.Ast = true;
             UpdateSnapshot(testFile);
+            return true;
         }
         else
         {
-            CompareSnapshot(testFile);
+            return CompareSnapshot(testFile);
         }
     }
 
@@ -125,12 +134,14 @@ public class Tester
         }
     }
 
-    private static void CompareSnapshot(string testFile)
+    private static bool CompareSnapshot(string testFile)
     {
         string folderType = testFile.Split("/")[1];
         (string astOutput, string stdOutput) = LoadTestContent(testFile);
 
         Result<CompileOutput> res = Compiler.Compile(testFile);
+
+        bool passed = false;
 
         string error = "";
 
@@ -192,6 +203,8 @@ public class Tester
                     }
                 }
             }
+
+            passed = res.IsSuccess;
         }
         else if (folderType == "error")
         {
@@ -201,10 +214,10 @@ public class Tester
             {
                 error += $"CompileError: {compileError}\n";
             }
+            passed = !res.IsSuccess;
         }
         else
         {
-
             Console.WriteLine("Unkown folderType " + folderType);
         }
 
@@ -214,6 +227,8 @@ public class Tester
         string icon = error == string.Empty ? Green(IconPass) : Red(IconFail);
         Log($"{icon} {testFile} {time}");
         if (error != string.Empty) Error(error);
+
+        return passed;
     }
 
     private static (string astOutput, string stdOutput) LoadTestContent(string testFile)

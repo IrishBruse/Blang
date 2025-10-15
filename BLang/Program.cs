@@ -1,8 +1,9 @@
 namespace BLang;
 
-using System;
 using System.CommandLine;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using BLang.Utility;
 
 public class Program
@@ -160,13 +161,15 @@ public class Program
 
         if (file != null && file != "")
         {
-            Tester.TestFile(file);
+            _ = Tester.TestFile(file);
         }
         else
         {
-            Tester.TestDirectory("Examples/");
-            Console.WriteLine();
-            Tester.TestDirectory("Tests/");
+            string[] exampleFiles = Directory.GetFiles("Examples/", "*.b", SearchOption.AllDirectories);
+            string[] testFiles = Directory.GetFiles("Tests/", "*.b", SearchOption.AllDirectories);
+            string[] tests = exampleFiles.Concat(testFiles).ToArray();
+
+            Tester.TestFiles(tests);
         }
 
         return 0;

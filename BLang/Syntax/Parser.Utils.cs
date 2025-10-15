@@ -19,6 +19,11 @@ public partial class Parser
         return tokens.Current.TokenType;
     }
 
+    public Token PeekToken()
+    {
+        return tokens.Current;
+    }
+
     private Token Next()
     {
         Token token = tokens.Current;
@@ -39,8 +44,8 @@ public partial class Parser
 
     private static void LogToken(Token token)
     {
-        string type = token.TokenType.ToString();
-        string content = token.Content;
+        string type = token.TokenType.ToString().Trim();
+        string content = token.Content.Trim();
 
         if (token.TokenType == TokenType.IntegerLiteral)
         {
@@ -56,7 +61,7 @@ public partial class Parser
         }
         else if (token.TokenType == TokenType.Identifier)
         {
-            // content = content;
+            content = Colors.White(content);
         }
         else if (token.TokenType == TokenType.OpenBracket || token.TokenType == TokenType.CloseBracket)
         {
@@ -79,7 +84,7 @@ public partial class Parser
             content = Colors.Gray(content);
         }
 
-        Console.WriteLine($"{type,-20} {content}");
+        Console.WriteLine($"{type,-20} {content,-20}");
     }
 
     [StackTraceHidden]
@@ -87,11 +92,14 @@ public partial class Parser
     {
         Token token = Next();
 
+        Position = previousTokenRange.Start;
+
         if (token.TokenType != type)
         {
             int start = previousTokenRange.Start;
-            throw new ParserException(data.GetFileLocation(start) + $" Expected {type} but got {token.TokenType}");
+            throw new ParserException($"Expected {type} but got {token.TokenType}");
         }
+
 
         return token;
     }

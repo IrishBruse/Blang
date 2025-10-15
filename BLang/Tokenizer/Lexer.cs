@@ -92,6 +92,7 @@ public class Lexer(CompilerContext data)
         ["/="] = TokenType.DivisionAssignment,
         ["%="] = TokenType.ModuloAssignment,
         ["|="] = TokenType.BitwiseOrAssignment,
+        ["&="] = TokenType.BitwiseOrAssignment,
 
         ["="] = TokenType.Assignment,
 

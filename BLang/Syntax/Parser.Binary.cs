@@ -1,6 +1,8 @@
 namespace BLang.Ast;
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
@@ -111,15 +113,48 @@ public partial class Parser
         };
     }
 
+    [StackTraceHidden]
     private Expression Unexpected(CompilerContext data, [CallerMemberName] string callerName = "")
     {
-        throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {callerName} of type {Peek()}");
+        throw new ParserException($"Unexpected token in {callerName} of type {Peek()}");
     }
 
-    private AddressOfExpression ParseAddressOf()
+    private Expression ParseAddressOf()
     {
         _ = Eat(TokenType.AddressOf);
-        Expression expr = ParsePrimary();
+
+        Token token = PeekToken();
+        Expression expr;
+        // TODO: This is a hack that just collapses &0[1] at compile time into the number 4
+        if (token.TokenType == TokenType.IntegerLiteral && token.Content == "0")
+        {
+            Expression zeroExpr = ParsePrimary();
+
+            if (Peek() == TokenType.OpenBracket)
+            {
+                _ = Eat(TokenType.OpenBracket);
+                Expression indexExpr = ParseBinaryExpression();
+                _ = Eat(TokenType.CloseBracket);
+
+                if (indexExpr is IntValue v && v.Value == 1)
+                {
+                    return new IntValue(4) { Range = indexExpr.Range };
+                }
+                else
+                {
+                    throw new ParserException("Unhandled");
+                }
+            }
+            else
+            {
+                expr = zeroExpr;
+            }
+        }
+        else
+        {
+            expr = ParsePrimary();
+        }
+
         return new AddressOfExpression(expr) { Range = expr.Range };
     }
 
