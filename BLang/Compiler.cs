@@ -26,8 +26,6 @@ public static class Compiler
 
     private static Result<CompileOutput> CompileFile(string file)
     {
-        Stopwatch sw = Stopwatch.StartNew();
-
         CompilerContext data = new(file);
 
         IEnumerator<Token> tokens = Lex(file, data);
@@ -35,12 +33,10 @@ public static class Compiler
         Result<CompilationUnit> parseResult = Parse(tokens, data);
         if (parseResult.IsFailure) return parseResult.Error;
 
-        long elapsedTime = sw.ElapsedMilliseconds;
 
         Result<CompileOutput> emitResult = Emit(parseResult.Value, data);
         if (emitResult.IsFailure) return emitResult.Error;
 
-        emitResult.Value.CompileTime = elapsedTime;
         return emitResult.Value;
     }
 

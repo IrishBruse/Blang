@@ -12,7 +12,7 @@ using static BLang.Utility.Colors;
 public class Tester
 {
     private const char IconPass = '✓';
-    private const char IconFail = '×';
+    private const char IconFail = '\u0078';
     private const char IconUpdated = 'u';
     private const char IconSame = '~';
 
@@ -28,7 +28,7 @@ public class Tester
             }
         }
         Console.WriteLine();
-        Console.WriteLine("Tests finished in " + sw.Elapsed.TotalSeconds.ToString("0.00") + "s");
+        Console.WriteLine($"Tests finished in {sw.Elapsed.TotalSeconds:0.00}s");
         Console.WriteLine($"{passed}/{tests.Length} Passed");
         Console.WriteLine();
     }
@@ -51,8 +51,6 @@ public class Tester
     {
         string folderType = testFile.Split("/")[1];
         (string astPreviousOutput, string stdPreviousOutput) = LoadTestContent(testFile);
-
-        Options.Verbose = 0; // Force readable messages and no traces
 
         Result<CompileOutput> res = Compiler.Compile(testFile);
 
@@ -149,6 +147,8 @@ public class Tester
             folderType = "example";
         }
 
+        Stopwatch timer = Stopwatch.StartNew();
+
         if (folderType == "ok" || folderType == "example")
         {
             passed = CompareSuccess(testFile, folderType, res, ref error);
@@ -162,9 +162,9 @@ public class Tester
             Console.WriteLine("Unkown folderType " + folderType);
         }
 
-        long ms = res.IsSuccess ? res.Value.CompileTime : 0;
+        double ms = timer.ElapsedTicks / 1000000.0;
 
-        string time = Gray($"({ms}ms)");
+        string time = Gray($"({ms:0.00}ms)");
         string icon = error == string.Empty ? Green(IconPass) : Red(IconFail);
         Log($"{icon} {testFile} {time}");
         if (error != string.Empty) Error(error);
