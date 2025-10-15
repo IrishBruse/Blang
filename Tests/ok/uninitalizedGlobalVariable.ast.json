@@ -2,8 +2,7 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main",
-        "Kind": 0
+        "Name": "main"
       },
       "Parameters": [],
       "Body": [
@@ -11,8 +10,7 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf",
-              "Kind": 0
+              "Name": "printf"
             }
           ],
           "Range": {
@@ -21,10 +19,9 @@
           }
         },
         {
-          "_Type": "VariableDeclaration",
+          "_Type": "GlobalVariableDecleration",
           "Symbol": {
-            "Name": "variable",
-            "Kind": 0
+            "Name": "variable"
           },
           "Value": {
             "_Type": "IntValue",
@@ -42,8 +39,7 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "printf",
-            "Kind": 0
+            "Name": "printf"
           },
           "Parameters": [
             {
@@ -57,8 +53,7 @@
             {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "variable",
-                "Kind": 0
+                "Name": "variable"
               },
               "Range": {
                 "Start": 87,
@@ -80,10 +75,9 @@
   ],
   "GlobalVariables": [
     {
-      "$type": "VariableDeclaration",
+      "$type": "GlobalVariableDecleration",
       "Symbol": {
-        "Name": "variable",
-        "Kind": 0
+        "Name": "variable"
       },
       "Value": null,
       "Range": {

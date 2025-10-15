@@ -2,8 +2,7 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main",
-        "Kind": 0
+        "Name": "main"
       },
       "Parameters": [],
       "Body": [
@@ -11,8 +10,7 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf",
-              "Kind": 0
+              "Name": "printf"
             }
           ],
           "Range": {
@@ -21,10 +19,9 @@
           }
         },
         {
-          "_Type": "VariableDeclaration",
+          "_Type": "GlobalVariableDecleration",
           "Symbol": {
-            "Name": "foo",
-            "Kind": 0
+            "Name": "foo"
           },
           "Value": {
             "_Type": "IntValue",
@@ -42,8 +39,7 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "printf",
-            "Kind": 0
+            "Name": "printf"
           },
           "Parameters": [
             {
@@ -57,8 +53,7 @@
             {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "foo",
-                "Kind": 0
+                "Name": "foo"
               },
               "Range": {
                 "Start": 70,
@@ -74,8 +69,7 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "printf",
-            "Kind": 0
+            "Name": "printf"
           },
           "Parameters": [
             {
@@ -89,8 +83,7 @@
             {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "bar",
-                "Kind": 2
+                "Name": "bar"
               },
               "Range": {
                 "Start": 99,
@@ -112,10 +105,9 @@
   ],
   "GlobalVariables": [
     {
-      "$type": "VariableDeclaration",
+      "$type": "GlobalVariableDecleration",
       "Symbol": {
-        "Name": "foo",
-        "Kind": 0
+        "Name": "foo"
       },
       "Value": null,
       "Range": {
@@ -124,10 +116,9 @@
       }
     },
     {
-      "$type": "VariableDeclaration",
+      "$type": "GlobalVariableDecleration",
       "Symbol": {
-        "Name": "bar",
-        "Kind": 0
+        "Name": "bar"
       },
       "Value": {
         "_Type": "IntValue",

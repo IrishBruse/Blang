@@ -72,11 +72,11 @@ public class QbeTarget : ITarget
         {
             switch (variable)
             {
-                case VariableDeclaration varDecl:
+                case GlobalVariableDecleration varDecl:
                     VisitGlobalVariable(varDecl);
                     break;
 
-                case ArrayDeclaration arrayDecl:
+                case GlobalArrayDeclaration arrayDecl:
                     VisitGlobalArray(arrayDecl);
                     break;
 
@@ -94,7 +94,7 @@ public class QbeTarget : ITarget
         GenerateExternsSection();
     }
 
-    private void VisitGlobalVariable(VariableDeclaration variable)
+    private void VisitGlobalVariable(GlobalVariableDecleration variable)
     {
         qbe.Comment(variable.Symbol.Name);
         _ = CreateGlobalMemoryRegister(variable.Symbol);// TODO: remove
@@ -103,7 +103,7 @@ public class QbeTarget : ITarget
         qbe.WriteLine();
     }
 
-    private void VisitGlobalArray(ArrayDeclaration array)
+    private void VisitGlobalArray(GlobalArrayDeclaration array)
     {
         qbe.Comment($"{array.Symbol.Name}[{array.Size}]");
         _ = CreateGlobalMemoryRegister(array.Symbol);// TODO: remove
@@ -142,7 +142,7 @@ public class QbeTarget : ITarget
             case ExternalStatement s: VisitExternalStatement(s); break;
             case FunctionCall s: VisitFunctionCall(s); break;
             case AutoStatement s: VisitAutoStatement(s); break;
-            case VariableDeclaration s: VisitVariableAssignment(s); break;
+            case GlobalVariableDecleration s: VisitVariableAssignment(s); break;
             case WhileStatement s: VisitWhileStatement(s); break;
             case IfStatement s: VisitIfStatement(s); break;
             default: throw new ParserException(node.ToString());
@@ -206,7 +206,7 @@ public class QbeTarget : ITarget
         qbe.Comment("while " + node.Condition);
         string labelPrefix = $"while_{++conditionIndex}_";
         qbe.Label($"{labelPrefix}condition");
-        string reg = GenerateBinaryExpressionIR(node.Condition, new("while_condition", SymbolKind.Load));
+        string reg = GenerateBinaryExpressionIR(node.Condition, new("while_condition"));
         qbe.Jnz(reg, $"{labelPrefix}body", $"{labelPrefix}end");
         qbe.Label($"{labelPrefix}body");
         EmitBody(node.Body);
@@ -223,7 +223,7 @@ public class QbeTarget : ITarget
         string labelPrefix = $"if_{++conditionIndex}_";
         qbe.Label($"{labelPrefix}condition");
 
-        string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + conditionIndex, SymbolKind.Load));
+        string reg = GenerateBinaryExpressionIR(node.Condition, new("if_condition" + conditionIndex));
         string labelSuffix = node.ElseBody == null ? "end" : "else";
         qbe.Jnz(reg, $"{labelPrefix}body", $"{labelPrefix}{labelSuffix}");
         qbe.Label($"{labelPrefix}body");
@@ -302,7 +302,7 @@ public class QbeTarget : ITarget
         return string.Join(", ", registers);
     }
 
-    public void VisitVariableAssignment(VariableDeclaration variableAssignment)
+    public void VisitVariableAssignment(GlobalVariableDecleration variableAssignment)
     {
         Expression value = variableAssignment.Value!;// TODO: null
 

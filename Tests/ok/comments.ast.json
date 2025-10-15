@@ -2,8 +2,7 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main",
-        "Kind": 0
+        "Name": "main"
       },
       "Parameters": [],
       "Body": [],
@@ -14,8 +13,7 @@
     },
     {
       "Symbol": {
-        "Name": "test",
-        "Kind": 0
+        "Name": "test"
       },
       "Parameters": [],
       "Body": [],

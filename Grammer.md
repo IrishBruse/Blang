@@ -30,7 +30,23 @@ CompilationUnit
 
 ```
 Definition
+    GlobalVariableDecleration
+    GlobalArrayDecleration
+    FunctionDecleration
+```
+
+```
+GlobalVariableDecleration
     (Name, ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
+```
+
+```
+GlobalArrayDecleration
+    (Name, ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
+```
+
+```
+FunctionDecleration
     (Name, '(', (Name, (',', Name)*)?, ')', Statement)
 ```
 

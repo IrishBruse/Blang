@@ -1,6 +1,6 @@
 namespace BLang.Utility;
 
-public record Symbol(string Name, SymbolKind Kind = SymbolKind.Load)
+public record Symbol(string Name)
 {
     public override string ToString()
     {

@@ -2,16 +2,14 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main",
-        "Kind": 0
+        "Name": "main"
       },
       "Parameters": [],
       "Body": [
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "other",
-            "Kind": 2
+            "Name": "other"
           },
           "Parameters": [],
           "Range": {
@@ -27,8 +25,7 @@
     },
     {
       "Symbol": {
-        "Name": "other",
-        "Kind": 0
+        "Name": "other"
       },
       "Parameters": [],
       "Body": [
@@ -36,8 +33,7 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf",
-              "Kind": 0
+              "Name": "printf"
             }
           ],
           "Range": {
@@ -48,8 +44,7 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "printf",
-            "Kind": 0
+            "Name": "printf"
           },
           "Parameters": [
             {

@@ -5,7 +5,7 @@ using BLang.Ast;
 using BLang.Utility;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "_Type")]
-[JsonDerivedType(typeof(VariableDeclaration), nameof(VariableDeclaration))]
+[JsonDerivedType(typeof(GlobalVariableDecleration), nameof(GlobalVariableDecleration))]
 [JsonDerivedType(typeof(ExternalStatement), nameof(ExternalStatement))]
 [JsonDerivedType(typeof(WhileStatement), nameof(WhileStatement))]
 [JsonDerivedType(typeof(SwitchStatement), nameof(SwitchStatement))]
@@ -16,12 +16,12 @@ using BLang.Utility;
 [JsonDerivedType(typeof(ArrayAssignmentStatement), nameof(ArrayAssignmentStatement))]
 public abstract record Statement() : AstNode;
 
-[JsonDerivedType(typeof(VariableDeclaration), nameof(VariableDeclaration))]
-[JsonDerivedType(typeof(ArrayDeclaration), nameof(ArrayDeclaration))]
+[JsonDerivedType(typeof(GlobalVariableDecleration), nameof(GlobalVariableDecleration))]
+[JsonDerivedType(typeof(GlobalArrayDeclaration), nameof(GlobalArrayDeclaration))]
 public record GlobalVariable : Statement;
 
-public record VariableDeclaration(Symbol Symbol, Expression? Value) : GlobalVariable;
-public record ArrayDeclaration(Symbol Symbol, int Size, int[] Values) : GlobalVariable;
+public record GlobalVariableDecleration(Symbol Symbol, Expression? Value) : GlobalVariable;
+public record GlobalArrayDeclaration(Symbol Symbol, int Size, int[] Values) : GlobalVariable;
 
 public record ExternalStatement(Symbol[] Externals) : Statement;
 

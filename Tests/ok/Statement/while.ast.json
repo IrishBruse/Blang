@@ -2,8 +2,7 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main",
-        "Kind": 0
+        "Name": "main"
       },
       "Parameters": [],
       "Body": [
@@ -11,8 +10,7 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf",
-              "Kind": 0
+              "Name": "printf"
             }
           ],
           "Range": {
@@ -25,8 +23,7 @@
           "Variables": [
             {
               "Symbol": {
-                "Name": "i",
-                "Kind": 0
+                "Name": "i"
               },
               "Value": 0
             }
@@ -37,10 +34,9 @@
           }
         },
         {
-          "_Type": "VariableDeclaration",
+          "_Type": "GlobalVariableDecleration",
           "Symbol": {
-            "Name": "i",
-            "Kind": 0
+            "Name": "i"
           },
           "Value": {
             "_Type": "IntValue",
@@ -62,8 +58,7 @@
             "Left": {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "i",
-                "Kind": 0
+                "Name": "i"
               },
               "Range": {
                 "Start": 68,
@@ -87,8 +82,7 @@
             {
               "_Type": "FunctionCall",
               "Symbol": {
-                "Name": "printf",
-                "Kind": 0
+                "Name": "printf"
               },
               "Parameters": [
                 {
@@ -102,8 +96,7 @@
                 {
                   "_Type": "Variable",
                   "Symbol": {
-                    "Name": "i",
-                    "Kind": 0
+                    "Name": "i"
                   },
                   "Range": {
                     "Start": 104,
@@ -117,10 +110,9 @@
               }
             },
             {
-              "_Type": "VariableDeclaration",
+              "_Type": "GlobalVariableDecleration",
               "Symbol": {
-                "Name": "i",
-                "Kind": 0
+                "Name": "i"
               },
               "Value": {
                 "_Type": "BinaryExpression",
@@ -128,8 +120,7 @@
                 "Left": {
                   "_Type": "Variable",
                   "Symbol": {
-                    "Name": "i",
-                    "Kind": 0
+                    "Name": "i"
                   },
                   "Range": {
                     "Start": 0,

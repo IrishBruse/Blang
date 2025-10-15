@@ -104,4 +104,3 @@ public record ArrayIndexExpression(Variable Variable, Expression Index) : Expres
         return Variable.ToString() + $"[{Index}]";
     }
 }
-

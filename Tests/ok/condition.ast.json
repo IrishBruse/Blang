@@ -2,8 +2,7 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main",
-        "Kind": 0
+        "Name": "main"
       },
       "Parameters": [],
       "Body": [
@@ -11,8 +10,7 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf",
-              "Kind": 0
+              "Name": "printf"
             }
           ],
           "Range": {
@@ -25,8 +23,7 @@
           "Variables": [
             {
               "Symbol": {
-                "Name": "a",
-                "Kind": 0
+                "Name": "a"
               },
               "Value": 0
             }
@@ -37,10 +34,9 @@
           }
         },
         {
-          "_Type": "VariableDeclaration",
+          "_Type": "GlobalVariableDecleration",
           "Symbol": {
-            "Name": "a",
-            "Kind": 0
+            "Name": "a"
           },
           "Value": {
             "_Type": "IntValue",
@@ -66,8 +62,7 @@
               "Left": {
                 "_Type": "Variable",
                 "Symbol": {
-                  "Name": "a",
-                  "Kind": 0
+                  "Name": "a"
                 },
                 "Range": {
                   "Start": 62,
@@ -120,8 +115,7 @@
             {
               "_Type": "FunctionCall",
               "Symbol": {
-                "Name": "printf",
-                "Kind": 0
+                "Name": "printf"
               },
               "Parameters": [
                 {
@@ -135,8 +129,7 @@
                 {
                   "_Type": "Variable",
                   "Symbol": {
-                    "Name": "a",
-                    "Kind": 0
+                    "Name": "a"
                   },
                   "Range": {
                     "Start": 104,
@@ -159,8 +152,7 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "printf",
-            "Kind": 0
+            "Name": "printf"
           },
           "Parameters": [
             {

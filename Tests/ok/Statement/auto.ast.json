@@ -2,8 +2,7 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main",
-        "Kind": 0
+        "Name": "main"
       },
       "Parameters": [],
       "Body": [
@@ -12,8 +11,7 @@
           "Variables": [
             {
               "Symbol": {
-                "Name": "foo",
-                "Kind": 0
+                "Name": "foo"
               },
               "Value": 0
             }
@@ -24,10 +22,9 @@
           }
         },
         {
-          "_Type": "VariableDeclaration",
+          "_Type": "GlobalVariableDecleration",
           "Symbol": {
-            "Name": "foo",
-            "Kind": 0
+            "Name": "foo"
           },
           "Value": {
             "_Type": "IntValue",

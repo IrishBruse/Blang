@@ -2,8 +2,7 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main",
-        "Kind": 0
+        "Name": "main"
       },
       "Parameters": [],
       "Body": [
@@ -11,8 +10,7 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "exit",
-              "Kind": 0
+              "Name": "exit"
             }
           ],
           "Range": {
@@ -23,8 +21,7 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "exit",
-            "Kind": 0
+            "Name": "exit"
           },
           "Parameters": [
             {

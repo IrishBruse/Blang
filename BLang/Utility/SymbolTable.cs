@@ -5,11 +5,6 @@ using System.Collections.Generic;
 using BLang.Exceptions;
 using BLang.Tokenizer;
 
-public enum SymbolKind
-{
-    Define, Assign, Load
-}
-
 // Represents the symbol table structure (managing scopes)
 public class SymbolTable
 {
@@ -45,18 +40,18 @@ public class SymbolTable
         }
     }
 
-    public Symbol Add(Token token, SymbolKind kind = SymbolKind.Load)
+    public Symbol Add(Token token)
     {
         if (token.TokenType != TokenType.Identifier && !token.TokenType.IsKeyword())
         {
             throw new ParserException(token.Content);
         }
-        return Add(token.Content, kind);
+        return Add(token.Content);
     }
 
-    public Symbol Add(string name, SymbolKind kind = SymbolKind.Load)
+    public Symbol Add(string name)
     {
-        Symbol symbol = new(name, kind);
+        Symbol symbol = new(name);
         Dictionary<string, Symbol> currentScope = scopes.Peek();
         if (currentScope.ContainsKey(name))
         {
@@ -65,7 +60,7 @@ public class SymbolTable
             throw new InvalidOperationException($"Symbol '{name}' already declared in current scope.");
         }
         currentScope.Add(name, symbol);
-        Log($"Added {symbol.Kind} symbol: {symbol.Name} in scope {CurrentScopeDepth}");
+        Log($"Added symbol: {symbol.Name} in scope {CurrentScopeDepth}");
 
         return symbol;
     }
@@ -83,7 +78,7 @@ public class SymbolTable
         throw new ParserException($"Couldnt find symbol \"{name}\" in any scope");
     }
 
-    public Symbol GetOrAdd(Token token, SymbolKind kind = SymbolKind.Load)
+    public Symbol GetOrAdd(Token token)
     {
         foreach (Dictionary<string, Symbol> scope in scopes)
         {
@@ -93,7 +88,7 @@ public class SymbolTable
             }
         }
 
-        return Add(token, kind);
+        return Add(token);
     }
 
     /// <summary> Look up a symbol only in the current scope </summary>
