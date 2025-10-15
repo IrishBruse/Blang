@@ -1,6 +1,5 @@
 namespace BLang.Ast;
 
-using System;
 using System.Diagnostics;
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
@@ -29,7 +28,7 @@ public partial class Parser
         Token token = tokens.Current;
         if (token != null)
         {
-            previousTokenRange = token.Range;
+            TokenPosition = token.Range;
         }
 
         if (Options.Tokens && token != null)
@@ -92,11 +91,8 @@ public partial class Parser
     {
         Token token = Next();
 
-        Position = previousTokenRange.Start;
-
         if (token.TokenType != type)
         {
-            int start = previousTokenRange.Start;
             throw new ParserException($"Expected {type} but got {token.TokenType}");
         }
 

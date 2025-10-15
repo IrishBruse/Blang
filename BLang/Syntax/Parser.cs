@@ -8,14 +8,11 @@ using BLang.Exceptions;
 using BLang.Tokenizer;
 using BLang.Utility;
 
-#pragma warning disable IDE0072
-
 public partial class Parser(CompilerContext data)
 {
-    public int Position { get; set; }
+    public SourceRange TokenPosition { get; set; } = SourceRange.Zero;
 
     private IEnumerator<Token> tokens = null!;
-    private SourceRange previousTokenRange = SourceRange.Zero;
     private readonly SymbolTable symbols = data.Symbols;
 
     public Result<CompilationUnit> Parse(IEnumerator<Token> tokens)
@@ -26,21 +23,21 @@ public partial class Parser(CompilerContext data)
 
         try
         {
-            return ParseTopLevel();
+            return ParseCompilationUnit();
         }
         catch (Exception e)
         {
             string error = Options.Verbose > 0 ? e.ToString() : e.Message;
-            return data.GetFileLocation(Position) + " " + error.Trim();
+            return data.GetFileLocation(TokenPosition.End) + " " + error.Trim();
         }
     }
 
-    private CompilationUnit ParseTopLevel()
+    private CompilationUnit ParseCompilationUnit()
     {
         List<FunctionDecleration> functions = [];
         List<GlobalVariable> globals = [];
 
-        SourceRange start = previousTokenRange;
+        SourceRange start = TokenPosition;
 
         EatComments();
 
@@ -68,7 +65,7 @@ public partial class Parser(CompilerContext data)
             }
             else
             {
-                throw new ParserException(data.GetFileLocation(previousTokenRange.End) + " Unexpected top level token of type " + Peek());
+                throw new ParserException(data.GetFileLocation(TokenPosition.End) + " Unexpected top level token of type " + Peek());
             }
 
             EatComments();
@@ -81,7 +78,7 @@ public partial class Parser(CompilerContext data)
 
         return new(functions.ToArray(), globals.ToArray())
         {
-            Range = start.Merge(previousTokenRange)
+            Range = start.Merge(TokenPosition)
         };
     }
 
@@ -160,7 +157,7 @@ public partial class Parser(CompilerContext data)
         symbols.ExitScope();
         return new FunctionDecleration(symbol, parameters.ToArray(), body)
         {
-            Range = begin.Merge(previousTokenRange),
+            Range = begin.Merge(TokenPosition),
         };
     }
 
@@ -197,7 +194,7 @@ public partial class Parser(CompilerContext data)
             TokenType.IfKeyword => ParseIfDefinition(),
             TokenType.AutoKeyword => ParseAutoStatement(),
             TokenType.Identifier => ParseIdentifierStatement(),
-            _ => throw new InvalidTokenException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParseStatement)} of type {Peek()}")
+            _ => throw new InvalidTokenException($"{data.GetFileLocation(TokenPosition.End)} Unexpected token in {nameof(ParseStatement)} of type {Peek()}")
         };
     }
 
@@ -214,7 +211,7 @@ public partial class Parser(CompilerContext data)
 
         return new((BinaryExpression)condition, body)
         {
-            Range = start.Range.Merge(previousTokenRange),
+            Range = start.Range.Merge(TokenPosition),
         };
     }
 
@@ -231,7 +228,7 @@ public partial class Parser(CompilerContext data)
 
         return new((BinaryExpression)condition, body)
         {
-            Range = start.Range.Merge(previousTokenRange),
+            Range = start.Range.Merge(TokenPosition),
         };
     }
 
@@ -255,7 +252,7 @@ public partial class Parser(CompilerContext data)
 
         return new(condition, body, elseBody)
         {
-            Range = start.Range.Merge(previousTokenRange),
+            Range = start.Range.Merge(TokenPosition),
         };
     }
 
@@ -327,7 +324,7 @@ public partial class Parser(CompilerContext data)
         // Statement (handled by body)
         return new AutoStatement(variables.ToArray())
         {
-            Range = auto.Range.Merge(previousTokenRange),
+            Range = auto.Range.Merge(TokenPosition),
         };
     }
 

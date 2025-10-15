@@ -5,14 +5,6 @@ using System.Collections.Generic;
 using BLang.Exceptions;
 using BLang.Tokenizer;
 
-public record Symbol(string Name, SymbolKind Kind = SymbolKind.Load)
-{
-    public override string ToString()
-    {
-        return Name;
-    }
-}
-
 public enum SymbolKind
 {
     Define, Assign, Load

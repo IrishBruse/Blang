@@ -241,11 +241,11 @@ public static class Extensions
             BinaryOperator.Decrement => "--",
 
             BinaryOperator.BitwiseOr => "|",
-            BinaryOperator.BitwiseComplement => throw new System.NotImplementedException(),
-            BinaryOperator.BitwiseAnd => throw new System.NotImplementedException(),
-            BinaryOperator.BitwiseXOr => throw new System.NotImplementedException(),
-            BinaryOperator.BitwiseShiftLeft => throw new System.NotImplementedException(),
-            BinaryOperator.BitwiseShiftRight => throw new System.NotImplementedException(),
+            BinaryOperator.BitwiseComplement => throw new NotImplementedException(),
+            BinaryOperator.BitwiseAnd => throw new NotImplementedException(),
+            BinaryOperator.BitwiseXOr => throw new NotImplementedException(),
+            BinaryOperator.BitwiseShiftLeft => throw new NotImplementedException(),
+            BinaryOperator.BitwiseShiftRight => throw new NotImplementedException(),
 
             BinaryOperator.ArrayIndexing => "[?]",
 

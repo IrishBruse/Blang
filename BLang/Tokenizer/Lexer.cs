@@ -29,31 +29,32 @@ public class Lexer(CompilerContext data)
             {
                 EatWhitespace(c);
             }
-            else if (char.IsLetter(c))
-            {
-                yield return LexIdentifier(c);
-            }
-            else if (char.IsNumber(c))
-            {
-                yield return LexNumber(c);
-            }
             else if (c == '/' && p == '/')
             {
                 _ = LexSingleLineComment();
-                continue;
             }
             else if (c == '/' && p == '*')
             {
                 _ = LexMultiLineComment();
-                continue;
-            }
-            else if (c == '"')
-            {
-                yield return LexString();
             }
             else
             {
-                yield return LexOperator(c);
+                if (char.IsLetter(c))
+                {
+                    yield return LexIdentifier(c);
+                }
+                else if (char.IsNumber(c))
+                {
+                    yield return LexNumber(c);
+                }
+                else if (c == '"')
+                {
+                    yield return LexString();
+                }
+                else
+                {
+                    yield return LexOperator(c);
+                }
             }
         }
 

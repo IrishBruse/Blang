@@ -1,6 +1,5 @@
 namespace BLang.Ast;
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -30,7 +29,7 @@ public partial class Parser
         {
             if (!OperatorPrecedence.TryGetValue(Peek(), out int precedence))
             {
-                throw new ParserException($"{data.GetFileLocation(previousTokenRange.End)} Unexpected token in {nameof(ParseBinaryExpression)} of type {Peek()}");
+                throw new ParserException($"{data.GetFileLocation(TokenPosition.End)} Unexpected token in {nameof(ParseBinaryExpression)} of type {Peek()}");
             }
 
             Token conditionalOperator = Next();
@@ -123,8 +122,9 @@ public partial class Parser
     {
         _ = Eat(TokenType.AddressOf);
 
-        Token token = PeekToken();
         Expression expr;
+
+        Token token = PeekToken();
         // TODO: This is a hack that just collapses &0[1] at compile time into the number 4
         if (token.TokenType == TokenType.IntegerLiteral && token.Content == "0")
         {
