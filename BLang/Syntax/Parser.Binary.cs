@@ -29,7 +29,7 @@ public partial class Parser
         {
             if (!OperatorPrecedence.TryGetValue(Peek(), out int precedence))
             {
-                throw new ParserException($"{data.GetFileLocation(TokenPosition.End)} Unexpected token in {nameof(ParseBinaryExpression)} of type {Peek()}");
+                throw new ParserException($"Unexpected token in {nameof(ParseBinaryExpression)} of type {Peek()}");
             }
 
             Token conditionalOperator = Next();

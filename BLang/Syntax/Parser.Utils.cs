@@ -153,8 +153,7 @@ public partial class Parser
 
         if (!int.TryParse(numberText, out int number))
         {
-            string loc = data.GetFileLocation(integer.Range.Start);
-            throw new ParserException($"{loc} {integer} larger than 32bits");
+            throw new ParserException($"{integer} larger than 32bits");
         }
 
         return new IntValue(number)

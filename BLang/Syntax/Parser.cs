@@ -65,7 +65,7 @@ public partial class Parser(CompilerContext data)
             }
             else
             {
-                throw new ParserException(data.GetFileLocation(TokenPosition.End) + " Unexpected top level token of type " + Peek());
+                throw new ParserException("Unexpected top level token of type " + Peek());
             }
 
             EatComments();
@@ -194,7 +194,7 @@ public partial class Parser(CompilerContext data)
             TokenType.IfKeyword => ParseIfDefinition(),
             TokenType.AutoKeyword => ParseAutoStatement(),
             TokenType.Identifier => ParseIdentifierStatement(),
-            _ => throw new InvalidTokenException($"{data.GetFileLocation(TokenPosition.End)} Unexpected token in {nameof(ParseStatement)} of type {Peek()}")
+            _ => throw new InvalidTokenException($"Unexpected token in {nameof(ParseStatement)} of type {Peek()}")
         };
     }
 
@@ -407,8 +407,7 @@ public partial class Parser(CompilerContext data)
         Symbol? symbol = symbols.GetOrAdd(variable, SymbolKind.Load);
         if (symbol == null)
         {
-            string loc = data.GetFileLocation(variable.Range.Start);
-            throw new ParserException($"{loc}  {variable}");
+            throw new ParserException($"{variable}");
         }
 
         // TODO: match b better (Rvalue, '[', Rvalue, ']')
