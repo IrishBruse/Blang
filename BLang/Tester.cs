@@ -137,7 +137,6 @@ public class Tester
     private static bool CompareSnapshot(string testFile)
     {
         string folderType = testFile.Split("/")[1];
-        (string astOutput, string stdOutput) = LoadTestContent(testFile);
 
         Result<CompileOutput> res = Compiler.Compile(testFile);
 
@@ -152,69 +151,11 @@ public class Tester
 
         if (folderType == "ok" || folderType == "example")
         {
-            if (!res.IsSuccess)
-            {
-                error = res.Error;
-            }
-            else
-            {
-                CompileOutput output = res.Value;
-
-                string astJson = output!.CompilationUnit.ToJson();
-
-                Executable runOutput = Executable.Run(output.Executable);
-
-                if (runOutput.ExitCode != 0)
-                {
-                    error += $"ExitCode: {runOutput.ExitCode}\n";
-                    error += "\n";
-                }
-
-                if (folderType != "example")
-                {
-                    if (!astJson.Equals(astOutput, StringComparison.Ordinal))
-                    {
-                        (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, astJson);
-
-                        error += $"""
-                {Path.ChangeExtension(testFile, ".ast.json")}:{line}
-                Expected Ast:
-                {line1}
-                Recieved:
-                {line2}
-
-                """.Trim();
-                        error += "\n";
-                    }
-
-                    if (!stdOutput.Equals(runOutput.StdOut, StringComparison.Ordinal))
-                    {
-                        (int line, string? line1, string? line2) = FindFirstDifferentLine(stdOutput, runOutput.StdOut!);
-
-                        error += $"""
-                {Path.ChangeExtension(testFile, ".out")}:{line}
-                Expected Output:
-                {line1}
-                Recieved:
-                {line2}
-
-                """.Trim();
-                        error += "\n";
-                    }
-                }
-            }
-
-            passed = res.IsSuccess;
+            passed = CompareSuccess(testFile, folderType, res, ref error);
         }
         else if (folderType == "error")
         {
-            string compileError = res.Error;
-
-            if (!stdOutput.Equals(compileError, StringComparison.Ordinal))
-            {
-                error += $"CompileError: {compileError}\n";
-            }
-            passed = !res.IsSuccess;
+            passed = CompareError(testFile, res, ref error);
         }
         else
         {
@@ -229,6 +170,77 @@ public class Tester
         if (error != string.Empty) Error(error);
 
         return passed;
+    }
+
+    private static bool CompareSuccess(string testFile, string folderType, Result<CompileOutput> res, ref string error)
+    {
+        (string astOutput, string stdOutput) = LoadTestContent(testFile);
+        if (!res.IsSuccess)
+        {
+            error = res.Error;
+        }
+        else
+        {
+            CompileOutput output = res.Value;
+
+            string astJson = output!.CompilationUnit.ToJson();
+
+            Executable runOutput = Executable.Run(output.Executable);
+
+            if (runOutput.ExitCode != 0)
+            {
+                error += $"ExitCode: {runOutput.ExitCode}\n";
+                error += "\n";
+            }
+
+            if (folderType != "example")
+            {
+                if (!astJson.Equals(astOutput, StringComparison.Ordinal))
+                {
+                    (int line, string? line1, string? line2) = FindFirstDifferentLine(astOutput, astJson);
+
+                    error += $"""
+                {Path.ChangeExtension(testFile, ".ast.json")}:{line}
+                Expected Ast:
+                {line1}
+                Recieved:
+                {line2}
+
+                """.Trim();
+                    error += "\n";
+                }
+
+                if (!stdOutput.Equals(runOutput.StdOut, StringComparison.Ordinal))
+                {
+                    (int line, string? line1, string? line2) = FindFirstDifferentLine(stdOutput, runOutput.StdOut!);
+
+                    error += $"""
+                {Path.ChangeExtension(testFile, ".out")}:{line}
+                Expected Output:
+                {line1}
+                Recieved:
+                {line2}
+
+                """.Trim();
+                    error += "\n";
+                }
+            }
+        }
+
+        return res.IsSuccess;
+    }
+
+    private static bool CompareError(string testFile, Result<CompileOutput> res, ref string error)
+    {
+        (_, string stdOutput) = LoadTestContent(testFile);
+        string compileError = res.Error;
+
+        if (!stdOutput.Equals(compileError, StringComparison.Ordinal))
+        {
+            error += $"CompileError: {compileError}\n";
+        }
+
+        return !res.IsSuccess;
     }
 
     private static (string astOutput, string stdOutput) LoadTestContent(string testFile)
@@ -259,25 +271,20 @@ public class Tester
             lineNumber++;
         }
 
-        // Check for differences in length
         if (reader1.ReadLine() != null || reader2.ReadLine() != null)
         {
-            // If content1 is longer, we return the first line of content1 that doesn't have a match in content2.
             if (reader1.Peek() != -1)
             {
                 line1 = reader2.ReadLine();
                 line2 = reader2.ReadLine();
                 return Tuple.Create(lineNumber, line1, line2);
             }
-            // If content2 is longer, the first different line is the end of content1.
-            // We return null for the line content since content1 has no more lines.
             else
             {
                 return Tuple.Create<int, string?, string?>(lineNumber, string.Empty, string.Empty);
             }
         }
 
-        // If we reach here, strings are identical
         return Tuple.Create<int, string?, string?>(0, string.Empty, string.Empty);
     }
 }
