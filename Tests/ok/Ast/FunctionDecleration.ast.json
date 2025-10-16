@@ -13,17 +13,6 @@
     },
     {
       "Symbol": {
-        "Name": "example"
-      },
-      "Parameters": [],
-      "Body": [],
-      "Range": {
-        "Start": 10,
-        "End": 22
-      }
-    },
-    {
-      "Symbol": {
         "Name": "a"
       },
       "Parameters": [
@@ -40,14 +29,56 @@
       ],
       "Body": [],
       "Range": {
-        "Start": 23,
-        "End": 36
+        "Start": 9,
+        "End": 23
+      }
+    },
+    {
+      "Symbol": {
+        "Name": "c"
+      },
+      "Parameters": [
+        {
+          "_Type": "Variable",
+          "Symbol": {
+            "Name": "a"
+          },
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        },
+        {
+          "_Type": "Variable",
+          "Symbol": {
+            "Name": "b"
+          },
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        },
+        {
+          "_Type": "Variable",
+          "Symbol": {
+            "Name": "c"
+          },
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        }
+      ],
+      "Body": [],
+      "Range": {
+        "Start": 24,
+        "End": 42
       }
     }
   ],
   "GlobalVariables": [],
   "Range": {
     "Start": 0,
-    "End": 36
+    "End": 42
   }
 }

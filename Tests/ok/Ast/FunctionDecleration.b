@@ -1,4 +1,3 @@
 main(){}
-
-example() {}
-example(a) {}
+example1(a) {}
+example2(a,b,c) {}
