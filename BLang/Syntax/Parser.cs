@@ -48,22 +48,13 @@ public partial class Parser(CompilerContext data)
             // Definition
             //     FunctionDecleration
             //     GlobalVariableDecleration
-            //     GlobalArrayDecleration
             if (Peek(TokenType.OpenParenthesis))
             {
                 functions.Add(ParseFunctionDecleration(identifier));
             }
-            else if (Peek(TokenType.Semicolon) || Peek(TokenType.IntegerLiteral))
-            {
-                globals.Add(ParseGlobalVariableDecleration(identifier));
-            }
-            else if (Peek(TokenType.OpenBracket))
-            {
-                globals.Add(ParseGlobalArrayDecleration(identifier));
-            }
             else
             {
-                throw new ParserException("Unexpected top level token of type " + Peek());
+                globals.Add(ParseGlobalVariableDecleration(identifier));
             }
 
             EatComments();
@@ -81,7 +72,7 @@ public partial class Parser(CompilerContext data)
     }
 
     // FunctionDecleration
-    //     (Name, '(', (Name, (',', Name)*)?, ')', Statement)
+    //     (Identifier, '(', (Identifier, (',', Identifier)*)?, ')', Statement)
     private FunctionDecleration ParseFunctionDecleration(Token identifier)
     {
         symbols.EnterScope(identifier.Content);
@@ -115,49 +106,59 @@ public partial class Parser(CompilerContext data)
         };
     }
 
-
-    private GlobalVariableDecleration ParseGlobalVariableDecleration(Token identifier)
+    // GlobalVariableDecleration
+    //     (Identifier, ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
+    private GlobalVariable ParseGlobalVariableDecleration(Token identifier)
     {
+        // Identifier,
         Symbol symbol = symbols.Add(identifier.Content);
-        Expression? value = null;
-        if (Peek(TokenType.IntegerLiteral))
+
+        int? arraySize = null;
+
+        // ('[', Constant?, ']')?,
+        if (Peek(TokenType.OpenBracket))
         {
-            Token number = Eat(TokenType.IntegerLiteral);
-            value = new IntValue(number.ToInteger());
+            _ = Eat(TokenType.OpenBracket); // '['
+            // Constant?
+            if (TryEat(TokenType.IntegerLiteral, out Token? token))
+            {
+                arraySize = token.Number;
+            }
+            _ = Eat(TokenType.CloseBracket); // ']'
         }
 
-        _ = Eat(TokenType.Semicolon);
+        List<Expression> values = new();
 
-        return new(symbol, value);
-    }
-
-    // ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
-    private GlobalArrayDeclaration ParseGlobalArrayDecleration(Token identifier)
-    {
-        List<int> values = [];
-
-        _ = Eat(TokenType.OpenBracket); // '['
-        Token arraySize = Eat(TokenType.IntegerLiteral); // Constant?
-        _ = Eat(TokenType.CloseBracket); // ']'
-
-        Symbol symbol = symbols.Add(identifier.Content);
+        int arrayValues = 0;
 
         // (Ival, (',', Ival)*)?, ';')
         if (Peek(TokenType.IntegerLiteral))
         {
-            Token number = Eat(TokenType.IntegerLiteral);
-            values.Add(number.Number);
+            values.Add(new IntValue(EatInt()));
+            arrayValues++;
 
-            while (Peek(TokenType.Comma))
+            while (TryEat(TokenType.Comma))
             {
-                _ = Eat(TokenType.Comma);
-                number = Eat(TokenType.IntegerLiteral);
-                values.Add(number.Number);
+                values.Add(new IntValue(EatInt()));
+                arrayValues++;
+            }
+
+            if (arraySize != null && arraySize < arrayValues)
+            {
+                throw new CompilerException($"Array of size {arraySize} contains {arrayValues} elements");
             }
         }
+
         _ = Eat(TokenType.Semicolon);
 
-        return new(symbol, arraySize.Number, values.ToArray());
+        if (arraySize != null)
+        {
+            return new GlobalArrayDeclaration(symbol, values.ToArray(), 1);
+        }
+        else
+        {
+            return new GlobalVariableDecleration(symbol, arrayValues == 1 ? values[0] : null);
+        }
     }
 
     private Statement[] ParseBlock()
@@ -276,7 +277,7 @@ public partial class Parser(CompilerContext data)
         };
     }
 
-    // ('auto', Name, Constant?, (',', Name, Constant?)*, ';', Statement)
+    // ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';', Statement)
     private AutoStatement ParseAutoStatement()
     {
         List<VariableAssignment> variables = [];
@@ -285,7 +286,7 @@ public partial class Parser(CompilerContext data)
         // 'auto'
         Token auto = Eat(TokenType.AutoKeyword);
 
-        // Name
+        // Identifier
         Token identifier = Eat(TokenType.Identifier);
 
         // Constant?
@@ -296,7 +297,7 @@ public partial class Parser(CompilerContext data)
         Symbol sym = symbols.Add(identifier);
         variables.Add(new(sym, value));
 
-        // (',', Name, Constant?)*
+        // (',', Identifier, Constant?)*
         while (Peek(TokenType.Comma))
         {
             value = 0;
@@ -304,7 +305,7 @@ public partial class Parser(CompilerContext data)
             // ','
             _ = Eat(TokenType.Comma);
 
-            // Name
+            // Identifier
             identifier = Eat(TokenType.Identifier);
 
             // Constant?

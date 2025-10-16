@@ -107,7 +107,7 @@ public class QbeTarget : ITarget
     {
         qbe.Comment($"{array.Symbol.Name}[{array.Size}]");
         _ = CreateGlobalMemoryRegister(array.Symbol);// TODO: remove
-        int[] values = array.Values;
+        Expression[] values = array.Values;
         string data = "w";
         for (int i = 0; i < array.Size; i++)
         {

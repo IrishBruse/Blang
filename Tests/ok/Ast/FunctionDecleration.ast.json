@@ -10,11 +10,44 @@
         "Start": 0,
         "End": 8
       }
+    },
+    {
+      "Symbol": {
+        "Name": "example"
+      },
+      "Parameters": [],
+      "Body": [],
+      "Range": {
+        "Start": 10,
+        "End": 22
+      }
+    },
+    {
+      "Symbol": {
+        "Name": "a"
+      },
+      "Parameters": [
+        {
+          "_Type": "Variable",
+          "Symbol": {
+            "Name": "a"
+          },
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        }
+      ],
+      "Body": [],
+      "Range": {
+        "Start": 23,
+        "End": 36
+      }
     }
   ],
   "GlobalVariables": [],
   "Range": {
     "Start": 0,
-    "End": 8
+    "End": 36
   }
 }

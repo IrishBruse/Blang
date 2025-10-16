@@ -75,12 +75,33 @@
       "Symbol": {
         "Name": "arr"
       },
-      "Size": 5,
       "Values": [
-        1,
-        2,
-        3
+        {
+          "_Type": "IntValue",
+          "Value": 1,
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        },
+        {
+          "_Type": "IntValue",
+          "Value": 2,
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        },
+        {
+          "_Type": "IntValue",
+          "Value": 3,
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        }
       ],
+      "Size": 1,
       "Range": {
         "Start": 0,
         "End": 0

@@ -1,6 +1,7 @@
 namespace BLang.Ast;
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using BLang.Ast.Nodes;
 using BLang.Exceptions;
 using BLang.Tokenizer;
@@ -100,7 +101,21 @@ public partial class Parser
         return token;
     }
 
-    private bool TryEat(TokenType type, out Token? token)
+    [StackTraceHidden]
+    private int EatInt()
+    {
+        Token token = Next();
+
+        if (token.TokenType != TokenType.IntegerLiteral)
+        {
+            throw new ParserException($"Expected {TokenType.IntegerLiteral} but got {token.TokenType}");
+        }
+
+        return int.Parse(token.Content);
+    }
+
+    [StackTraceHidden]
+    private bool TryEat(TokenType type, [NotNullWhen(true)] out Token? token)
     {
         TokenType peek = Peek();
 

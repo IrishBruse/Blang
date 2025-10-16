@@ -1,1 +1,4 @@
 main(){}
+
+example() {}
+example(a) {}

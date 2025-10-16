@@ -11,7 +11,7 @@
 
 ## Lexical Conventions
 
--   **Identifiers (`name`)**: Start with an `<alpha>` character and can be followed by up to seven `<alpha_digit>` characters (for a total maximum length of 8).
+-   **Identifiers**: Start with an `<alpha>` character and can be followed by up to seven `<alpha_digit>` characters (for a total maximum length of 8).
 -   **Keywords**: All keywords (`auto`, `extrn`, `if`, `else`, etc.) are reserved and must be in lowercase.
 -   **Character Set**: The B language uses the ANSCII character set.
     -   `<alpha>`: Any uppercase letter (`A-Z`), lowercase letter (`a-z`), or underscore (`_`).
@@ -31,36 +31,30 @@ CompilationUnit
 ```
 Definition
     GlobalVariableDecleration
-    GlobalArrayDecleration
     FunctionDecleration
 ```
 
 ```
 GlobalVariableDecleration
-    (Name, ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
-```
-
-```
-GlobalArrayDecleration
-    (Name, ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
+    (Identifier, ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
 ```
 
 ```
 FunctionDecleration
-    (Name, '(', (Name, (',', Name)*)?, ')', Statement)
+    (Identifier, '(', (Identifier, (',', Identifier)*)?, ')', Statement)
 ```
 
 ```
 Ival
     Constant
-    Name
+    Identifier
 ```
 
 ```
 Statement
-    ('auto', Name, Constant?, (',', Name, Constant?)*, ';', Statement)
-    ('extrn', Name, (',', Name)*, ';', Statement)
-    (Name, ':', Statement)
+    ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';', Statement)
+    ('extrn', Identifier, (',', Identifier)*, ';', Statement)
+    (Identifier, ':', Statement)
     ('case', Constant, ':', Statement)
     ('{', Statement*, '}')
     ('if', '(', Rvalue, ')', Statement, ('else', Statement)?)
@@ -115,7 +109,7 @@ Binary
 
 ```
 Lvalue
-    Name
+    Identifier
     ('*', Rvalue)
     (Rvalue, '[', Rvalue, ']')
 ```
@@ -128,6 +122,6 @@ Constant
 ```
 
 ```
-Name
+Identifier
     <alpha>, (<alpha> | <digit>)[0-7]
 ```
