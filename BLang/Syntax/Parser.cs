@@ -76,7 +76,6 @@ public partial class Parser(CompilerContext data)
     private FunctionDecleration ParseFunctionDecleration(Token identifier)
     {
         symbols.EnterScope(identifier.Content);
-
         Symbol symbol = symbols.Add(identifier.Content);
 
         SourceRange begin = identifier.Range;
@@ -84,17 +83,19 @@ public partial class Parser(CompilerContext data)
         List<Variable> parameters = [];
 
         _ = Eat(TokenType.OpenParenthesis);
-        while (!Peek(TokenType.CloseParenthesis) && !Peek(TokenType.Eof))
-        {
-            Token variable = Eat(TokenType.Identifier);
-            symbol = symbols.Add(variable.Content);
-            parameters.Add(symbol);
 
-            if (Peek(TokenType.Comma))
+        // (Identifier, (',', Identifier)*)?
+        if (Peek(TokenType.Identifier))
+        {
+            parameters.Add(EatSymbol());
+
+            // (',', Identifier)*
+            while (TryEat(TokenType.Comma))
             {
-                _ = Eat(TokenType.Comma);
+                parameters.Add(EatSymbol());
             }
         }
+
         _ = Eat(TokenType.CloseParenthesis);
 
         Statement[] body = ParseBlock();

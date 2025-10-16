@@ -91,13 +91,7 @@ public partial class Parser
     private Token Eat(TokenType type)
     {
         Token token = Next();
-
-        if (token.TokenType != type)
-        {
-            throw new ParserException($"Expected {type} but got {token.TokenType}");
-        }
-
-
+        Expect(type, token);
         return token;
     }
 
@@ -105,13 +99,16 @@ public partial class Parser
     private int EatInt()
     {
         Token token = Next();
-
-        if (token.TokenType != TokenType.IntegerLiteral)
-        {
-            throw new ParserException($"Expected {TokenType.IntegerLiteral} but got {token.TokenType}");
-        }
-
+        Expect(TokenType.IntegerLiteral, token);
         return int.Parse(token.Content);
+    }
+
+    [StackTraceHidden]
+    private Symbol EatSymbol()
+    {
+        Token token = Eat(TokenType.Identifier);
+        Symbol symbol = symbols.Add(token.Content);
+        return symbol;
     }
 
     [StackTraceHidden]
@@ -127,6 +124,15 @@ public partial class Parser
 
         token = Next();
         return true;
+    }
+
+    [StackTraceHidden]
+    private static void Expect(TokenType expect, Token got)
+    {
+        if (got.TokenType != expect)
+        {
+            throw new ParserException($"Expected {expect} but got {got.TokenType}");
+        }
     }
 
     private bool TryEat(TokenType type)

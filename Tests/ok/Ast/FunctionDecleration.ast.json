@@ -13,7 +13,7 @@
     },
     {
       "Symbol": {
-        "Name": "a"
+        "Name": "example1"
       },
       "Parameters": [
         {
@@ -35,7 +35,7 @@
     },
     {
       "Symbol": {
-        "Name": "c"
+        "Name": "example2"
       },
       "Parameters": [
         {
