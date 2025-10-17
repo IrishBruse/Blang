@@ -7,8 +7,8 @@
       "Parameters": [],
       "Body": [],
       "Range": {
-        "Start": 36,
-        "End": 44
+        "Start": 9,
+        "End": 17
       }
     }
   ],
@@ -41,88 +41,10 @@
         "Start": 0,
         "End": 0
       }
-    },
-    {
-      "$type": "GlobalArrayDeclaration",
-      "Symbol": {
-        "Name": "C"
-      },
-      "Values": [
-        {
-          "_Type": "IntValue",
-          "Value": 1,
-          "Range": {
-            "Start": 0,
-            "End": 0
-          }
-        },
-        {
-          "_Type": "IntValue",
-          "Value": 2,
-          "Range": {
-            "Start": 0,
-            "End": 0
-          }
-        }
-      ],
-      "Size": 2,
-      "Range": {
-        "Start": 0,
-        "End": 0
-      }
-    },
-    {
-      "$type": "GlobalArrayDeclaration",
-      "Symbol": {
-        "Name": "D"
-      },
-      "Values": [],
-      "Size": 3,
-      "Range": {
-        "Start": 0,
-        "End": 0
-      }
-    },
-    {
-      "$type": "GlobalArrayDeclaration",
-      "Symbol": {
-        "Name": "E"
-      },
-      "Values": [
-        {
-          "_Type": "IntValue",
-          "Value": 1,
-          "Range": {
-            "Start": 0,
-            "End": 0
-          }
-        },
-        {
-          "_Type": "IntValue",
-          "Value": 2,
-          "Range": {
-            "Start": 0,
-            "End": 0
-          }
-        },
-        {
-          "_Type": "IntValue",
-          "Value": 3,
-          "Range": {
-            "Start": 0,
-            "End": 0
-          }
-        }
-      ],
-      "Size": 4,
-      "Range": {
-        "Start": 0,
-        "End": 0
-      }
     }
   ],
   "Range": {
     "Start": 0,
-    "End": 44
+    "End": 17
   }
 }

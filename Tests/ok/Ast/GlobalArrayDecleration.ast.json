@@ -1,0 +1,99 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main"
+      },
+      "Parameters": [],
+      "Body": [],
+      "Range": {
+        "Start": 28,
+        "End": 36
+      }
+    }
+  ],
+  "GlobalVariables": [
+    {
+      "$type": "GlobalArrayDeclaration",
+      "Symbol": {
+        "Name": "A"
+      },
+      "Values": [],
+      "Size": 3,
+      "Range": {
+        "Start": 0,
+        "End": 0
+      }
+    },
+    {
+      "$type": "GlobalArrayDeclaration",
+      "Symbol": {
+        "Name": "B"
+      },
+      "Values": [
+        {
+          "_Type": "IntValue",
+          "Value": 1,
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        },
+        {
+          "_Type": "IntValue",
+          "Value": 2,
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        }
+      ],
+      "Size": 2,
+      "Range": {
+        "Start": 0,
+        "End": 0
+      }
+    },
+    {
+      "$type": "GlobalArrayDeclaration",
+      "Symbol": {
+        "Name": "C"
+      },
+      "Values": [
+        {
+          "_Type": "IntValue",
+          "Value": 1,
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        },
+        {
+          "_Type": "IntValue",
+          "Value": 2,
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        },
+        {
+          "_Type": "IntValue",
+          "Value": 3,
+          "Range": {
+            "Start": 0,
+            "End": 0
+          }
+        }
+      ],
+      "Size": 4,
+      "Range": {
+        "Start": 0,
+        "End": 0
+      }
+    }
+  ],
+  "Range": {
+    "Start": 0,
+    "End": 36
+  }
+}
