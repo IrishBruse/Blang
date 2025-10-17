@@ -191,4 +191,19 @@ public partial class Parser
             Range = str.Range
         };
     }
+
+    private static SourceRange Range(Token start, Token end)
+    {
+        return new SourceRange(start.Range.Start, end.Range.End);
+    }
+
+    private static SourceRange Range(SourceRange start, SourceRange end)
+    {
+        return new SourceRange(start.Start, end.End);
+    }
+
+    private static SourceRange Range(Token start, SourceRange end)
+    {
+        return new SourceRange(start.Range.Start, end.End);
+    }
 }

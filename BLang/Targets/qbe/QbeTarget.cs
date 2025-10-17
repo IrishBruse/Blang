@@ -64,8 +64,6 @@ public class QbeTarget : ITarget
         return new CompileOutput(file, binFile, unit);
     }
 
-    // Program (CompilationUnit)
-    //     Definition*
     public void VisitCompilationUnit(CompilationUnit node)
     {
         foreach (GlobalVariable variable in node.GlobalVariables)
@@ -140,12 +138,16 @@ public class QbeTarget : ITarget
     {
         switch (node)
         {
-            case ExternalStatement s: VisitExternalStatement(s); break;
-            case FunctionCall s: VisitFunctionCall(s); break;
             case AutoStatement s: VisitAutoStatement(s); break;
-            case GlobalVariableDecleration s: VisitVariableAssignment(s); break;
-            case WhileStatement s: VisitWhileStatement(s); break;
+            case ExternalStatement s: VisitExternalStatement(s); break;
+            // TODO: Case
             case IfStatement s: VisitIfStatement(s); break;
+            case WhileStatement s: VisitWhileStatement(s); break;
+
+            case GlobalVariableDecleration s: VisitVariableAssignment(s); break;
+            // TODO: Goto
+            // TODO: Label
+            case FunctionCall s: VisitFunctionCall(s); break;
             default: throw new ParserException(node.ToString());
         }
     }

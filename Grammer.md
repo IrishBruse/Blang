@@ -23,50 +23,66 @@
 
 ## Grammar
 
-```
+```js
 CompilationUnit
     Definition*
-```
 
-```
 Definition
     GlobalVariableDecleration
     FunctionDecleration
-```
 
-```
 GlobalVariableDecleration
     (Identifier, ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
-```
 
-```
 FunctionDecleration
     (Identifier, '(', (Identifier, (',', Identifier)*)?, ')', Block)
-```
 
-```
 Block
     ('{', Statement, '}')
     Statement
-```
 
-```
 Statement
-    ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';')
-    ('extrn', Identifier, (',', Identifier)*, ';')
-    ('case', Constant, ':')
-    ('if', '(', Rvalue, ')', Block, ('else', Block)?)
-    ('while', '(', Rvalue, ')')
-    ('switch', Rvalue)
-    ('goto', Rvalue, ';')
-    ('return', ('(', Rvalue, ')')?, ';')
+    AutoStatement
+    ExternStatement
+    CaseStatement
+    IfStatement
+    WhileStatement
+    SwitchStatement
+    GotoStatement
+    ReturnStatement
+    LabelStatement
     (Rvalue?, ';')
+
+AutoStatement
+    ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';')
+
+ExternStatement
+    ('extrn', Identifier, (',', Identifier)*, ';')
+
+CaseStatement
+    ('case', Constant, ':')
+
+IfStatement
+    ('if', '(', Rvalue, ')', Block, ('else', Block)?)
+
+WhileStatement
+    ('while', '(', Rvalue, ')')
+
+SwitchStatement
+    ('switch', Rvalue)
+
+GotoStatement
+    ('goto', Rvalue, ';')
+
+ReturnStatement
+    ('return', ('(', Rvalue, ')')?, ';')
+
+LabelStatement
     (Identifier, ':')
-```
+
 
 <!-- WIP -->
 
-```
 Rvalue
     ('(', Rvalue, ')')
     Lvalue
@@ -79,26 +95,18 @@ Rvalue
     (Rvalue, Binary, Rvalue)
     (Rvalue, '?', Rvalue, ':', Rvalue)
     (Rvalue, '(', (Rvalue, (',', Rvalue)*)?, ')')
-```
 
-```
 Assign
     '=', Binary?
-```
 
-```
 IncDec
     '++'
     '--'
-```
 
-```
 Unary
     '-'
     '!'
-```
 
-```
 Binary
     '|' | '&'
     '==' | '!='
@@ -106,29 +114,21 @@ Binary
     '<<' | '>>'
     '-' | '+'
     '%' | '*' | '/'
-```
 
-```
 Lvalue
     Identifier
     ('*', Rvalue)
     (Rvalue, '[', Rvalue, ']')
-```
 
-```
 Ival
     Constant
     Identifier
-```
 
-```
 Constant
     <digit>+
     ('\'', <char>[1-2], '\'')
     ('"', <char>*, '"')
-```
 
-```
 Identifier
     <alpha>, (<alpha> | <digit>)[0-7]
 ```

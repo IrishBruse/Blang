@@ -38,7 +38,7 @@ public partial class Parser
 
             left = new BinaryExpression((BinaryOperator)conditionalOperator.TokenType, left, right)
             {
-                Range = left.Range.Merge(right.Range)
+                Range = Range(left.Range, right.Range)
             };
         }
 

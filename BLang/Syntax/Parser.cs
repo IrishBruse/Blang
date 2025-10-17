@@ -67,7 +67,7 @@ public partial class Parser(CompilerContext data)
 
         return new(functions.ToArray(), globals.ToArray())
         {
-            Range = start.Merge(TokenPosition)
+            Range = Range(start, TokenPosition),
         };
     }
 
@@ -78,7 +78,7 @@ public partial class Parser(CompilerContext data)
         symbols.EnterScope(identifier.Content);
         Symbol symbol = symbols.Add(identifier.Content);
 
-        SourceRange begin = identifier.Range;
+        SourceRange start = identifier.Range;
 
         List<Variable> parameters = [];
 
@@ -103,7 +103,7 @@ public partial class Parser(CompilerContext data)
         symbols.ExitScope();
         return new FunctionDecleration(symbol, parameters.ToArray(), body)
         {
-            Range = begin.Merge(TokenPosition),
+            Range = Range(start, TokenPosition),
         };
     }
 
@@ -118,11 +118,10 @@ public partial class Parser(CompilerContext data)
         bool isArray = false;
 
         // ('[', Constant?, ']')?,
-        if (Peek(TokenType.OpenBracket))
+        if (TryEat(TokenType.OpenBracket)) // '['
         {
             isArray = true;
 
-            _ = Eat(TokenType.OpenBracket); // '['
             // Constant?
             if (TryEat(TokenType.IntegerLiteral, out Token? token))
             {
@@ -195,16 +194,16 @@ public partial class Parser(CompilerContext data)
     }
 
     // Statement
-    //     ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';')
-    //     ('extrn', Identifier, (',', Identifier)*, ';')
-    //     ('case', Constant, ':')
-    //     ('if', '(', Rvalue, ')', Block, ('else', Block)?)
-    //     ('while', '(', Rvalue, ')')
-    //     ('switch', Rvalue)
-    //     ('goto', Rvalue, ';')
-    //     ('return', ('(', Rvalue, ')')?, ';')
+    //     AutoStatement
+    //     ExternStatement
+    //     CaseStatement
+    //     IfStatement
+    //     WhileStatement
+    //     SwitchStatement
+    //     GotoStatement
+    //     ReturnStatement
+    //     LabelStatement
     //     (Rvalue?, ';')
-    //     (Identifier, ':')
     private Statement ParseStatement()
     {
         return Peek() switch
@@ -222,89 +221,16 @@ public partial class Parser(CompilerContext data)
         };
     }
 
-    private WhileStatement ParseWhileDefinition()
-    {
-        Token start = Eat(TokenType.WhileKeyword);
 
-        Expression condition = ParseBinaryExpression();
-        if (condition is not BinaryExpression)
-        {
-            throw new ParserException("ParseWhileDefinition condition: " + condition);
-        }
-        Statement[] body = ParseBlock();
-
-        return new((BinaryExpression)condition, body)
-        {
-            Range = start.Range.Merge(TokenPosition),
-        };
-    }
-
-    private SwitchStatement ParseSwitchDefinition()
-    {
-        Token start = Eat(TokenType.SwitchKeyword);
-
-        Expression condition = ParseBinaryExpression();
-        if (condition is not BinaryExpression)
-        {
-            throw new ParserException("ParseSwitchDefinition condition: " + condition);
-        }
-        Statement[] body = ParseBlock();
-
-        return new((BinaryExpression)condition, body)
-        {
-            Range = start.Range.Merge(TokenPosition),
-        };
-    }
-
-    private IfStatement ParseIfDefinition()
-    {
-        Token start = Eat(TokenType.IfKeyword);
-
-        Expression condition = ParseBinaryExpression();
-
-        Statement[] body = ParseBlock();
-        Statement[]? elseBody = null;
-        if (Peek(TokenType.ElseKeyword))
-        {
-            _ = Eat(TokenType.ElseKeyword);
-            elseBody = ParseBlock();
-        }
-
-        return new(condition, body, elseBody)
-        {
-            Range = start.Range.Merge(TokenPosition),
-        };
-    }
-
-    private ExternalStatement ParseExternalDefinition()
-    {
-        Token start = Eat(TokenType.ExternKeyword);
-        Token identifier = Eat(TokenType.Identifier);
-
-        List<Symbol> externs = [symbols.Add(identifier)];
-        while (Peek(TokenType.Comma))
-        {
-            _ = Eat(TokenType.Comma);
-            identifier = Eat(TokenType.Identifier);
-            externs.Add(symbols.Add(identifier));
-        }
-
-        Token end = Eat(TokenType.Semicolon);
-
-        return new ExternalStatement(externs.ToArray())
-        {
-            Range = start.Range.Merge(end.Range),
-        };
-    }
-
-    // ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';')
+    // AutoStatement
+    //     ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';')
     private AutoStatement ParseAutoStatement()
     {
         List<VariableAssignment> variables = [];
         int value = 0;
 
         // 'auto'
-        Token auto = Eat(TokenType.AutoKeyword);
+        Token start = Eat(TokenType.AutoKeyword);
 
         // Identifier
         Token identifier = Eat(TokenType.Identifier);
@@ -339,14 +265,91 @@ public partial class Parser(CompilerContext data)
         }
 
         // ';'
-        _ = Eat(TokenType.Semicolon);
+        Token end = Eat(TokenType.Semicolon);
 
         // Statement (handled by body)
         return new AutoStatement(variables.ToArray())
         {
-            Range = auto.Range.Merge(TokenPosition),
+            Range = Range(start, end),
         };
     }
+
+    // ExternStatement
+    //     ('extrn', Identifier, (',', Identifier)*, ';')
+    private ExternalStatement ParseExternalDefinition()
+    {
+        Token start = Eat(TokenType.ExternKeyword);
+
+        Token identifier = Eat(TokenType.Identifier);
+
+        List<Symbol> externs = [symbols.Add(identifier)];
+        while (TryEat(TokenType.Comma))
+        {
+            identifier = Eat(TokenType.Identifier);
+            externs.Add(symbols.Add(identifier));
+        }
+
+        Token end = Eat(TokenType.Semicolon);
+
+        return new ExternalStatement(externs.ToArray())
+        {
+            Range = Range(start, end),
+        };
+    }
+
+    private IfStatement ParseIfDefinition()
+    {
+        Token start = Eat(TokenType.IfKeyword);
+
+        Expression condition = ParseBinaryExpression();
+
+        Statement[] body = ParseBlock();
+        Statement[]? elseBody = null;
+        if (TryEat(TokenType.ElseKeyword))
+        {
+            elseBody = ParseBlock();
+        }
+
+        return new(condition, body, elseBody)
+        {
+            Range = Range(start, TokenPosition),
+        };
+    }
+
+    private WhileStatement ParseWhileDefinition()
+    {
+        Token start = Eat(TokenType.WhileKeyword);
+
+        Expression condition = ParseBinaryExpression();
+        if (condition is not BinaryExpression)
+        {
+            throw new ParserException("ParseWhileDefinition condition: " + condition);
+        }
+        Statement[] body = ParseBlock();
+
+        return new((BinaryExpression)condition, body)
+        {
+            Range = Range(start.Range, TokenPosition),
+        };
+    }
+
+    private SwitchStatement ParseSwitchDefinition()
+    {
+        Token start = Eat(TokenType.SwitchKeyword);
+
+        Expression condition = ParseBinaryExpression();
+        if (condition is not BinaryExpression)
+        {
+            throw new ParserException("ParseSwitchDefinition condition: " + condition);
+        }
+        Statement[] body = ParseBlock();
+
+        return new((BinaryExpression)condition, body)
+        {
+            Range = Range(start, TokenPosition),
+        };
+    }
+
 
     private Statement ParseIdentifierStatement()
     {
@@ -380,7 +383,7 @@ public partial class Parser(CompilerContext data)
                 indexExpr,
                 value
             )
-            { Range = identifier.Range };
+            { Range = Range(identifier, TokenPosition), };
         }
         else
         {
@@ -404,7 +407,7 @@ public partial class Parser(CompilerContext data)
 
         return new FunctionCall(symbol, parameters.ToArray())
         {
-            Range = identifier.Range,
+            Range = Range(identifier, TokenPosition),
         };
     }
 
@@ -436,13 +439,13 @@ public partial class Parser(CompilerContext data)
             // Create a pointer dereference expression
             return new ArrayIndexExpression(new Variable(symbol) { Range = variable.Range }, rval)
             {
-                Range = variable.Range
+                Range = Range(variable, TokenPosition)
             };
         }
 
         return new Variable(symbol)
         {
-            Range = variable.Range
+            Range = Range(variable, TokenPosition)
         };
     }
 
