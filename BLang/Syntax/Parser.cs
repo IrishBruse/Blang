@@ -72,7 +72,7 @@ public partial class Parser(CompilerContext data)
     }
 
     // FunctionDecleration
-    //     (Identifier, '(', (Identifier, (',', Identifier)*)?, ')', Statement)
+    //     (Identifier, '(', (Identifier, (',', Identifier)*)?, ')', Block)
     private FunctionDecleration ParseFunctionDecleration(Token identifier)
     {
         symbols.EnterScope(identifier.Content);
@@ -115,10 +115,13 @@ public partial class Parser(CompilerContext data)
         Symbol symbol = symbols.Add(identifier.Content);
 
         int? arraySize = null;
+        bool isArray = false;
 
         // ('[', Constant?, ']')?,
         if (Peek(TokenType.OpenBracket))
         {
+            isArray = true;
+
             _ = Eat(TokenType.OpenBracket); // '['
             // Constant?
             if (TryEat(TokenType.IntegerLiteral, out Token? token))
@@ -130,71 +133,91 @@ public partial class Parser(CompilerContext data)
 
         List<Expression> values = new();
 
-        int arrayValues = 0;
+        int valueCount = 0;
 
-        // (Ival, (',', Ival)*)?, ';')
+        // (Ival, (',', Ival)*)?,
         if (Peek(TokenType.IntegerLiteral))
         {
             values.Add(new IntValue(EatInt()));
-            arrayValues++;
+            valueCount++;
 
             while (TryEat(TokenType.Comma))
             {
                 values.Add(new IntValue(EatInt()));
-                arrayValues++;
+                valueCount++;
             }
 
-            if (arraySize != null && arraySize < arrayValues)
+            if (arraySize != null && arraySize < valueCount)
             {
-                throw new CompilerException($"Array of size {arraySize} contains {arrayValues} elements");
+                throw new ParserException($"Array of size {arraySize} contains {valueCount} elements");
             }
         }
 
         _ = Eat(TokenType.Semicolon);
 
-        if (arraySize != null)
+        if (isArray)
         {
-            return new GlobalArrayDeclaration(symbol, values.ToArray(), 1);
+            int size = valueCount;
+            if (valueCount < arraySize)
+            {
+                size = arraySize.Value;
+            }
+            return new GlobalArrayDeclaration(symbol, values.ToArray(), size);
         }
         else
         {
-            return new GlobalVariableDecleration(symbol, arrayValues == 1 ? values[0] : null);
+            return new GlobalVariableDecleration(symbol, valueCount == 1 ? values[0] : null);
         }
     }
 
+    // Block
+    //     ('{', Statement, '}')
+    //     Statement
     private Statement[] ParseBlock()
     {
         List<Statement> statements = [];
 
-        _ = Eat(TokenType.OpenScope);
-        while (!Peek(TokenType.CloseScope))
+        //     ('{', Statement, '}')
+        if (TryEat(TokenType.OpenScope))
         {
-            Statement? statement = ParseStatement();
-
-            if (statement != null)
+            while (!Peek(TokenType.CloseScope))
             {
-                statements.Add(statement);
+                statements.Add(ParseStatement());
             }
-            else
-            {
-                break;
-            }
+            _ = Eat(TokenType.CloseScope);
         }
-        _ = Eat(TokenType.CloseScope);
+        else //     Statement
+        {
+            statements.Add(ParseStatement());
+        }
 
         return statements.ToArray();
     }
 
+    // Statement
+    //     ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';')
+    //     ('extrn', Identifier, (',', Identifier)*, ';')
+    //     ('case', Constant, ':')
+    //     ('if', '(', Rvalue, ')', Block, ('else', Block)?)
+    //     ('while', '(', Rvalue, ')')
+    //     ('switch', Rvalue)
+    //     ('goto', Rvalue, ';')
+    //     ('return', ('(', Rvalue, ')')?, ';')
+    //     (Rvalue?, ';')
+    //     (Identifier, ':')
     private Statement ParseStatement()
     {
         return Peek() switch
         {
+            TokenType.AutoKeyword => ParseAutoStatement(),
             TokenType.ExternKeyword => ParseExternalDefinition(),
+            // TODO: Case
+            TokenType.IfKeyword => ParseIfDefinition(),
             TokenType.WhileKeyword => ParseWhileDefinition(),
             TokenType.SwitchKeyword => ParseWhileDefinition(),
-            TokenType.IfKeyword => ParseIfDefinition(),
-            TokenType.AutoKeyword => ParseAutoStatement(),
+            // TODO: Goto
             TokenType.Identifier => ParseIdentifierStatement(),
+            // TODO: Label
             _ => throw new InvalidTokenException($"Unexpected token in {nameof(ParseStatement)} of type {Peek()}")
         };
     }
@@ -238,12 +261,8 @@ public partial class Parser(CompilerContext data)
         Token start = Eat(TokenType.IfKeyword);
 
         Expression condition = ParseBinaryExpression();
-        // if (condition is not BinaryExpression)
-        // {
-        //     throw new ParserException("ParseWhileDefinition condition: " + condition);
-        // }
 
-        Statement[] body = !Peek(TokenType.OpenScope) ? [ParseStatement()] : ParseBlock();
+        Statement[] body = ParseBlock();
         Statement[]? elseBody = null;
         if (Peek(TokenType.ElseKeyword))
         {
@@ -278,7 +297,7 @@ public partial class Parser(CompilerContext data)
         };
     }
 
-    // ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';', Statement)
+    // ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';')
     private AutoStatement ParseAutoStatement()
     {
         List<VariableAssignment> variables = [];

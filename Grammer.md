@@ -41,29 +41,30 @@ GlobalVariableDecleration
 
 ```
 FunctionDecleration
-    (Identifier, '(', (Identifier, (',', Identifier)*)?, ')', Statement)
+    (Identifier, '(', (Identifier, (',', Identifier)*)?, ')', Block)
 ```
 
 ```
-Ival
-    Constant
-    Identifier
+Block
+    ('{', Statement, '}')
+    Statement
 ```
 
 ```
 Statement
-    ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';', Statement)
-    ('extrn', Identifier, (',', Identifier)*, ';', Statement)
-    (Identifier, ':', Statement)
-    ('case', Constant, ':', Statement)
-    ('{', Statement*, '}')
-    ('if', '(', Rvalue, ')', Statement, ('else', Statement)?)
-    ('while', '(', Rvalue, ')', Statement)
-    ('switch', Rvalue, Statement)
+    ('auto', Identifier, Constant?, (',', Identifier, Constant?)*, ';')
+    ('extrn', Identifier, (',', Identifier)*, ';')
+    ('case', Constant, ':')
+    ('if', '(', Rvalue, ')', Block, ('else', Block)?)
+    ('while', '(', Rvalue, ')')
+    ('switch', Rvalue)
     ('goto', Rvalue, ';')
     ('return', ('(', Rvalue, ')')?, ';')
     (Rvalue?, ';')
+    (Identifier, ':')
 ```
+
+<!-- WIP -->
 
 ```
 Rvalue
@@ -112,6 +113,12 @@ Lvalue
     Identifier
     ('*', Rvalue)
     (Rvalue, '[', Rvalue, ']')
+```
+
+```
+Ival
+    Constant
+    Identifier
 ```
 
 ```

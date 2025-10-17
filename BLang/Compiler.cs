@@ -2,7 +2,6 @@ namespace BLang;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using BLang.Ast;
 using BLang.Exceptions;

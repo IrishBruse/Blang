@@ -113,6 +113,7 @@ public class QbeTarget : ITarget
         {
             data += " " + (i < values.Length ? values[i] : 0);
         }
+
         qbe.Data(array.Symbol.Name, data);
         qbe.WriteLine();
     }
