@@ -18,6 +18,8 @@ public class Tester
 
     public static void TestFiles(string[] tests)
     {
+        List<string> failed = new();
+
         Stopwatch sw = Stopwatch.StartNew();
         int passed = 0;
         foreach (string testFile in tests)
@@ -26,7 +28,27 @@ public class Tester
             {
                 passed++;
             }
+            else
+            {
+                failed.Add(testFile);
+            }
         }
+
+        if (failed.Count > 0 && !Options.UpdateSnapshots)
+        {
+            Console.WriteLine();
+            Console.WriteLine($"{tests.Length - passed} Tests failed:");
+            Console.WriteLine();
+            foreach (string item in failed)
+            {
+                int v = Options.Verbose;
+                Options.Verbose = 1;
+                _ = TestFile(item);
+                Options.Verbose = v;
+                Console.WriteLine();
+            }
+        }
+
         Console.WriteLine();
         Console.WriteLine($"Tests finished in {sw.Elapsed.TotalSeconds:0.00}s");
         Console.WriteLine($"{passed}/{tests.Length} Passed");
@@ -135,11 +157,6 @@ public class Tester
     private static bool CompareSnapshot(string testFile)
     {
         string folderType = testFile.Split("/")[1];
-
-        Result<CompileOutput> res = Compiler.Compile(testFile);
-
-        bool passed = false;
-
         string error = "";
 
         if (testFile.Contains("Examples/"))
@@ -149,6 +166,9 @@ public class Tester
 
         Stopwatch timer = Stopwatch.StartNew();
 
+        Result<CompileOutput> res = Compiler.Compile(testFile);
+
+        bool passed = false;
         if (folderType == "ok" || folderType == "example")
         {
             passed = CompareSuccess(testFile, folderType, res, ref error);
