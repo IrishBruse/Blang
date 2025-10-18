@@ -23,7 +23,7 @@
 
 ## Grammar
 
-```js
+```groovy
 CompilationUnit
     Definition*
 
