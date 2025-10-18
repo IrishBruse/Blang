@@ -733,8 +733,10 @@ export default {
             name: "Extuw",
             description: "Zero-extends a word to a long.",
             args: {
-                value: "int",
+                value: "Val",
             },
+            ret: "Reg",
+            retSize: "l",
         },
         sltof: {
             name: "Sltof",

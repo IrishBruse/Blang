@@ -7,6 +7,18 @@
       "Parameters": [],
       "Body": [
         {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf"
+            }
+          ],
+          "Range": {
+            "Start": 22,
+            "End": 35
+          }
+        },
+        {
           "_Type": "AutoStatement",
           "Variables": [
             {
@@ -14,35 +26,11 @@
                 "Name": "i"
               },
               "Value": 0
-            },
-            {
-              "Symbol": {
-                "Name": "arr"
-              },
-              "Value": 0
             }
           ],
           "Range": {
-            "Start": 22,
-            "End": 33
-          }
-        },
-        {
-          "_Type": "GlobalVariableDecleration",
-          "Symbol": {
-            "Name": "i"
-          },
-          "Value": {
-            "_Type": "IntValue",
-            "Value": 0,
-            "Range": {
-              "Start": 42,
-              "End": 43
-            }
-          },
-          "Range": {
-            "Start": 38,
-            "End": 39
+            "Start": 40,
+            "End": 49
           }
         },
         {
@@ -59,40 +47,40 @@
                 "Name": "i"
               },
               "Range": {
-                "Start": 54,
-                "End": 55
+                "Start": 59,
+                "End": 60
               }
             },
             "Right": {
               "_Type": "IntValue",
               "Value": 1,
               "Range": {
-                "Start": 56,
-                "End": 57
+                "Start": 61,
+                "End": 62
               }
             },
             "Range": {
-              "Start": 54,
-              "End": 57
+              "Start": 59,
+              "End": 62
             }
           },
           "Value": {
             "_Type": "IntValue",
             "Value": 2,
             "Range": {
-              "Start": 61,
-              "End": 62
+              "Start": 66,
+              "End": 67
             }
           },
           "Range": {
-            "Start": 50,
-            "End": 63
+            "Start": 55,
+            "End": 68
           }
         }
       ],
       "Range": {
         "Start": 9,
-        "End": 65
+        "End": 70
       }
     }
   ],
@@ -112,6 +100,6 @@
   ],
   "Range": {
     "Start": 0,
-    "End": 65
+    "End": 70
   }
 }

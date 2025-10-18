@@ -52,8 +52,8 @@ for (const group of Object.keys(instructions)) {
 function GenGroup(groupName: string, group: any) {
     writeLine(`// ${groupName}`);
     writeLine();
-    for (const instr of Object.keys(group)) {
-        const instruction = group[instr];
+    for (const mnemonic of Object.keys(group)) {
+        const instruction = group[mnemonic];
         const name = instruction.name;
 
         const args = Object.entries(instruction?.args ?? []);
@@ -62,7 +62,7 @@ function GenGroup(groupName: string, group: any) {
             .map(([name, type]) => `${type} ${name}`)
             .join(", ");
 
-        if (instruction?.ret === "Reg") {
+        if (instruction?.ret === "Reg" && !instruction?.retSize) {
             parameters += ", Size regType = Size.W";
         }
 
@@ -78,7 +78,7 @@ function GenGroup(groupName: string, group: any) {
         if (instruction?.overrideBody) {
             writeLine(instruction?.overrideBody);
         } else {
-            writeInstruction(instr, args, returnType);
+            writeInstruction(mnemonic, args, instruction);
         }
         if (returnType !== "void") {
             writeLine("return reg;");
@@ -94,16 +94,18 @@ writeLine("}");
 
 writeFileSync("./QbeOutput.gen.cs", text);
 
-function writeInstruction(instr: string, args: any[], ret: string) {
+function writeInstruction(mnemonic: string, args: any[], instruction: any) {
     beginLine();
     write("Write(");
     write('$"');
 
-    if (ret === "Reg") {
+    if (instruction?.retSize) {
+        write(`{reg} =${instruction.retSize} `);
+    } else if (instruction?.ret === "Reg") {
         write("{reg} ={ToChar(regType)} ");
     }
 
-    write(instr + " ");
+    write(mnemonic + " ");
     let first = true;
     for (const arg of args) {
         if (!first) {

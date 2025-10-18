@@ -116,6 +116,23 @@ public class QbeTarget : ITarget
         qbe.WriteLine();
     }
 
+    private void VisitArrayAssignmentStatement(ArrayAssignmentStatement array)
+    {
+        qbe.Comment($"{array.Symbol.Name}[{array.Index}] = {array.Value}");
+
+        string addrReg = GetMemoryRegister(array.Symbol);
+
+        string idxReg = GenerateBinaryExpressionIR(array.Index, new("array_index"));
+        string temp = qbe.Extuw(idxReg);
+        addrReg = qbe.Add(addrReg, temp, Size.L);
+
+        string valueReg = GenerateBinaryExpressionIR(array.Value, array.Symbol);
+
+        qbe.Storew(valueReg, addrReg);
+
+        qbe.WriteLine();
+    }
+
     private void GenerateDataSection()
     {
         qbe.Comment("Data");
@@ -148,6 +165,8 @@ public class QbeTarget : ITarget
             // TODO: Goto
             // TODO: Label
             case FunctionCall s: VisitFunctionCall(s); break;
+
+            case ArrayAssignmentStatement s: VisitArrayAssignmentStatement(s); break;
             default: throw new ParserException(node.ToString());
         }
     }
@@ -249,8 +268,8 @@ public class QbeTarget : ITarget
     {
         foreach (VariableAssignment variable in autoDeclaration.Variables)
         {
-            qbe.Comment($"auto {variable}");
-            string varName = qbe.Alloc4(4, Size.L);
+            qbe.Comment($"auto {variable.Symbol} = {variable.Value}");
+            string varName = qbe.Alloc8(8, Size.L);
             memoryAllocations[variable.Symbol.Name] = varName;// TODO:
             qbe.Storew(variable.Value, varName);
         }
@@ -317,7 +336,7 @@ public class QbeTarget : ITarget
 
     // Expression
 
-    public string GenerateBinaryExpressionIR(Expression expr, Symbol targetSymbol)
+    public string GenerateBinaryExpressionIR(Expression expr, Symbol targetSymbol)// TODO: targetSymbol unused
     {
         switch (expr)
         {

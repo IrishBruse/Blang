@@ -620,9 +620,11 @@ public partial class QbeOutput
     }
 
     /// <summary> Zero-extends a word to a long. </summary>
-    public void Extuw(int value)
+    public Reg Extuw(Val value)
     {
-        Write($"extuw {value}");
+        Reg reg = GetTempReg();
+        Write($"{reg} =l extuw {value}");
+        return reg;
     }
 
     /// <summary> Converts a signed long integer to a floating-point number. </summary>
