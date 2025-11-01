@@ -68,7 +68,7 @@
             "_Type": "IntValue",
             "Value": 2,
             "Range": {
-              "Start": 66,
+              "Start": 64,
               "End": 67
             }
           },
@@ -94,7 +94,7 @@
       "Size": 4,
       "Range": {
         "Start": 0,
-        "End": 0
+        "End": 7
       }
     }
   ],

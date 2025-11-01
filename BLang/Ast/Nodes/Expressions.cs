@@ -13,6 +13,8 @@ using BLang.Utility;
 [JsonDerivedType(typeof(AddressOfExpression), nameof(AddressOfExpression))]
 [JsonDerivedType(typeof(PointerDereferenceExpression), nameof(PointerDereferenceExpression))]
 [JsonDerivedType(typeof(ArrayIndexExpression), nameof(ArrayIndexExpression))]
+[JsonDerivedType(typeof(CallExpression), nameof(CallExpression))]
+[JsonDerivedType(typeof(AssignmentExpression), nameof(AssignmentExpression))]
 public abstract record Expression() : AstNode;
 
 public record StringValue(string Value) : Expression
@@ -102,5 +104,30 @@ public record ArrayIndexExpression(Variable Variable, Expression Index) : Expres
     public override string ToString()
     {
         return Variable.ToString() + $"[{Index}]";
+    }
+}
+
+public record CallExpression(Expression Callee, Expression[] Parameters) : Expression
+{
+    public override string ToString()
+    {
+        string args = string.Join(", ", Parameters.Select(p => p.ToString()));
+        return $"{Callee}({args})";
+    }
+}
+
+public record AssignmentExpression(BinaryOperator Operation, Expression Left, Expression Right) : Expression
+{
+    public override string ToString()
+    {
+        if (Operation == BinaryOperator.None)
+        {
+            return $"({Left} = {Right})";
+        }
+        else
+        {
+            // Show compound assignment like `x += y` using the operation text
+            return $"({Left} {Operation.ToText()}= {Right})";
+        }
     }
 }

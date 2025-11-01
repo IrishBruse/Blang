@@ -19,19 +19,14 @@ public abstract record Statement() : AstNode;
 [JsonDerivedType(typeof(GlobalVariableDecleration), nameof(GlobalVariableDecleration))]
 [JsonDerivedType(typeof(GlobalArrayDeclaration), nameof(GlobalArrayDeclaration))]
 public record GlobalVariable : Statement;
-
 public record GlobalVariableDecleration(Symbol Symbol, Expression? Value) : GlobalVariable;
 public record GlobalArrayDeclaration(Symbol Symbol, Expression[] Values, int Size) : GlobalVariable;
 
 public record ExternalStatement(Symbol[] Externals) : Statement;
-
 public record WhileStatement(BinaryExpression Condition, Statement[] Body) : Statement;
-
 public record SwitchStatement(BinaryExpression Condition, Statement[] Body) : Statement;
-
 public record IfStatement(Expression Condition, Statement[] Body, Statement[]? ElseBody) : Statement;
-
 public record AutoStatement(VariableAssignment[] Variables) : Statement;
-public record VariableAssignment(Symbol Symbol, int Value);
-
 public record FunctionCall(Symbol Symbol, Expression[] Parameters) : Statement;
+
+public record VariableAssignment(Symbol Symbol, int Value);

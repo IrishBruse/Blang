@@ -66,10 +66,10 @@ IfStatement
     ('if', '(', Rvalue, ')', Block, ('else', Block)?)
 
 WhileStatement
-    ('while', '(', Rvalue, ')')
+    ('while', '(', Rvalue, ')', Block)
 
 SwitchStatement
-    ('switch', Rvalue)
+    ('switch', Rvalue, Block)
 
 GotoStatement
     ('goto', Rvalue, ';')
@@ -94,7 +94,7 @@ Rvalue
     ('&', Lvalue)
     (Rvalue, Binary, Rvalue)
     (Rvalue, '?', Rvalue, ':', Rvalue)
-    (Rvalue, '(', (Rvalue, (',', Rvalue)*)?, ')')
+    (Rvalue, '(', (Rvalue, (',', Rvalue)* )?, ')')
 
 Assign
     '=', Binary?

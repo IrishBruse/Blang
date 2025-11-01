@@ -34,6 +34,10 @@ public partial class Parser(CompilerContext data)
 
     // CompilationUnit
     //     Definition*
+    //
+    // Definition
+    //     GlobalVariableDecleration
+    //     FunctionDecleration
     private CompilationUnit ParseCompilationUnit()
     {
         List<FunctionDecleration> functions = [];
@@ -297,14 +301,24 @@ public partial class Parser(CompilerContext data)
         };
     }
 
+    // IfStatement
+    //     ('if', '(', Rvalue, ')', Block, ('else', Block)?)
     private IfStatement ParseIfDefinition()
     {
+        // 'if'
         Token start = Eat(TokenType.IfKeyword);
 
-        Expression condition = ParseBinaryExpression();
+        // TODO: '(', Rvalue, ')',
+        _ = Eat(TokenType.OpenParenthesis);
+        Expression condition = ParseRValue();
+        _ = Eat(TokenType.CloseParenthesis);
 
+        // Block
         Statement[] body = ParseBlock();
+
         Statement[]? elseBody = null;
+
+        // ('else', Block)?
         if (TryEat(TokenType.ElseKeyword))
         {
             elseBody = ParseBlock();
@@ -316,15 +330,17 @@ public partial class Parser(CompilerContext data)
         };
     }
 
+    // WhileStatement
+    //     ('while', '(', Rvalue, ')', Block)
     private WhileStatement ParseWhileDefinition()
     {
+        // 'while'
         Token start = Eat(TokenType.WhileKeyword);
 
+        // TODO: '(', Rvalue, ')',
         Expression condition = ParseBinaryExpression();
-        if (condition is not BinaryExpression)
-        {
-            throw new ParserException("ParseWhileDefinition condition: " + condition);
-        }
+
+        // Block
         Statement[] body = ParseBlock();
 
         return new((BinaryExpression)condition, body)
@@ -333,15 +349,17 @@ public partial class Parser(CompilerContext data)
         };
     }
 
+    // SwitchStatement
+    //     ('switch', Rvalue, Block)
     private SwitchStatement ParseSwitchDefinition()
     {
+        // 'switch'
         Token start = Eat(TokenType.SwitchKeyword);
 
+        // Rvalue
         Expression condition = ParseBinaryExpression();
-        if (condition is not BinaryExpression)
-        {
-            throw new ParserException("ParseSwitchDefinition condition: " + condition);
-        }
+
+        // Block
         Statement[] body = ParseBlock();
 
         return new((BinaryExpression)condition, body)
@@ -349,7 +367,6 @@ public partial class Parser(CompilerContext data)
             Range = Range(start, TokenPosition),
         };
     }
-
 
     private Statement ParseIdentifierStatement()
     {
@@ -363,21 +380,16 @@ public partial class Parser(CompilerContext data)
         }
         else if (TryEat(TokenType.OpenBracket))
         {
-            // Parse array index expression: arr[expr] = value;
             Expression indexExpr = ParseBinaryExpression();
             _ = Eat(TokenType.CloseBracket);
-
-            // Support assignment to array index: arr[expr] = value;
 
             Symbol symbol = symbols.GetOrAdd(identifier);
             Expression value;
 
-
-            value = ParseRValue(symbol);
+            value = ParseRValueOld(symbol);
 
             _ = Eat(TokenType.Semicolon);
 
-            // Return an ArrayAssignmentStatement for the array index assignment
             return new ArrayAssignmentStatement(
                 symbol,
                 indexExpr,
@@ -452,52 +464,106 @@ public partial class Parser(CompilerContext data)
     private GlobalVariableDecleration ParseAssignment(Token identifier)
     {
         Symbol symbol = symbols.GetOrAdd(identifier);
-        Expression value = ParseRValue(symbol);
+        Expression value = ParseRValueOld(symbol);
 
         _ = Eat(TokenType.Semicolon);
 
         return new GlobalVariableDecleration(symbol, value) { Range = identifier.Range };
     }
 
-    private Expression ParseRValue(Symbol symbol)
+    private Expression ParseRValueOld(Symbol symbol)
     {
         TokenType assignmentType = Peek();
         _ = Eat(assignmentType);
+        SourceRange start = TokenPosition;
 
-        Expression value;
-        Expression rhs;
-        switch (assignmentType)
+        // Helper to create left side variable expression
+        Variable leftVar = new(symbol);
+        Expression value = assignmentType switch
         {
-            case TokenType.Assignment:
-                value = ParseBinaryExpression();
-                break;
+            // Simple assignment: x = <expr>
+            TokenType.Assignment => ParseBinaryExpression(),
 
-            case TokenType.AdditionAssignment:
-                value = new BinaryExpression(BinaryOperator.Addition, new Variable(symbol), ParseBinaryExpression());
-                break;
+            // Compound assignments map to the corresponding binary operation:
+            // x += y  -> x + y
+            TokenType.AdditionAssignment => new BinaryExpression(BinaryOperator.Addition, leftVar, ParseBinaryExpression()),
+            // x -= y -> x - y
+            TokenType.SubtractionAssignment => new BinaryExpression(BinaryOperator.Subtraction, leftVar, ParseBinaryExpression()),
+            // x *= y -> x * y
+            TokenType.MultiplicationAssignment => new BinaryExpression(BinaryOperator.Multiplication, leftVar, ParseBinaryExpression()),
+            // x /= y -> x / y
+            TokenType.DivisionAssignment => new BinaryExpression(BinaryOperator.Division, leftVar, ParseBinaryExpression()),
+            // x %= y -> x % y
+            TokenType.ModuloAssignment => new BinaryExpression(BinaryOperator.Modulo, leftVar, ParseBinaryExpression()),
+            // x <<= y -> x << y
+            TokenType.BitwiseShiftLeftAssignment => new BinaryExpression(BinaryOperator.BitwiseShiftLeft, leftVar, ParseBinaryExpression()),
+            // x >>= y -> x << y
+            TokenType.BitwiseShiftRightAssignment => new BinaryExpression(BinaryOperator.BitwiseShiftRight, leftVar, ParseBinaryExpression()),
+            // x |= y -> x << y
+            TokenType.BitwiseOrAssignment => new BinaryExpression(BinaryOperator.BitwiseOr, leftVar, ParseBinaryExpression()),
 
-            case TokenType.BitwiseShiftLeftAssignment:
-                rhs = ParseBinaryExpression();
-                value = new BinaryExpression(BinaryOperator.BitwiseShiftLeft, new Variable(symbol), rhs);
-                break;
+            // Postfix increment / decrement: x++  /  x--
+            TokenType.Increment => new BinaryExpression(BinaryOperator.Addition, leftVar, new IntValue(1)),
+            TokenType.Decrement => new BinaryExpression(BinaryOperator.Subtraction, leftVar, new IntValue(1)),
+            _ => throw new ParserException("Unknown assignment/operation type " + assignmentType),
+        };
 
-            case TokenType.BitwiseOrAssignment:
-                rhs = ParseBinaryExpression();
-                value = new BinaryExpression(BinaryOperator.BitwiseOr, new Variable(symbol), rhs);
-                break;
+        return value with { Range = Range(start, TokenPosition) };
+    }
 
-            case TokenType.BitwiseAnd:
-                rhs = ParseBinaryExpression();
-                value = new BinaryExpression(BinaryOperator.BitwiseAnd, new Variable(symbol), rhs);
-                break;
+    // Rvalue
+    //     ('(', Rvalue, ')')
+    //     Lvalue
+    //     Constant
+    //     (Lvalue, Assign, Rvalue)
+    //     (IncDec, Lvalue)
+    //     (Lvalue, IncDec)
+    //     (Unary, Rvalue)
+    //     ('&', Lvalue)
+    //     (Rvalue, Binary, Rvalue)
+    //     (Rvalue, '?', Rvalue, ':', Rvalue)
+    //     (Rvalue, '(', (Rvalue, (',', Rvalue)* )?, ')')
+    private Expression ParseRValue()
+    {
+        // General RValue parser used in places like `if ( ... )`.
+        // This parser covers a subset of the full RValue grammar used by the
+        // language implementation. Operator-heavy expressions (binary ops and
+        // indexing/grouping) are delegated to ParseBinaryExpression which uses
+        // the operator-precedence table. Here we implement the cases that need
+        // special handling around lvalues such as prefix/postfix ++/--.
 
-            case TokenType.Increment:
-                value = new BinaryExpression(BinaryOperator.Addition, new Variable(symbol), new IntValue(1));
-                break;
+        // Prefix increment/decrement: ++x / --x
+        if (Peek(TokenType.Increment) || Peek(TokenType.Decrement))
+        {
+            TokenType op = Peek();
+            _ = Eat(op);
 
-            default: throw new ParserException("Unknown assignment type " + assignmentType);
+            // After prefix inc/dec we expect an lvalue (identifier or indexing)
+            Expression left = ParseIdentifier();
+
+            return op == TokenType.Increment
+                ? new BinaryExpression(BinaryOperator.Addition, left, new IntValue(1)) { Range = Range(left.Range, TokenPosition) }
+                : new BinaryExpression(BinaryOperator.Subtraction, left, new IntValue(1)) { Range = Range(left.Range, TokenPosition) };
         }
 
-        return value;
+        // Parse the bulk of expressions (constants, variables, grouped exprs,
+        // address-of, pointer deref, and binary operations) using the
+        // binary-expression parser.
+        Expression expr = ParseBinaryExpression();
+
+        // Postfix increment/decrement: x++ / x--
+        if (Peek(TokenType.Increment) || Peek(TokenType.Decrement))
+        {
+            TokenType op = Peek();
+            _ = Eat(op);
+
+            return op == TokenType.Increment
+                ? new BinaryExpression(BinaryOperator.Addition, expr, new IntValue(1)) { Range = Range(expr.Range, TokenPosition) }
+                : new BinaryExpression(BinaryOperator.Subtraction, expr, new IntValue(1)) { Range = Range(expr.Range, TokenPosition) };
+        }
+
+        // No special postfix/prefix; return the expression parsed by the
+        // precedence-aware binary parser.
+        return expr;
     }
 }
