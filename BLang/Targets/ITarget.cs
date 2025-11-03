@@ -5,5 +5,5 @@ using BLang.Utility;
 
 public interface ITarget
 {
-    Result<CompileOutput> Emit(CompilationUnit unit, CompilerContext data);
+    Result<EmitOutput> Emit(CompilationUnit unit, CompilerContext data);
 }

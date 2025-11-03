@@ -1,7 +1,7 @@
 namespace BLang;
 
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using BLang.Ast;
 using BLang.Exceptions;
@@ -11,32 +11,36 @@ using BLang.Utility;
 
 public static class Compiler
 {
-    public static Result<CompileOutput> Compile(string file)
-    {
-        try
-        {
-            return CompileFile(file);
-        }
-        catch (Exception e)
-        {
-            return Options.Verbose > 0 ? e.ToString() : e.Message;
-        }
-    }
+    private static Stopwatch Timer = Stopwatch.StartNew();
 
-    private static Result<CompileOutput> CompileFile(string file)
+    public static CompileOutput Compile(string file)
     {
         CompilerContext data = new(file);
+        CompileOutput output = new(file);
 
         IEnumerator<Token> tokens = Lex(file, data);
 
         Result<CompilationUnit> parseResult = Parse(tokens, data);
-        if (parseResult.IsFailure) return parseResult.Error;
+        if (parseResult.IsFailure)
+        {
+            output.Error = parseResult.Error;
+            return output;
+        }
 
+        Result<EmitOutput> emitResult = Emit(parseResult.Value, data);
+        if (emitResult.IsFailure)
+        {
+            output.Error = emitResult.Error;
+            return output;
+        }
+        EmitOutput emitOutput = emitResult.Value;
 
-        Result<CompileOutput> emitResult = Emit(parseResult.Value, data);
-        if (emitResult.IsFailure) return emitResult.Error;
+        // TODO: cleanup Emit above
+        output.Executable = emitOutput.Executable;
+        output.CompilationUnit = emitOutput.CompilationUnit;
 
-        return emitResult.Value;
+        output.Success = true;
+        return output;
     }
 
     private static IEnumerator<Token> Lex(string file, CompilerContext data)
@@ -48,29 +52,37 @@ public static class Compiler
 
     private static Result<CompilationUnit> Parse(IEnumerator<Token> tokens, CompilerContext data)
     {
+        if (Options.Verbose >= 2) Timer.Restart();
+
         Parser parser = new(data);
-        Result<CompilationUnit> parseResult = parser.Parse(tokens);
-        if (parseResult.IsFailure) return parseResult.Error;
+        Result<CompilationUnit> result = parser.Parse(tokens);
+        if (result.IsFailure) return result.Error;
 
         if (Options.Ast)
         {
             string astFile = Path.ChangeExtension(data.File, "ast.json");
-            File.WriteAllText(astFile, parseResult.Value.ToJson());
+            File.WriteAllText(astFile, result.Value.ToJson());
         }
 
-        return parseResult;
+        if (Options.Verbose >= 2) Debug($"Parse Complete ({Timer.Elapsed.TotalMilliseconds}ms)");
+
+        return result;
     }
 
-    private static Result<CompileOutput> Emit(CompilationUnit unit, CompilerContext data)
+    private static Result<EmitOutput> Emit(CompilationUnit unit, CompilerContext data)
     {
+        if (Options.Verbose >= 2) Timer.Restart();
+
         QbeTarget target = Options.Target switch
         {
             CompilationTarget.Qbe => new QbeTarget(),
             _ => throw new CompilerException($"Unknown Target {Options.Target}"),
         };
 
-        Result<CompileOutput> result = target.Emit(unit, data);
+        Result<EmitOutput> result = target.Emit(unit, data);
         if (result.IsFailure) return data.File + " Failed to emit " + result.Error;
+
+        if (Options.Verbose >= 2) Debug($"Emitting Complete ({Timer.Elapsed.TotalMilliseconds}ms)");
 
         return result;
     }

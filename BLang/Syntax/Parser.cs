@@ -165,11 +165,11 @@ public partial class Parser(CompilerContext data)
             {
                 size = arraySize.Value;
             }
-            return new GlobalArrayDeclaration(symbol, values.ToArray(), size);
+            return new GlobalArrayDeclaration(symbol, values.ToArray(), size) { Range = Range(identifier, TokenPosition) };
         }
         else
         {
-            return new GlobalVariableDecleration(symbol, valueCount == 1 ? values[0] : null);
+            return new GlobalVariableDecleration(symbol, valueCount == 1 ? values[0] : null) { Range = Range(identifier, TokenPosition) };
         }
     }
 
@@ -200,13 +200,13 @@ public partial class Parser(CompilerContext data)
     // Statement
     //     AutoStatement
     //     ExternStatement
-    //     CaseStatement
     //     IfStatement
     //     WhileStatement
     //     SwitchStatement
+    //     CaseStatement
     //     GotoStatement
-    //     ReturnStatement
     //     LabelStatement
+    //     ReturnStatement
     //     (Rvalue?, ';')
     private Statement ParseStatement()
     {
@@ -214,13 +214,14 @@ public partial class Parser(CompilerContext data)
         {
             TokenType.AutoKeyword => ParseAutoStatement(),
             TokenType.ExternKeyword => ParseExternalDefinition(),
-            // TODO: Case
             TokenType.IfKeyword => ParseIfDefinition(),
             TokenType.WhileKeyword => ParseWhileDefinition(),
-            TokenType.SwitchKeyword => ParseWhileDefinition(),
+            // TODO: Switch
+            // TODO: Case
             // TODO: Goto
-            TokenType.Identifier => ParseIdentifierStatement(),
             // TODO: Label
+            // TODO: Return
+            TokenType.Identifier => ParseIdentifierStatement(),
             _ => throw new InvalidTokenException($"Unexpected token in {nameof(ParseStatement)} of type {Peek()}")
         };
     }
@@ -308,7 +309,7 @@ public partial class Parser(CompilerContext data)
         // 'if'
         Token start = Eat(TokenType.IfKeyword);
 
-        // TODO: '(', Rvalue, ')',
+        // '(', Rvalue, ')',
         _ = Eat(TokenType.OpenParenthesis);
         Expression condition = ParseRValue();
         _ = Eat(TokenType.CloseParenthesis);
@@ -338,7 +339,9 @@ public partial class Parser(CompilerContext data)
         Token start = Eat(TokenType.WhileKeyword);
 
         // TODO: '(', Rvalue, ')',
-        Expression condition = ParseBinaryExpression();
+        _ = Eat(TokenType.OpenParenthesis);
+        Expression condition = ParseRValue();
+        _ = Eat(TokenType.CloseParenthesis);
 
         // Block
         Statement[] body = ParseBlock();
@@ -357,7 +360,7 @@ public partial class Parser(CompilerContext data)
         Token start = Eat(TokenType.SwitchKeyword);
 
         // Rvalue
-        Expression condition = ParseBinaryExpression();
+        Expression condition = ParseRValue();
 
         // Block
         Statement[] body = ParseBlock();
@@ -428,10 +431,12 @@ public partial class Parser(CompilerContext data)
         return Peek() switch
         {
             TokenType.StringLiteral => ParseString(),
-            TokenType.IntegerLiteral => ParseInteger(),
+
             TokenType.Subtraction => ParseInteger(TokenType.Subtraction),
             TokenType.Addition => ParseInteger(TokenType.Addition),
-            TokenType.Identifier => ParseIdentifier(),
+
+            TokenType.IntegerLiteral => ParseBinaryExpression(),
+            TokenType.Identifier => ParseBinaryExpression(),
             _ => throw new ParserException(Peek().ToString()),
         };
     }
@@ -505,6 +510,7 @@ public partial class Parser(CompilerContext data)
             // Postfix increment / decrement: x++  /  x--
             TokenType.Increment => new BinaryExpression(BinaryOperator.Addition, leftVar, new IntValue(1)),
             TokenType.Decrement => new BinaryExpression(BinaryOperator.Subtraction, leftVar, new IntValue(1)),
+
             _ => throw new ParserException("Unknown assignment/operation type " + assignmentType),
         };
 
@@ -525,20 +531,11 @@ public partial class Parser(CompilerContext data)
     //     (Rvalue, '(', (Rvalue, (',', Rvalue)* )?, ')')
     private Expression ParseRValue()
     {
-        // General RValue parser used in places like `if ( ... )`.
-        // This parser covers a subset of the full RValue grammar used by the
-        // language implementation. Operator-heavy expressions (binary ops and
-        // indexing/grouping) are delegated to ParseBinaryExpression which uses
-        // the operator-precedence table. Here we implement the cases that need
-        // special handling around lvalues such as prefix/postfix ++/--.
-
-        // Prefix increment/decrement: ++x / --x
         if (Peek(TokenType.Increment) || Peek(TokenType.Decrement))
         {
             TokenType op = Peek();
             _ = Eat(op);
 
-            // After prefix inc/dec we expect an lvalue (identifier or indexing)
             Expression left = ParseIdentifier();
 
             return op == TokenType.Increment
@@ -546,9 +543,6 @@ public partial class Parser(CompilerContext data)
                 : new BinaryExpression(BinaryOperator.Subtraction, left, new IntValue(1)) { Range = Range(left.Range, TokenPosition) };
         }
 
-        // Parse the bulk of expressions (constants, variables, grouped exprs,
-        // address-of, pointer deref, and binary operations) using the
-        // binary-expression parser.
         Expression expr = ParseBinaryExpression();
 
         // Postfix increment/decrement: x++ / x--
@@ -562,8 +556,6 @@ public partial class Parser(CompilerContext data)
                 : new BinaryExpression(BinaryOperator.Subtraction, expr, new IntValue(1)) { Range = Range(expr.Range, TokenPosition) };
         }
 
-        // No special postfix/prefix; return the expression parsed by the
-        // precedence-aware binary parser.
         return expr;
     }
 }

@@ -86,16 +86,16 @@ public class Program
 
         string file = parseResult.GetValue(BuildFileArg)!;
 
-        Result<CompileOutput> output = Compiler.Compile(file);
+        CompileOutput output = Compiler.Compile(file);
 
-        if (!output)
+        if (!output.Success)
         {
             return -1;
         }
 
         if (Options.Ast)
         {
-            output.Value.WriteAst();
+            output.WriteAst();
         }
 
         return 0;
@@ -122,19 +122,19 @@ public class Program
 
         string file = parseResult.GetValue(RunFileArg)!;
 
-        Result<CompileOutput> output = Compiler.Compile(file);
+        CompileOutput output = Compiler.Compile(file);
 
-        int code = 0;
-        output.Success((output) =>
+        if (output.Success)
         {
-            Process.Start(output.Executable).WaitForExit();
-        }).Failure((error) =>
+            Process process = Process.Start(output.Executable!);
+            process.WaitForExit();
+            return process.ExitCode;
+        }
+        else
         {
-            Error(error);
-            code = 1;
-        });
-
-        return code;
+            Error(output.Error);
+            return 1;
+        }
     }
 
 

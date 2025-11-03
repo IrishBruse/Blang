@@ -20,6 +20,8 @@ public class Tester
     {
         List<string> failed = new();
 
+        Options.Verbose = 0;
+
         Stopwatch sw = Stopwatch.StartNew();
         int passed = 0;
         foreach (string testFile in tests)
@@ -34,6 +36,8 @@ public class Tester
             }
         }
 
+        Options.Verbose = 1;
+
         if (failed.Count > 0 && !Options.UpdateSnapshots)
         {
             Console.WriteLine();
@@ -41,11 +45,7 @@ public class Tester
             Console.WriteLine();
             foreach (string item in failed)
             {
-                int v = Options.Verbose;
-                Options.Verbose = 1;
                 _ = TestFile(item);
-                Options.Verbose = v;
-                Console.WriteLine();
             }
         }
 
@@ -74,7 +74,7 @@ public class Tester
         string folderType = testFile.Split("/")[1];
         (string astPreviousOutput, string stdPreviousOutput) = LoadTestContent(testFile);
 
-        Result<CompileOutput> res = Compiler.Compile(testFile);
+        CompileOutput output = Compiler.Compile(testFile);
 
         string astFile = Path.ChangeExtension(testFile, ".ast.json");
         string stdFile = Path.ChangeExtension(testFile, ".out");
@@ -86,20 +86,21 @@ public class Tester
 
         if (folderType == "ok")
         {
-            if (!res.IsSuccess)
+            if (!output.Success)
             {
                 Log($"{Red(IconFail)} {testFile}");
-                Error(res.Error);
+                Error(output.Error);
                 return;
             }
 
-            CompileOutput output = res.Value;
-
-            Executable runOutput = Executable.Run(output.Executable);
-
             StringBuilder stdOutput = new();
-            _ = stdOutput.Append(runOutput.StdOut);
-            _ = stdOutput.Append(runOutput.StdError);
+            if (output.Executable != null)
+            {
+                Executable runOutput = Executable.Run(output.Executable);
+                _ = stdOutput.Append(runOutput.StdOut);
+                _ = stdOutput.Append(runOutput.StdError);
+            }
+
             if (stdOutput.Length > 0) File.WriteAllText(stdFile, stdOutput.ToString());
 
             string astOutput = output.CompilationUnit.ToJson();
@@ -122,18 +123,18 @@ public class Tester
         }
         else if (folderType == "error")
         {
-            if (res.IsSuccess)
+            if (output.Success)
             {
                 Log($"{Red(IconFail)} {testFile}");
                 Error("Test did not produce a compile error as expected");
                 return;
             }
 
-            string error = res.Error;
+            string? error = output.Error;
 
-            if (error.Length > 0) File.WriteAllText(stdFile, error.ToString());
+            if (error != null && error.Length > 0) File.WriteAllText(stdFile, error.ToString());
 
-            bool stdChanged = !error.Equals(stdPreviousOutput, StringComparison.Ordinal);
+            bool stdChanged = error != null && !error.Equals(stdPreviousOutput, StringComparison.Ordinal);
             string stdIcon = stdChanged ? Green(IconUpdated) : Gray(IconSame);
 
             bool anyChanges = stdChanged;
@@ -166,16 +167,16 @@ public class Tester
 
         Stopwatch timer = Stopwatch.StartNew();
 
-        Result<CompileOutput> res = Compiler.Compile(testFile);
+        CompileOutput output = Compiler.Compile(testFile);
 
         bool passed = false;
         if (folderType == "ok" || folderType == "example")
         {
-            passed = CompareSuccess(testFile, folderType, res, ref error);
+            passed = CompareSuccess(testFile, folderType, output, ref error);
         }
         else if (folderType == "error")
         {
-            passed = CompareError(testFile, res, ref error);
+            passed = CompareError(testFile, output, ref error);
         }
         else
         {
@@ -192,18 +193,16 @@ public class Tester
         return passed;
     }
 
-    private static bool CompareSuccess(string testFile, string folderType, Result<CompileOutput> res, ref string error)
+    private static bool CompareSuccess(string testFile, string folderType, CompileOutput output, ref string error)
     {
         (string astOutput, string stdOutput) = LoadTestContent(testFile);
-        if (!res.IsSuccess)
+        if (!output.Success)
         {
-            error = res.Error;
+            error = output.Error;
         }
         else
         {
-            CompileOutput output = res.Value;
-
-            string astJson = output!.CompilationUnit.ToJson();
+            string astJson = output.CompilationUnit.ToJson();
 
             Executable runOutput = Executable.Run(output.Executable);
 
@@ -247,20 +246,20 @@ public class Tester
             }
         }
 
-        return res.IsSuccess;
+        return output.Success;
     }
 
-    private static bool CompareError(string testFile, Result<CompileOutput> res, ref string error)
+    private static bool CompareError(string testFile, CompileOutput res, ref string error)
     {
         (_, string stdOutput) = LoadTestContent(testFile);
-        string compileError = res.Error;
+        string? compileError = res.Error;
 
         if (!stdOutput.Equals(compileError, StringComparison.Ordinal))
         {
             error += $"CompileError: {compileError}\n";
         }
 
-        return !res.IsSuccess;
+        return !res.Success;
     }
 
     private static (string astOutput, string stdOutput) LoadTestContent(string testFile)

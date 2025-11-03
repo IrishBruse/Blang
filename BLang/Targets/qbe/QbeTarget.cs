@@ -22,7 +22,7 @@ public class QbeTarget : ITarget
     private int conditionIndex;
     private QbeOutput qbe = new();
 
-    public Result<CompileOutput> Emit(CompilationUnit unit, CompilerContext data)
+    public Result<EmitOutput> Emit(CompilationUnit unit, CompilerContext data)
     {
         _ = data;
 
@@ -46,7 +46,6 @@ public class QbeTarget : ITarget
         string qbeIR = qbe.Text.ToString();
         File.WriteAllText(objFile + ".ssa", qbeIR);
 
-
         if (error != "")
         {
             return error;
@@ -61,7 +60,7 @@ public class QbeTarget : ITarget
         exe = Executable.Run("gcc", $"{objFile}.s -o {binFile}").PipeErrorTo(stdError);
         if (!exe.Success) return $"Failed to compile \"{objFile}.ssa\" into valid \"{objFile}.s\"\n" + stdError.ToString().Replace("qbe:", "");
 
-        return new CompileOutput(file, binFile, unit);
+        return new EmitOutput(binFile, unit);
     }
 
     public void VisitCompilationUnit(CompilationUnit node)
@@ -390,25 +389,6 @@ public class QbeTarget : ITarget
                         BinaryOperator.LessThanEqual => qbe.Cslew(leftOp, rightOp),
                         BinaryOperator.Modulo => qbe.Rem(leftOp, rightOp),
                         BinaryOperator.Multiplication => qbe.Mul(leftOp, rightOp),
-
-                        BinaryOperator.Subtraction => throw new NotImplementedException(),
-                        BinaryOperator.Division => throw new NotImplementedException(),
-                        BinaryOperator.GreaterThan => throw new NotImplementedException(),
-                        BinaryOperator.GreaterThanEqual => throw new NotImplementedException(),
-                        BinaryOperator.NotEqual => throw new NotImplementedException(),
-                        BinaryOperator.LogicalAnd => throw new NotImplementedException(),
-                        BinaryOperator.LogicalOr => throw new NotImplementedException(),
-                        BinaryOperator.LogicalNot => throw new NotImplementedException(),
-                        BinaryOperator.Increment => throw new NotImplementedException(),
-                        BinaryOperator.Decrement => throw new NotImplementedException(),
-                        BinaryOperator.BitwiseComplement => throw new NotImplementedException(),
-                        BinaryOperator.BitwiseAnd => throw new NotImplementedException(),
-                        BinaryOperator.BitwiseXOr => throw new NotImplementedException(),
-                        BinaryOperator.BitwiseShiftLeft => throw new NotImplementedException(),
-                        BinaryOperator.BitwiseShiftRight => throw new NotImplementedException(),
-
-                        BinaryOperator.None => throw new NotImplementedException(),
-                        BinaryOperator.ArrayIndexing => throw new NotImplementedException(),
 
                         _ => throw new ParserException("Unknown operator " + binary.Operation),
                     };
