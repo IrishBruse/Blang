@@ -1,0 +1,19 @@
+
+# A
+data $A = { w 0 }
+
+
+# B
+data $B = { w 2 }
+
+export function w $main()
+{
+@start
+    ret 0
+}
+
+
+# Data
+
+
+# Externs

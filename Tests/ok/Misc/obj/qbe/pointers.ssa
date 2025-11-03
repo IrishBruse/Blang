@@ -1,0 +1,45 @@
+export function w $main()
+{
+@start
+    # auto a = 0
+    %temp_0 =l alloc8 8
+    storew 0, %temp_0
+
+    # auto b = 0
+    %temp_1 =l alloc8 8
+    storew 0, %temp_1
+
+    # auto c = 0
+    %temp_2 =l alloc8 8
+    storew 0, %temp_2
+
+    # a = 12
+    storew 12, %temp_0
+
+    # call printf
+    %temp_3 =w loadw %temp_0
+    call $printf(l $string_0, w %temp_3)
+
+    # b = &a
+    storew %temp_0, %temp_1
+
+    # c = *b
+    %b_4 =l loadw %temp_1
+    %b_5 =w loadw %b_4
+    storew %b_5, %temp_2
+
+    # call printf
+    %b_6 =w loadw %temp_2
+    call $printf(l $string_1, w %b_6)
+    ret 0
+}
+
+
+# Data
+data $string_0 = { b "a %d\n", b 0 }
+data $string_1 = { b "c %d\n", b 0 }
+
+
+# Externs
+
+# - printf

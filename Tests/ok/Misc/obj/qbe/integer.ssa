@@ -1,0 +1,19 @@
+export function w $main()
+{
+@start
+    # call printf
+    call $printf(l $string_0, w -2147483648)
+
+    # call printf
+    call $printf(l $string_0, w 2147483647)
+    ret 0
+}
+
+
+# Data
+data $string_0 = { b "%d\n", b 0 }
+
+
+# Externs
+
+# - printf

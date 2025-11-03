@@ -1,0 +1,27 @@
+export function w $main()
+{
+@start
+    # if (1 < 0)
+    @if_1_condition
+        %temp_0 =w csltw 1, 0
+        jnz %temp_0, @if_1_body, @if_1_else
+    @if_1_body
+        # call printf
+        call $printf(l $string_0)
+        jmp @if_1_end
+    @if_1_else
+        # call printf
+        call $printf(l $string_1)
+    @if_1_end
+    ret 0
+}
+
+
+# Data
+data $string_0 = { b "Fail\n", b 0 }
+data $string_1 = { b "Pass\n", b 0 }
+
+
+# Externs
+
+# - printf

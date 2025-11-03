@@ -1,0 +1,17 @@
+export function w $main()
+{
+@start
+    # auto foo = 0
+    %temp_0 =l alloc8 8
+    storew 0, %temp_0
+
+    # foo = 123
+    storew 123, %temp_0
+    ret 0
+}
+
+
+# Data
+
+
+# Externs

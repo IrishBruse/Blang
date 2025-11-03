@@ -1,0 +1,17 @@
+export function w $main()
+{
+@start
+    ret 0
+}
+
+function w $test()
+{
+@start
+    ret 
+}
+
+
+# Data
+
+
+# Externs

@@ -1,0 +1,24 @@
+
+# variable
+data $variable = { w 0 }
+
+export function w $main()
+{
+@start
+    # variable = 6
+    storew 6, $variable
+
+    # call printf
+    %temp_0 =w loadw $variable
+    call $printf(l $string_0, w %temp_0)
+    ret 0
+}
+
+
+# Data
+data $string_0 = { b "variable %d\n", b 0 }
+
+
+# Externs
+
+# - printf

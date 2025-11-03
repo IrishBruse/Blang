@@ -1,0 +1,24 @@
+export function w $main()
+{
+@start
+    # call other
+    call $other()
+    ret 0
+}
+
+function w $other()
+{
+@start
+    # call printf
+    call $printf(l $string_0)
+    ret 
+}
+
+
+# Data
+data $string_0 = { b "Pass\n", b 0 }
+
+
+# Externs
+
+# - printf

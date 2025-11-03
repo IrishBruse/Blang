@@ -1,0 +1,23 @@
+export function w $main()
+{
+@start
+    ret 0
+}
+
+function w $example1()
+{
+@start
+    ret 
+}
+
+function w $example2()
+{
+@start
+    ret 
+}
+
+
+# Data
+
+
+# Externs

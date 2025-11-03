@@ -1,0 +1,15 @@
+export function w $main()
+{
+@start
+    # call exit
+    call $exit(w 0)
+    ret 0
+}
+
+
+# Data
+
+
+# Externs
+
+# - exit

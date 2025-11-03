@@ -44,13 +44,13 @@ Block
 Statement
     AutoStatement
     ExternStatement
-    CaseStatement
     IfStatement
     WhileStatement
     SwitchStatement
+    CaseStatement
     GotoStatement
-    ReturnStatement
     LabelStatement
+    ReturnStatement
     (Rvalue?, ';')
 
 AutoStatement
