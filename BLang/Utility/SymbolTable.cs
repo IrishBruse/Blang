@@ -5,25 +5,27 @@ using System.Collections.Generic;
 using BLang.Exceptions;
 using BLang.Tokenizer;
 
-// Represents the symbol table structure (managing scopes)
 public class SymbolTable
 {
-    // A stack of dictionaries, where each dictionary represents a scope
     private readonly Stack<Dictionary<string, Symbol>> scopes;
+    private readonly Stack<string> scopeNames;
 
     public SymbolTable()
     {
         scopes = new Stack<Dictionary<string, Symbol>>();
-        EnterScope("global"); // Start with the global scope
+        scopeNames = new Stack<string>();
     }
 
-    public int CurrentScopeDepth { get; private set; } = -1;
+    public int CurrentScopeDepth { get; private set; }
 
     public void EnterScope(string name)
     {
         scopes.Push([]);
+        scopeNames.Push(name);
+        Log("");
+        Log($"{name}");
+        Log($"{{");
         CurrentScopeDepth++;
-        Log($"Entered scope {name} at depth {CurrentScopeDepth}");
     }
 
     public void ExitScope()
@@ -31,8 +33,9 @@ public class SymbolTable
         if (scopes.Count > 1)
         {
             _ = scopes.Pop();
+            _ = scopeNames.Pop();
             CurrentScopeDepth--;
-            Log($"Exited scope to depth: {CurrentScopeDepth}");
+            Log($"}}");
         }
         else
         {
@@ -60,7 +63,7 @@ public class SymbolTable
             throw new InvalidOperationException($"Symbol '{name}' already declared in current scope.");
         }
         currentScope.Add(name, symbol);
-        Log($"Added symbol: {symbol.Name} in scope {CurrentScopeDepth}");
+        Log($"+ {symbol.Name}");
 
         return symbol;
     }
@@ -82,7 +85,13 @@ public class SymbolTable
     {
         if (Options.Symbols)
         {
-            Debug(message, "SYM");
+            Globals.Log(new string(' ', CurrentScopeDepth * 2) + message, "SYM", ConsoleColor.DarkGray);
         }
+    }
+
+    public void Clear()
+    {
+        scopes.Clear();
+        scopeNames.Clear();
     }
 }

@@ -22,9 +22,9 @@ public class Globals
         }
     }
 
-    public static void Log(string? message, string? prefix = null)
+    public static void Log(string? message, string? prefix = null, ConsoleColor? color = null)
     {
-        Print(message, prefix);
+        Print(message, prefix, color);
     }
 
     public static void Error(string? message, string? prefix = null)

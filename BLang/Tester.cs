@@ -46,6 +46,7 @@ public class Tester
             foreach (string item in failed)
             {
                 _ = TestFile(item);
+                Console.WriteLine();
             }
         }
 
@@ -103,7 +104,7 @@ public class Tester
 
             if (stdOutput.Length > 0) File.WriteAllText(stdFile, stdOutput.ToString());
 
-            string astOutput = output.CompilationUnit.ToJson();
+            string astOutput = output.CompilationUnit!.ToJson();
             if (astOutput.Length > 0) File.WriteAllText(astFile, astOutput.ToString());
 
             bool astChanged = !astOutput.Equals(astPreviousOutput, StringComparison.Ordinal);
@@ -158,7 +159,7 @@ public class Tester
     private static bool CompareSnapshot(string testFile)
     {
         string folderType = testFile.Split("/")[1];
-        string error = "";
+        string? error = null;
 
         if (testFile.Contains("Examples/"))
         {
@@ -186,14 +187,14 @@ public class Tester
         double ms = timer.ElapsedTicks / 1000000.0;
 
         string time = Gray($"({ms:0.00}ms)");
-        string icon = error == string.Empty ? Green(IconPass) : Red(IconFail);
+        string icon = error == null ? Green(IconPass) : Red(IconFail);
         Log($"{icon} {testFile} {time}");
         if (error != string.Empty) Error(error);
 
         return passed;
     }
 
-    private static bool CompareSuccess(string testFile, string folderType, CompileOutput output, ref string error)
+    private static bool CompareSuccess(string testFile, string folderType, CompileOutput output, ref string? error)
     {
         (string astOutput, string stdOutput) = LoadTestContent(testFile);
         if (!output.Success)
@@ -202,9 +203,9 @@ public class Tester
         }
         else
         {
-            string astJson = output.CompilationUnit.ToJson();
+            string astJson = output.CompilationUnit!.ToJson();
 
-            Executable runOutput = Executable.Run(output.Executable);
+            Executable runOutput = Executable.Run(output.Executable!);
 
             if (runOutput.ExitCode != 0)
             {
@@ -249,7 +250,7 @@ public class Tester
         return output.Success;
     }
 
-    private static bool CompareError(string testFile, CompileOutput res, ref string error)
+    private static bool CompareError(string testFile, CompileOutput res, ref string? error)
     {
         (_, string stdOutput) = LoadTestContent(testFile);
         string? compileError = res.Error;
