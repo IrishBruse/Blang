@@ -65,19 +65,6 @@ public class SymbolTable
         return symbol;
     }
 
-    public Symbol Get(string name)
-    {
-        foreach (Dictionary<string, Symbol> scope in scopes)
-        {
-            if (scope.TryGetValue(name, out Symbol? symbol))
-            {
-                return symbol;
-            }
-        }
-
-        throw new ParserException($"Couldnt find symbol \"{name}\" in any scope");
-    }
-
     public Symbol GetOrAdd(Token token)
     {
         foreach (Dictionary<string, Symbol> scope in scopes)
@@ -91,29 +78,7 @@ public class SymbolTable
         return Add(token);
     }
 
-    /// <summary> Look up a symbol only in the current scope </summary>
-    public Symbol? GetInCurrentScope(string name)
-    {
-        Dictionary<string, Symbol> currentScope = scopes.Peek();
-        _ = currentScope.TryGetValue(name, out Symbol? symbol);
-        return symbol;
-    }
-
-    public void PrintSymbolTable()
-    {
-        Log("\n--- Symbol Table Contents ---");
-        int depth = scopes.Count;
-        foreach (Dictionary<string, Symbol> scope in scopes)
-        {
-            Log($"Scope Depth: {depth--}");
-            foreach (KeyValuePair<string, Symbol> entry in scope)
-            {
-                Log($"  {entry.Value}");
-            }
-        }
-    }
-
-    public static void Log(string message)
+    public void Log(string message)
     {
         if (Options.Symbols)
         {

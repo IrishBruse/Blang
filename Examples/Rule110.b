@@ -26,14 +26,16 @@ next(base, n) {
     }
 }
 
+base[100];
+
 main() {
     extrn malloc, memset;
-    auto base, n;
+    auto   n;
 
     word = &0[1]; /* trick to obtain the word size */
     n    = 100;
-    base = malloc(word*n);
-    memset(base, 0, word*n);
+    /* base = malloc(word*n); */
+    memset(base, 0, word * n);
     base[n - 2] = 1;
 
     display(base, n);

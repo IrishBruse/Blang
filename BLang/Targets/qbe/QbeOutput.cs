@@ -133,21 +133,11 @@ public partial class QbeOutput()
         return "%" + name + "_" + tempRegCounter++;
     }
 
-    public string CreateTempRegister(Symbol symbol)
-    {
-        ssaVersionCounters[symbol] = !ssaVersionCounters.TryGetValue(symbol, out int value) ? 0 : ++value;
-
-        return $"%{symbol.Name}_{ssaVersionCounters[symbol]}";
-    }
-
     /// <summary> Stores a word (32-bit) integer value into memory. </summary>
     public void Storew(int value, string address)
     {
         Storew(value.ToString(), address);
     }
-
-
-
 }
 
 public enum Size

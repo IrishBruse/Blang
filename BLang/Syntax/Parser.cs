@@ -169,7 +169,7 @@ public partial class Parser(CompilerContext data)
         }
         else
         {
-            return new GlobalVariableDecleration(symbol, valueCount == 1 ? values[0] : null) { Range = Range(identifier, TokenPosition) };
+            return new GlobalVariableDecleration(symbol, valueCount == 1 ? values[0] : new IntValue(0)) { Range = Range(identifier, TokenPosition) };
         }
     }
 

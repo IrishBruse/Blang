@@ -19,7 +19,7 @@ public abstract record Statement() : AstNode;
 [JsonDerivedType(typeof(GlobalVariableDecleration), nameof(GlobalVariableDecleration))]
 [JsonDerivedType(typeof(GlobalArrayDeclaration), nameof(GlobalArrayDeclaration))]
 public record GlobalVariable : Statement;
-public record GlobalVariableDecleration(Symbol Symbol, Expression? Value) : GlobalVariable;
+public record GlobalVariableDecleration(Symbol Symbol, Expression Value) : GlobalVariable;
 public record GlobalArrayDeclaration(Symbol Symbol, Expression[] Values, int Size) : GlobalVariable;
 
 public record ExternalStatement(Symbol[] Externals) : Statement;
