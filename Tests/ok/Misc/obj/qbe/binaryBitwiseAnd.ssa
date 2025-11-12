@@ -6,13 +6,12 @@ export function w $main()
     # auto result = 0
     storew 0, %result_0
 
-    # result = (10 < 20)
-    %integer_1 =w csltw 10, 20
-    storew %integer_1, %result_0
+    # result = (5 & 3)
+    storew , %result_0
 
     # call printf
-    %result_2 =w loadw %result_0
-    call $printf(l $string_0, w %result_2)
+    %result_1 =w loadw %result_0
+    call $printf(l $string_0, w %result_1)
     ret 0
 }
 

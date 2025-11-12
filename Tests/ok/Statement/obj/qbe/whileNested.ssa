@@ -1,0 +1,58 @@
+export function w $main()
+{
+@start
+    %i_0 =l alloc8 8
+
+    # auto i = 0
+    storew 0, %i_0
+    %j_1 =l alloc8 8
+
+    # auto j = 0
+    storew 0, %j_1
+
+    # i = 0
+    storew 0, %i_0
+
+    # while (i < 3)
+@while_1_condition
+    %i_2 =w loadw %i_0
+    %integer_3 =w csltw %i_2, 3
+    jnz %integer_3, @while_1_body, @while_1_end
+@while_1_body
+    # j = 0
+    storew 0, %j_0
+
+    # while (j < 2)
+@while_2_condition
+    %j_4 =w loadw %j_0
+    %integer_5 =w csltw %j_4, 2
+    jnz %integer_5, @while_2_body, @while_2_end
+@while_2_body
+    # call printf
+    %i_6 =w loadw %i_1
+    %j_7 =w loadw %j_1
+    call $printf(l $string_0, w %i_6, w %j_7)
+
+    # j = (j + 1)
+    %j_8 =w loadw %j_2
+    %integer_9 =w add %j_8, 1
+    storew %integer_9, %j_3
+    jmp @while_2_condition
+@while_2_end
+    # i = (i + 1)
+    %i_10 =w loadw %i_2
+    %integer_11 =w add %i_10, 1
+    storew %integer_11, %i_3
+    jmp @while_1_condition
+@while_1_end
+    ret 0
+}
+
+
+# Data
+data $string_0 = { b "%d,%d ", b 0 }
+
+
+# Externs
+
+# - printf

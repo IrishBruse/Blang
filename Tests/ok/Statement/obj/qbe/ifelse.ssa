@@ -3,8 +3,8 @@ export function w $main()
 @start
     # if (1 < 0)
     @if_1_condition
-        %temp_0 =w csltw 1, 0
-        jnz %temp_0, @if_1_body, @if_1_else
+        %integer_0 =w csltw 1, 0
+        jnz %integer_0, @if_1_body, @if_1_else
     @if_1_body
         # call printf
         call $printf(l $string_0)

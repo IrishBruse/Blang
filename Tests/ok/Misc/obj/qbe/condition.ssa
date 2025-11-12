@@ -1,24 +1,25 @@
 export function w $main()
 {
 @start
+    %a_0 =l alloc8 8
+
     # auto a = 0
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
+    storew 0, %a_0
 
     # a = 0
-    storew 0, %temp_0
+    storew 0, %a_0
 
     # if ((a + 1000) < (100 * 2))
     @if_1_condition
-        %temp_1 =w loadw %temp_0
-        %temp_2 =w add %temp_1, 1000
-        %temp_3 =w mul 100, 2
-        %temp_4 =w csltw %temp_2, %temp_3
-        jnz %temp_4, @if_1_body, @if_1_end
+        %a_1 =w loadw %a_0
+        %integer_2 =w add %a_1, 1000
+        %integer_3 =w mul 100, 2
+        %integer_4 =w csltw %integer_2, %integer_3
+        jnz %integer_4, @if_1_body, @if_1_end
     @if_1_body
         # call printf
-        %temp_5 =w loadw %temp_0
-        call $printf(l $string_0, w %temp_5)
+        %a_5 =w loadw %a_1
+        call $printf(l $string_0, w %a_5)
     @if_1_end
     # call printf
     call $printf(l $string_0, w 123)

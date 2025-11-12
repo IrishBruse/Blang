@@ -1,0 +1,48 @@
+
+# arr[5]
+data $arr = { w 0 0 0 0 0 }
+
+export function w $main()
+{
+@start
+    %i_0 =l alloc8 8
+
+    # auto i = 0
+    storew 0, %i_0
+    %x_1 =l alloc8 8
+
+    # auto x = 0
+    storew 0, %x_1
+    %y_2 =l alloc8 8
+
+    # auto y = 0
+    storew 0, %y_2
+
+    # i = 2
+    storew 2, %i_0
+
+    # x = 10
+    storew 10, %x_0
+
+    # y = 20
+    storew 20, %y_0
+
+    # arr[i] = (x + y)
+    %i_3 =w loadw %i_0
+    %i_4 =l extuw %i_3
+    %i_5 =l add %arr_0, %i_4
+    %x_6 =w loadw %x_0
+    %y_7 =w loadw %y_0
+    %y_8 =w add %x_6, %y_7
+    storew %y_8, %i_5
+
+    ret 0
+}
+
+
+# Data
+
+
+# Externs
+
+# - printf

@@ -1,12 +1,13 @@
 export function w $main()
 {
 @start
+    %foo_0 =l alloc8 8
+
     # auto foo = 0
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
+    storew 0, %foo_0
 
     # foo = 123
-    storew 123, %temp_0
+    storew 123, %foo_0
     ret 0
 }
 

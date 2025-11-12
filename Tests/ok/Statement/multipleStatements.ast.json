@@ -1,0 +1,227 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main"
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf"
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "x"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 38
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "i"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 43,
+            "End": 50
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "x"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 5,
+            "Range": {
+              "Start": 57,
+              "End": 60
+            }
+          },
+          "Range": {
+            "Start": 55,
+            "End": 56
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "i"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 0,
+            "Range": {
+              "Start": 68,
+              "End": 71
+            }
+          },
+          "Range": {
+            "Start": 66,
+            "End": 67
+          }
+        },
+        {
+          "_Type": "WhileStatement",
+          "Condition": {
+            "Operation": 105,
+            "Left": {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "i"
+              },
+              "Range": {
+                "Start": 85,
+                "End": 86
+              }
+            },
+            "Right": {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "x"
+              },
+              "Range": {
+                "Start": 89,
+                "End": 90
+              }
+            },
+            "Range": {
+              "Start": 85,
+              "End": 90
+            }
+          },
+          "Body": [
+            {
+              "_Type": "IfStatement",
+              "Condition": {
+                "_Type": "BinaryExpression",
+                "Operation": 109,
+                "Left": {
+                  "_Type": "Variable",
+                  "Symbol": {
+                    "Name": "i"
+                  },
+                  "Range": {
+                    "Start": 106,
+                    "End": 107
+                  }
+                },
+                "Right": {
+                  "_Type": "IntValue",
+                  "Value": 2,
+                  "Range": {
+                    "Start": 111,
+                    "End": 112
+                  }
+                },
+                "Range": {
+                  "Start": 106,
+                  "End": 112
+                }
+              },
+              "Body": [
+                {
+                  "_Type": "FunctionCall",
+                  "Symbol": {
+                    "Name": "printf"
+                  },
+                  "Parameters": [
+                    {
+                      "_Type": "StringValue",
+                      "Value": "two\\n",
+                      "Range": {
+                        "Start": 135,
+                        "End": 142
+                      }
+                    }
+                  ],
+                  "Range": {
+                    "Start": 128,
+                    "End": 144
+                  }
+                }
+              ],
+              "ElseBody": null,
+              "Range": {
+                "Start": 102,
+                "End": 154
+              }
+            },
+            {
+              "_Type": "GlobalVariableDecleration",
+              "Symbol": {
+                "Name": "i"
+              },
+              "Value": {
+                "_Type": "BinaryExpression",
+                "Operation": 100,
+                "Left": {
+                  "_Type": "Variable",
+                  "Symbol": {
+                    "Name": "i"
+                  },
+                  "Range": {
+                    "Start": 167,
+                    "End": 168
+                  }
+                },
+                "Right": {
+                  "_Type": "IntValue",
+                  "Value": 1,
+                  "Range": {
+                    "Start": 171,
+                    "End": 172
+                  }
+                },
+                "Range": {
+                  "Start": 165,
+                  "End": 172
+                }
+              },
+              "Range": {
+                "Start": 163,
+                "End": 164
+              }
+            }
+          ],
+          "Range": {
+            "Start": 78,
+            "End": 179
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 181
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 181
+  }
+}

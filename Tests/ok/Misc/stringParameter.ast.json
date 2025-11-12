@@ -1,0 +1,53 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main"
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf"
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf"
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "Hello, World!\\n",
+              "Range": {
+                "Start": 38,
+                "End": 55
+              }
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 57
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 59
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 59
+  }
+}

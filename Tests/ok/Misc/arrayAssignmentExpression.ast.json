@@ -1,0 +1,193 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main"
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf"
+            }
+          ],
+          "Range": {
+            "Start": 22,
+            "End": 35
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "i"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 40,
+            "End": 47
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "x"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 52,
+            "End": 59
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "y"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 64,
+            "End": 71
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "i"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 2,
+            "Range": {
+              "Start": 78,
+              "End": 81
+            }
+          },
+          "Range": {
+            "Start": 76,
+            "End": 77
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "x"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 10,
+            "Range": {
+              "Start": 89,
+              "End": 93
+            }
+          },
+          "Range": {
+            "Start": 87,
+            "End": 88
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "y"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 20,
+            "Range": {
+              "Start": 101,
+              "End": 105
+            }
+          },
+          "Range": {
+            "Start": 99,
+            "End": 100
+          }
+        },
+        {
+          "_Type": "ArrayAssignmentStatement",
+          "Symbol": {
+            "Name": "arr"
+          },
+          "Index": {
+            "_Type": "Variable",
+            "Symbol": {
+              "Name": "i"
+            },
+            "Range": {
+              "Start": 115,
+              "End": 116
+            }
+          },
+          "Value": {
+            "_Type": "BinaryExpression",
+            "Operation": 100,
+            "Left": {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "x"
+              },
+              "Range": {
+                "Start": 120,
+                "End": 121
+              }
+            },
+            "Right": {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "y"
+              },
+              "Range": {
+                "Start": 124,
+                "End": 125
+              }
+            },
+            "Range": {
+              "Start": 118,
+              "End": 125
+            }
+          },
+          "Range": {
+            "Start": 111,
+            "End": 126
+          }
+        }
+      ],
+      "Range": {
+        "Start": 9,
+        "End": 128
+      }
+    }
+  ],
+  "GlobalVariables": [
+    {
+      "$type": "GlobalArrayDeclaration",
+      "Symbol": {
+        "Name": "arr"
+      },
+      "Values": [],
+      "Size": 5,
+      "Range": {
+        "Start": 0,
+        "End": 7
+      }
+    }
+  ],
+  "Range": {
+    "Start": 0,
+    "End": 128
+  }
+}

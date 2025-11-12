@@ -6,8 +6,8 @@ export function w $main()
     # auto result = 0
     storew 0, %result_0
 
-    # result = (10 < 20)
-    %integer_1 =w csltw 10, 20
+    # result = (17 % 5)
+    %integer_1 =w rem 17, 5
     storew %integer_1, %result_0
 
     # call printf

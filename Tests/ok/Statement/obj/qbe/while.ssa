@@ -1,27 +1,28 @@
 export function w $main()
 {
 @start
+    %i_0 =l alloc8 8
+
     # auto i = 0
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
+    storew 0, %i_0
 
     # i = 0
-    storew 0, %temp_0
+    storew 0, %i_0
 
     # while (i < 10)
 @while_1_condition
-    %temp_1 =w loadw %temp_0
-    %temp_2 =w csltw %temp_1, 10
-    jnz %temp_2, @while_1_body, @while_1_end
+    %i_1 =w loadw %i_0
+    %integer_2 =w csltw %i_1, 10
+    jnz %integer_2, @while_1_body, @while_1_end
 @while_1_body
     # call printf
-    %temp_3 =w loadw %temp_0
-    call $printf(l $string_0, w %temp_3)
+    %i_3 =w loadw %i_1
+    call $printf(l $string_0, w %i_3)
 
     # i = (i + 1)
-    %temp_4 =w loadw %temp_0
-    %temp_5 =w add %temp_4, 1
-    storew %temp_5, %temp_0
+    %i_4 =w loadw %i_2
+    %integer_5 =w add %i_4, 1
+    storew %integer_5, %i_3
     jmp @while_1_condition
 @while_1_end
     ret 0

@@ -6,8 +6,8 @@ export function w $main()
 {
 @start
     # call printf
-    %temp_0 =w loadw $variable
-    call $printf(l $string_0, w %temp_0)
+    %variable_0 =w loadw %variable_0
+    call $printf(l $string_0, w %variable_0)
     ret 0
 }
 

@@ -1,16 +1,17 @@
 export function w $main()
 {
 @start
+    %word_0 =l alloc8 8
+
     # auto word = 0
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
+    storew 0, %word_0
 
     # word = 4
-    storew 4, %temp_0
+    storew 4, %word_0
 
     # call printf
-    %temp_1 =w loadw %temp_0
-    call $printf(l $string_0, w %temp_1)
+    %word_1 =w loadw %word_0
+    call $printf(l $string_0, w %word_1)
     ret 0
 }
 

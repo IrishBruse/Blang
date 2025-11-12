@@ -10,15 +10,15 @@ export function w $main()
 {
 @start
     # foo = 1
-    storew 1, $foo
+    storew 1, %foo_0
 
     # call printf
-    %temp_0 =w loadw $foo
-    call $printf(l $string_0, w %temp_0)
+    %foo_0 =w loadw %foo_0
+    call $printf(l $string_0, w %foo_0)
 
     # call printf
-    %temp_1 =w loadw $bar
-    call $printf(l $string_1, w %temp_1)
+    %bar_1 =w loadw %bar_0
+    call $printf(l $string_1, w %bar_1)
     ret 0
 }
 

@@ -1,0 +1,200 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main"
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf"
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "x"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 38
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "x"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 2,
+            "Range": {
+              "Start": 45,
+              "End": 48
+            }
+          },
+          "Range": {
+            "Start": 43,
+            "End": 44
+          }
+        },
+        {
+          "_Type": "IfStatement",
+          "Condition": {
+            "_Type": "BinaryExpression",
+            "Operation": 109,
+            "Left": {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "x"
+              },
+              "Range": {
+                "Start": 58,
+                "End": 59
+              }
+            },
+            "Right": {
+              "_Type": "IntValue",
+              "Value": 1,
+              "Range": {
+                "Start": 63,
+                "End": 64
+              }
+            },
+            "Range": {
+              "Start": 58,
+              "End": 64
+            }
+          },
+          "Body": [
+            {
+              "_Type": "FunctionCall",
+              "Symbol": {
+                "Name": "printf"
+              },
+              "Parameters": [
+                {
+                  "_Type": "StringValue",
+                  "Value": "one\\n",
+                  "Range": {
+                    "Start": 83,
+                    "End": 90
+                  }
+                }
+              ],
+              "Range": {
+                "Start": 76,
+                "End": 92
+              }
+            }
+          ],
+          "ElseBody": [
+            {
+              "_Type": "IfStatement",
+              "Condition": {
+                "_Type": "BinaryExpression",
+                "Operation": 109,
+                "Left": {
+                  "_Type": "Variable",
+                  "Symbol": {
+                    "Name": "x"
+                  },
+                  "Range": {
+                    "Start": 118,
+                    "End": 119
+                  }
+                },
+                "Right": {
+                  "_Type": "IntValue",
+                  "Value": 2,
+                  "Range": {
+                    "Start": 123,
+                    "End": 124
+                  }
+                },
+                "Range": {
+                  "Start": 118,
+                  "End": 124
+                }
+              },
+              "Body": [
+                {
+                  "_Type": "FunctionCall",
+                  "Symbol": {
+                    "Name": "printf"
+                  },
+                  "Parameters": [
+                    {
+                      "_Type": "StringValue",
+                      "Value": "two\\n",
+                      "Range": {
+                        "Start": 147,
+                        "End": 154
+                      }
+                    }
+                  ],
+                  "Range": {
+                    "Start": 140,
+                    "End": 156
+                  }
+                }
+              ],
+              "ElseBody": [
+                {
+                  "_Type": "FunctionCall",
+                  "Symbol": {
+                    "Name": "printf"
+                  },
+                  "Parameters": [
+                    {
+                      "_Type": "StringValue",
+                      "Value": "other\\n",
+                      "Range": {
+                        "Start": 193,
+                        "End": 202
+                      }
+                    }
+                  ],
+                  "Range": {
+                    "Start": 186,
+                    "End": 204
+                  }
+                }
+              ],
+              "Range": {
+                "Start": 114,
+                "End": 214
+              }
+            }
+          ],
+          "Range": {
+            "Start": 54,
+            "End": 220
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 222
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 222
+  }
+}

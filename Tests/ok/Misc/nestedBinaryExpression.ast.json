@@ -1,0 +1,284 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main"
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf"
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "result"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 43
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "a"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 48,
+            "End": 55
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "b"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 60,
+            "End": 67
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "c"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 72,
+            "End": 79
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "d"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 84,
+            "End": 91
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "a"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 5,
+            "Range": {
+              "Start": 98,
+              "End": 101
+            }
+          },
+          "Range": {
+            "Start": 96,
+            "End": 97
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "b"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 3,
+            "Range": {
+              "Start": 109,
+              "End": 112
+            }
+          },
+          "Range": {
+            "Start": 107,
+            "End": 108
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "c"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 2,
+            "Range": {
+              "Start": 120,
+              "End": 123
+            }
+          },
+          "Range": {
+            "Start": 118,
+            "End": 119
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "d"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 1,
+            "Range": {
+              "Start": 131,
+              "End": 134
+            }
+          },
+          "Range": {
+            "Start": 129,
+            "End": 130
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "result"
+          },
+          "Value": {
+            "_Type": "BinaryExpression",
+            "Operation": 102,
+            "Left": {
+              "_Type": "BinaryExpression",
+              "Operation": 100,
+              "Left": {
+                "_Type": "Variable",
+                "Symbol": {
+                  "Name": "a"
+                },
+                "Range": {
+                  "Start": 150,
+                  "End": 151
+                }
+              },
+              "Right": {
+                "_Type": "Variable",
+                "Symbol": {
+                  "Name": "b"
+                },
+                "Range": {
+                  "Start": 154,
+                  "End": 155
+                }
+              },
+              "Range": {
+                "Start": 150,
+                "End": 155
+              }
+            },
+            "Right": {
+              "_Type": "BinaryExpression",
+              "Operation": 101,
+              "Left": {
+                "_Type": "Variable",
+                "Symbol": {
+                  "Name": "c"
+                },
+                "Range": {
+                  "Start": 160,
+                  "End": 161
+                }
+              },
+              "Right": {
+                "_Type": "Variable",
+                "Symbol": {
+                  "Name": "d"
+                },
+                "Range": {
+                  "Start": 164,
+                  "End": 165
+                }
+              },
+              "Range": {
+                "Start": 160,
+                "End": 165
+              }
+            },
+            "Range": {
+              "Start": 147,
+              "End": 166
+            }
+          },
+          "Range": {
+            "Start": 140,
+            "End": 146
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf"
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "%d\\n",
+              "Range": {
+                "Start": 179,
+                "End": 185
+              }
+            },
+            {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "result"
+              },
+              "Range": {
+                "Start": 187,
+                "End": 193
+              }
+            }
+          ],
+          "Range": {
+            "Start": 172,
+            "End": 195
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 197
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 197
+  }
+}

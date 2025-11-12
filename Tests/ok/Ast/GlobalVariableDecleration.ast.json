@@ -18,7 +18,14 @@
       "Symbol": {
         "Name": "A"
       },
-      "Value": null,
+      "Value": {
+        "_Type": "IntValue",
+        "Value": 0,
+        "Range": {
+          "Start": 0,
+          "End": 0
+        }
+      },
       "Range": {
         "Start": 0,
         "End": 2

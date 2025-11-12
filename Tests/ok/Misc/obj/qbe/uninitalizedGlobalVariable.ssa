@@ -6,11 +6,11 @@ export function w $main()
 {
 @start
     # variable = 6
-    storew 6, $variable
+    storew 6, %variable_0
 
     # call printf
-    %temp_0 =w loadw $variable
-    call $printf(l $string_0, w %temp_0)
+    %variable_0 =w loadw %variable_0
+    call $printf(l $string_0, w %variable_0)
     ret 0
 }
 

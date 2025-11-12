@@ -1,0 +1,112 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main"
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf"
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "result"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 43
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "result"
+          },
+          "Value": {
+            "_Type": "BinaryExpression",
+            "Operation": 102,
+            "Left": {
+              "_Type": "IntValue",
+              "Value": 6,
+              "Range": {
+                "Start": 57,
+                "End": 58
+              }
+            },
+            "Right": {
+              "_Type": "IntValue",
+              "Value": 7,
+              "Range": {
+                "Start": 61,
+                "End": 62
+              }
+            },
+            "Range": {
+              "Start": 55,
+              "End": 62
+            }
+          },
+          "Range": {
+            "Start": 48,
+            "End": 54
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf"
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "%d\\n",
+              "Range": {
+                "Start": 75,
+                "End": 81
+              }
+            },
+            {
+              "_Type": "Variable",
+              "Symbol": {
+                "Name": "result"
+              },
+              "Range": {
+                "Start": 83,
+                "End": 89
+              }
+            }
+          ],
+          "Range": {
+            "Start": 68,
+            "End": 91
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 93
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 93
+  }
+}

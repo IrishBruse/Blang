@@ -1,0 +1,147 @@
+{
+  "FunctionDeclarations": [
+    {
+      "Symbol": {
+        "Name": "main"
+      },
+      "Parameters": [],
+      "Body": [
+        {
+          "_Type": "ExternalStatement",
+          "Externals": [
+            {
+              "Name": "printf"
+            }
+          ],
+          "Range": {
+            "Start": 13,
+            "End": 26
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "x"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 31,
+            "End": 38
+          }
+        },
+        {
+          "_Type": "AutoStatement",
+          "Variables": [
+            {
+              "Symbol": {
+                "Name": "y"
+              },
+              "Value": 0
+            }
+          ],
+          "Range": {
+            "Start": 43,
+            "End": 50
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "x"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 5,
+            "Range": {
+              "Start": 57,
+              "End": 60
+            }
+          },
+          "Range": {
+            "Start": 55,
+            "End": 56
+          }
+        },
+        {
+          "_Type": "GlobalVariableDecleration",
+          "Symbol": {
+            "Name": "y"
+          },
+          "Value": {
+            "_Type": "IntValue",
+            "Value": 3,
+            "Range": {
+              "Start": 68,
+              "End": 71
+            }
+          },
+          "Range": {
+            "Start": 66,
+            "End": 67
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf"
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "%d\\n",
+              "Range": {
+                "Start": 84,
+                "End": 90
+              }
+            },
+            {
+              "_Type": "BinaryExpression",
+              "Operation": 100,
+              "Left": {
+                "_Type": "Variable",
+                "Symbol": {
+                  "Name": "x"
+                },
+                "Range": {
+                  "Start": 92,
+                  "End": 93
+                }
+              },
+              "Right": {
+                "_Type": "Variable",
+                "Symbol": {
+                  "Name": "y"
+                },
+                "Range": {
+                  "Start": 96,
+                  "End": 97
+                }
+              },
+              "Range": {
+                "Start": 92,
+                "End": 97
+              }
+            }
+          ],
+          "Range": {
+            "Start": 77,
+            "End": 99
+          }
+        }
+      ],
+      "Range": {
+        "Start": 0,
+        "End": 101
+      }
+    }
+  ],
+  "GlobalVariables": [],
+  "Range": {
+    "Start": 0,
+    "End": 101
+  }
+}

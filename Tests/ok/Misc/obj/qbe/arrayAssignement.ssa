@@ -5,16 +5,17 @@ data $arr = { w 0 0 0 0 }
 export function w $main()
 {
 @start
+    %i_0 =l alloc8 8
+
     # auto i = 0
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
+    storew 0, %i_0
 
     # arr[(i + 1)] = 2
-    %temp_1 =w loadw %temp_0
-    %temp_2 =w add %temp_1, 1
-    %temp_3 =l extuw %temp_2
-    %temp_4 =l add $arr, %temp_3
-    storew 2, %temp_4
+    %i_1 =w loadw %i_0
+    %integer_2 =w add %i_1, 1
+    %integer_3 =l extuw %integer_2
+    %integer_4 =l add %arr_0, %integer_3
+    storew 2, %integer_4
 
     ret 0
 }

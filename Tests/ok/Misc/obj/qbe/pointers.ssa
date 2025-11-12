@@ -1,36 +1,37 @@
 export function w $main()
 {
 @start
+    %a_0 =l alloc8 8
+
     # auto a = 0
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
+    storew 0, %a_0
+    %b_1 =l alloc8 8
 
     # auto b = 0
-    %temp_1 =l alloc8 8
-    storew 0, %temp_1
+    storew 0, %b_1
+    %c_2 =l alloc8 8
 
     # auto c = 0
-    %temp_2 =l alloc8 8
-    storew 0, %temp_2
+    storew 0, %c_2
 
     # a = 12
-    storew 12, %temp_0
+    storew 12, %a_0
 
     # call printf
-    %temp_3 =w loadw %temp_0
-    call $printf(l $string_0, w %temp_3)
+    %a_3 =w loadw %a_0
+    call $printf(l $string_0, w %a_3)
 
     # b = &a
-    storew %temp_0, %temp_1
+    storew %a_1, %b_0
 
     # c = *b
-    %b_4 =l loadw %temp_1
+    %b_4 =l loadw %b_0
     %b_5 =w loadw %b_4
-    storew %b_5, %temp_2
+    storew %b_5, %c_0
 
     # call printf
-    %b_6 =w loadw %temp_2
-    call $printf(l $string_1, w %b_6)
+    %c_6 =w loadw %c_0
+    call $printf(l $string_1, w %c_6)
     ret 0
 }
 
