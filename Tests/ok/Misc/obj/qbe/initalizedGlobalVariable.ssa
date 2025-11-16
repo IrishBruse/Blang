@@ -3,3 +3,4 @@ data $variable = { l 3 }
 export function l $main()
 {
 @start
+

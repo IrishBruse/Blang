@@ -5,6 +5,7 @@ data $B = { l 2 }
 export function l $main()
 {
 @start
+
     ret 0
 }
 

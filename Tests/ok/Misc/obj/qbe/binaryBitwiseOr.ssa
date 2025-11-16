@@ -1,6 +1,7 @@
 export function l $main()
 {
 @start
+
     %temp_0 =l alloc8 8
     storew 0, %temp_0
     %result_0 =l or 5, 3

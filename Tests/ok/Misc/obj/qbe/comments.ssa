@@ -1,12 +1,14 @@
 export function l $main()
 {
 @start
+
     ret 0
 }
 
 function w $test()
 {
 @start
+
     ret 
 }
 

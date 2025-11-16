@@ -1,6 +1,7 @@
 export function l $main()
 {
 @start
+
     ret 0
 }
 

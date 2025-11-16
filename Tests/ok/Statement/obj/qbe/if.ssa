@@ -1,6 +1,7 @@
 export function l $main()
 {
 @start
+
     @if_1_condition
         %temp_0 =l csltl 0, 1
         jnz %temp_0, @if_1_body, @if_1_end

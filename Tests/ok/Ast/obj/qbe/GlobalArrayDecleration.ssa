@@ -1,12 +1,13 @@
-data $A = { w 0 0 0 }
+data $A = { l 0 0 0 }
 
-data $B = { w 1 2 }
+data $B = { l 1 2 }
 
-data $C = { w 1 2 3 0 }
+data $C = { l 1 2 3 0 }
 
 export function l $main()
 {
 @start
+
     ret 0
 }
 
