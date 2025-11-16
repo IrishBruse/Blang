@@ -1,33 +1,7 @@
+data $foo = { l 0 }
 
-# foo
-data $foo = { w 0 }
+data $bar = { l 3 }
 
-
-# bar
-data $bar = { w 3 }
-
-export function w $main()
+export function l $main()
 {
 @start
-    # foo = 1
-    storew 1, %foo_0
-
-    # call printf
-    %foo_0 =w loadw %foo_0
-    call $printf(l $string_0, w %foo_0)
-
-    # call printf
-    %bar_1 =w loadw %bar_0
-    call $printf(l $string_1, w %bar_1)
-    ret 0
-}
-
-
-# Data
-data $string_0 = { b "foo %d\n", b 0 }
-data $string_1 = { b "bar %d\n", b 0 }
-
-
-# Externs
-
-# - printf

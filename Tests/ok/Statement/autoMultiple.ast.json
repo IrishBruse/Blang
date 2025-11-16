@@ -2,7 +2,8 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main"
+        "Name": "main",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [
@@ -10,7 +11,8 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf"
+              "Name": "printf",
+              "IsGlobal": false
             }
           ],
           "Range": {
@@ -23,7 +25,8 @@
           "Variables": [
             {
               "Symbol": {
-                "Name": "a"
+                "Name": "a",
+                "IsGlobal": false
               },
               "Value": 5
             }
@@ -38,7 +41,8 @@
           "Variables": [
             {
               "Symbol": {
-                "Name": "b"
+                "Name": "b",
+                "IsGlobal": false
               },
               "Value": 10
             }
@@ -53,7 +57,8 @@
           "Variables": [
             {
               "Symbol": {
-                "Name": "c"
+                "Name": "c",
+                "IsGlobal": false
               },
               "Value": 15
             }
@@ -66,7 +71,8 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "printf"
+            "Name": "printf",
+            "IsGlobal": false
           },
           "Parameters": [
             {
@@ -80,7 +86,8 @@
             {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "a"
+                "Name": "a",
+                "IsGlobal": false
               },
               "Range": {
                 "Start": 96,
@@ -90,7 +97,8 @@
             {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "b"
+                "Name": "b",
+                "IsGlobal": false
               },
               "Range": {
                 "Start": 99,
@@ -100,7 +108,8 @@
             {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "c"
+                "Name": "c",
+                "IsGlobal": false
               },
               "Range": {
                 "Start": 102,

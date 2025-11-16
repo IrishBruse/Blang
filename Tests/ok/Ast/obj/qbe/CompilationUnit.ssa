@@ -1,11 +1,7 @@
-export function w $main()
+export function l $main()
 {
 @start
     ret 0
 }
 
 
-# Data
-
-
-# Externs

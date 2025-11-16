@@ -2,7 +2,8 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main"
+        "Name": "main",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [
@@ -10,7 +11,8 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf"
+              "Name": "printf",
+              "IsGlobal": false
             }
           ],
           "Range": {
@@ -21,7 +23,8 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "printf"
+            "Name": "printf",
+            "IsGlobal": false
           },
           "Parameters": [
             {
@@ -36,7 +39,8 @@
               "_Type": "ArrayIndexExpression",
               "Variable": {
                 "Symbol": {
-                  "Name": "arr"
+                  "Name": "arr",
+                  "IsGlobal": true
                 },
                 "Range": {
                   "Start": 71,
@@ -73,7 +77,8 @@
     {
       "$type": "GlobalArrayDeclaration",
       "Symbol": {
-        "Name": "arr"
+        "Name": "arr",
+        "IsGlobal": true
       },
       "Values": [
         {

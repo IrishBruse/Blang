@@ -1,4 +1,4 @@
-export function w $main()
+export function l $main()
 {
 @start
     ret 0
@@ -11,7 +11,3 @@ function w $test()
 }
 
 
-# Data
-
-
-# Externs

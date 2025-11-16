@@ -1,16 +1,9 @@
-export function w $main()
+export function l $main()
 {
 @start
-    # call printf
     call $printf(l $string_0)
     ret 0
 }
 
-
-# Data
 data $string_0 = { b "Hello, World!\n", b 0 }
 
-
-# Externs
-
-# - printf

@@ -1,19 +1,11 @@
+data $A = { l 0 }
 
-# A
-data $A = { w 0 }
+data $B = { l 2 }
 
-
-# B
-data $B = { w 2 }
-
-export function w $main()
+export function l $main()
 {
 @start
     ret 0
 }
 
 
-# Data
-
-
-# Externs

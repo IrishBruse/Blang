@@ -2,7 +2,8 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main"
+        "Name": "main",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [
@@ -10,7 +11,8 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf"
+              "Name": "printf",
+              "IsGlobal": false
             }
           ],
           "Range": {
@@ -23,7 +25,8 @@
           "Variables": [
             {
               "Symbol": {
-                "Name": "result"
+                "Name": "result",
+                "IsGlobal": false
               },
               "Value": 0
             }
@@ -36,7 +39,8 @@
         {
           "_Type": "GlobalVariableDecleration",
           "Symbol": {
-            "Name": "result"
+            "Name": "result",
+            "IsGlobal": false
           },
           "Value": {
             "_Type": "BinaryExpression",
@@ -70,7 +74,8 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "printf"
+            "Name": "printf",
+            "IsGlobal": false
           },
           "Parameters": [
             {
@@ -84,7 +89,8 @@
             {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "result"
+                "Name": "result",
+                "IsGlobal": false
               },
               "Range": {
                 "Start": 83,

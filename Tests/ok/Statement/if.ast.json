@@ -2,7 +2,8 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main"
+        "Name": "main",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [
@@ -10,7 +11,8 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf"
+              "Name": "printf",
+              "IsGlobal": false
             }
           ],
           "Range": {
@@ -48,7 +50,8 @@
             {
               "_Type": "FunctionCall",
               "Symbol": {
-                "Name": "printf"
+                "Name": "printf",
+                "IsGlobal": false
               },
               "Parameters": [
                 {

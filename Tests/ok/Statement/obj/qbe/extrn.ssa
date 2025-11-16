@@ -1,15 +1,8 @@
-export function w $main()
+export function l $main()
 {
 @start
-    # call exit
-    call $exit(w 0)
+    call $exit(l 0)
     ret 0
 }
 
 
-# Data
-
-
-# Externs
-
-# - exit

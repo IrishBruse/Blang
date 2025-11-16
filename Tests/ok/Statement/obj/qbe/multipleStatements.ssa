@@ -1,51 +1,32 @@
-export function w $main()
+export function l $main()
 {
 @start
-    %x_0 =l alloc8 8
-
-    # auto x = 0
-    storew 0, %x_0
-    %i_1 =l alloc8 8
-
-    # auto i = 0
-    storew 0, %i_1
-
-    # x = 5
-    storew 5, %x_0
-
-    # i = 0
-    storew 0, %i_0
-
-    # while (i < x)
+    %temp_0 =l alloc8 8
+    storew 0, %temp_0
+    %temp_1 =l alloc8 8
+    storew 0, %temp_1
+    storel 5, %temp_0
+    storel 0, %temp_1
 @while_1_condition
-    %i_2 =w loadw %i_0
-    %x_3 =w loadw %x_0
-    %x_4 =w csltw %i_2, %x_3
-    jnz %x_4, @while_1_body, @while_1_end
+    %i_0 =l loadl %temp_1
+    %i_1 =l loadl %temp_0
+    %i_2 =l csltl %i_0, %i_1
+    jnz %i_2, @while_1_body, @while_1_end
 @while_1_body
-    # if (i == 2)
     @if_2_condition
-        %i_5 =w loadw %i_1
-        %integer_6 =w ceqw %i_5, 2
-        jnz %integer_6, @if_2_body, @if_2_end
+        %i_3 =l loadl %temp_1
+        %i_4 =l ceql %i_3, 2
+        jnz %i_4, @if_2_body, @if_2_end
     @if_2_body
-        # call printf
         call $printf(l $string_0)
     @if_2_end
-    # i = (i + 1)
-    %i_7 =w loadw %i_2
-    %integer_8 =w add %i_7, 1
-    storew %integer_8, %i_3
+    %i_5 =l loadl %temp_1
+    %i_6 =l add %i_5, 1
+    storel %i_6, %temp_1
     jmp @while_1_condition
 @while_1_end
     ret 0
 }
 
-
-# Data
 data $string_0 = { b "two\n", b 0 }
 
-
-# Externs
-
-# - printf

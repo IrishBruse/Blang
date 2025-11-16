@@ -1,22 +1,12 @@
-export function w $main()
+export function l $main()
 {
 @start
-    %y_0 =l alloc8 8
-
-    # auto y = 5
-    storew 5, %y_0
-
-    # call printf
-    %y_1 =w loadw %y_0
-    call $printf(l $string_0, w %y_1)
+    %temp_0 =l alloc8 8
+    storew 5, %temp_0
+    %y_0 =l loadl %temp_0
+    call $printf(l $string_0, l %y_0)
     ret 0
 }
 
-
-# Data
 data $string_0 = { b "%d\n", b 0 }
 
-
-# Externs
-
-# - printf

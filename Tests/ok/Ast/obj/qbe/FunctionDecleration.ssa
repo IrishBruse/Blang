@@ -1,23 +1,19 @@
-export function w $main()
+export function l $main()
 {
 @start
     ret 0
 }
 
-function w $example1()
+function w $example1(l %a_0)
 {
 @start
     ret 
 }
 
-function w $example2()
+function w $example2(l %a_0, l %b_0, l %c_0)
 {
 @start
     ret 
 }
 
 
-# Data
-
-
-# Externs

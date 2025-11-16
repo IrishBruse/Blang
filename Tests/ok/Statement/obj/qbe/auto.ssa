@@ -1,18 +1,10 @@
-export function w $main()
+export function l $main()
 {
 @start
-    %foo_0 =l alloc8 8
-
-    # auto foo = 0
-    storew 0, %foo_0
-
-    # foo = 123
-    storew 123, %foo_0
+    %temp_0 =l alloc8 8
+    storew 0, %temp_0
+    storel 123, %temp_0
     ret 0
 }
 
 
-# Data
-
-
-# Externs

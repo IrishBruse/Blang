@@ -1,48 +1,32 @@
-export function w $main()
+export function l $main()
 {
 @start
-    %x_0 =l alloc8 8
-
-    # auto x = 0
-    storew 0, %x_0
-
-    # x = 2
-    storew 2, %x_0
-
-    # if (x == 1)
+    %temp_0 =l alloc8 8
+    storew 0, %temp_0
+    storel 2, %temp_0
     @if_1_condition
-        %x_1 =w loadw %x_0
-        %integer_2 =w ceqw %x_1, 1
-        jnz %integer_2, @if_1_body, @if_1_else
+        %x_0 =l loadl %temp_0
+        %x_1 =l ceql %x_0, 1
+        jnz %x_1, @if_1_body, @if_1_else
     @if_1_body
-        # call printf
         call $printf(l $string_0)
         jmp @if_1_end
     @if_1_else
-        # if (x == 2)
         @if_2_condition
-            %x_3 =w loadw %x_1
-            %integer_4 =w ceqw %x_3, 2
-            jnz %integer_4, @if_2_body, @if_2_else
+            %x_2 =l loadl %temp_0
+            %x_3 =l ceql %x_2, 2
+            jnz %x_3, @if_2_body, @if_2_else
         @if_2_body
-            # call printf
             call $printf(l $string_1)
             jmp @if_2_end
         @if_2_else
-            # call printf
             call $printf(l $string_2)
         @if_2_end
     @if_1_end
     ret 0
 }
 
-
-# Data
 data $string_0 = { b "one\n", b 0 }
 data $string_1 = { b "two\n", b 0 }
 data $string_2 = { b "other\n", b 0 }
 
-
-# Externs
-
-# - printf

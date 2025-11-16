@@ -1,25 +1,13 @@
-export function w $main()
+export function l $main()
 {
 @start
-    %word_0 =l alloc8 8
-
-    # auto word = 0
-    storew 0, %word_0
-
-    # word = 4
-    storew 4, %word_0
-
-    # call printf
-    %word_1 =w loadw %word_0
-    call $printf(l $string_0, w %word_1)
+    %temp_0 =l alloc8 8
+    storew 0, %temp_0
+    storel 4, %temp_0
+    %word_0 =l loadl %temp_0
+    call $printf(l $string_0, l %word_0)
     ret 0
 }
 
-
-# Data
 data $string_0 = { b "word size = %d", b 0 }
 
-
-# Externs
-
-# - printf

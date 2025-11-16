@@ -2,7 +2,8 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main"
+        "Name": "main",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [],
@@ -16,7 +17,8 @@
     {
       "$type": "GlobalArrayDeclaration",
       "Symbol": {
-        "Name": "A"
+        "Name": "A",
+        "IsGlobal": true
       },
       "Values": [],
       "Size": 3,
@@ -28,7 +30,8 @@
     {
       "$type": "GlobalArrayDeclaration",
       "Symbol": {
-        "Name": "B"
+        "Name": "B",
+        "IsGlobal": true
       },
       "Values": [
         {
@@ -57,7 +60,8 @@
     {
       "$type": "GlobalArrayDeclaration",
       "Symbol": {
-        "Name": "C"
+        "Name": "C",
+        "IsGlobal": true
       },
       "Values": [
         {

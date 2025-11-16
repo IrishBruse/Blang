@@ -1,23 +1,12 @@
-
-# arr[5]
 data $arr = { w 1 2 3 0 0 }
 
-export function w $main()
+export function l $main()
 {
 @start
-    # call printf
-
-    # arr[0]
-    %arrayIndex_0 =l loadw %arr_0
-    call $printf(l $string_0, w %arrayIndex_0)
+    %temp_0 =l loadl $arr
+    call $printf(l $string_0, l %temp_0)
     ret 0
 }
 
-
-# Data
 data $string_0 = { b "arr[0] = %d\n", b 0 }
 
-
-# Externs
-
-# - printf

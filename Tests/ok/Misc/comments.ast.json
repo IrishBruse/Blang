@@ -2,7 +2,8 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main"
+        "Name": "main",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [],
@@ -13,7 +14,8 @@
     },
     {
       "Symbol": {
-        "Name": "test"
+        "Name": "test",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [],

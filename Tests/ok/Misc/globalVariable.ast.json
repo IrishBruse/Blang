@@ -2,7 +2,8 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main"
+        "Name": "main",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [
@@ -10,7 +11,8 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf"
+              "Name": "printf",
+              "IsGlobal": false
             }
           ],
           "Range": {
@@ -21,7 +23,8 @@
         {
           "_Type": "GlobalVariableDecleration",
           "Symbol": {
-            "Name": "foo"
+            "Name": "foo",
+            "IsGlobal": true
           },
           "Value": {
             "_Type": "IntValue",
@@ -39,7 +42,8 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "printf"
+            "Name": "printf",
+            "IsGlobal": false
           },
           "Parameters": [
             {
@@ -53,7 +57,8 @@
             {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "foo"
+                "Name": "foo",
+                "IsGlobal": true
               },
               "Range": {
                 "Start": 70,
@@ -69,7 +74,8 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "printf"
+            "Name": "printf",
+            "IsGlobal": false
           },
           "Parameters": [
             {
@@ -83,7 +89,8 @@
             {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "bar"
+                "Name": "bar",
+                "IsGlobal": false
               },
               "Range": {
                 "Start": 99,
@@ -107,7 +114,8 @@
     {
       "$type": "GlobalVariableDecleration",
       "Symbol": {
-        "Name": "foo"
+        "Name": "foo",
+        "IsGlobal": true
       },
       "Value": {
         "_Type": "IntValue",
@@ -125,7 +133,8 @@
     {
       "$type": "GlobalVariableDecleration",
       "Symbol": {
-        "Name": "bar"
+        "Name": "bar",
+        "IsGlobal": true
       },
       "Value": {
         "_Type": "IntValue",

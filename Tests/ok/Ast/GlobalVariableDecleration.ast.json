@@ -2,7 +2,8 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main"
+        "Name": "main",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [],
@@ -16,7 +17,8 @@
     {
       "$type": "GlobalVariableDecleration",
       "Symbol": {
-        "Name": "A"
+        "Name": "A",
+        "IsGlobal": true
       },
       "Value": {
         "_Type": "IntValue",
@@ -34,7 +36,8 @@
     {
       "$type": "GlobalVariableDecleration",
       "Symbol": {
-        "Name": "B"
+        "Name": "B",
+        "IsGlobal": true
       },
       "Value": {
         "_Type": "IntValue",

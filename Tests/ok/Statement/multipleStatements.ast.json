@@ -2,7 +2,8 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main"
+        "Name": "main",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [
@@ -10,7 +11,8 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf"
+              "Name": "printf",
+              "IsGlobal": false
             }
           ],
           "Range": {
@@ -23,7 +25,8 @@
           "Variables": [
             {
               "Symbol": {
-                "Name": "x"
+                "Name": "x",
+                "IsGlobal": false
               },
               "Value": 0
             }
@@ -38,7 +41,8 @@
           "Variables": [
             {
               "Symbol": {
-                "Name": "i"
+                "Name": "i",
+                "IsGlobal": false
               },
               "Value": 0
             }
@@ -51,7 +55,8 @@
         {
           "_Type": "GlobalVariableDecleration",
           "Symbol": {
-            "Name": "x"
+            "Name": "x",
+            "IsGlobal": false
           },
           "Value": {
             "_Type": "IntValue",
@@ -69,7 +74,8 @@
         {
           "_Type": "GlobalVariableDecleration",
           "Symbol": {
-            "Name": "i"
+            "Name": "i",
+            "IsGlobal": false
           },
           "Value": {
             "_Type": "IntValue",
@@ -91,7 +97,8 @@
             "Left": {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "i"
+                "Name": "i",
+                "IsGlobal": false
               },
               "Range": {
                 "Start": 85,
@@ -101,7 +108,8 @@
             "Right": {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "x"
+                "Name": "x",
+                "IsGlobal": false
               },
               "Range": {
                 "Start": 89,
@@ -122,7 +130,8 @@
                 "Left": {
                   "_Type": "Variable",
                   "Symbol": {
-                    "Name": "i"
+                    "Name": "i",
+                    "IsGlobal": false
                   },
                   "Range": {
                     "Start": 106,
@@ -146,7 +155,8 @@
                 {
                   "_Type": "FunctionCall",
                   "Symbol": {
-                    "Name": "printf"
+                    "Name": "printf",
+                    "IsGlobal": false
                   },
                   "Parameters": [
                     {
@@ -173,7 +183,8 @@
             {
               "_Type": "GlobalVariableDecleration",
               "Symbol": {
-                "Name": "i"
+                "Name": "i",
+                "IsGlobal": false
               },
               "Value": {
                 "_Type": "BinaryExpression",
@@ -181,7 +192,8 @@
                 "Left": {
                   "_Type": "Variable",
                   "Symbol": {
-                    "Name": "i"
+                    "Name": "i",
+                    "IsGlobal": false
                   },
                   "Range": {
                     "Start": 167,

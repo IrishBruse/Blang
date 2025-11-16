@@ -1,23 +1,13 @@
-
-# A[3]
 data $A = { w 0 0 0 }
 
-
-# B[2]
 data $B = { w 1 2 }
 
-
-# C[4]
 data $C = { w 1 2 3 0 }
 
-export function w $main()
+export function l $main()
 {
 @start
     ret 0
 }
 
 
-# Data
-
-
-# Externs

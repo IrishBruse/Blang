@@ -2,7 +2,8 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main"
+        "Name": "main",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [
@@ -10,7 +11,8 @@
           "_Type": "ExternalStatement",
           "Externals": [
             {
-              "Name": "printf"
+              "Name": "printf",
+              "IsGlobal": false
             }
           ],
           "Range": {
@@ -23,7 +25,8 @@
           "Variables": [
             {
               "Symbol": {
-                "Name": "y"
+                "Name": "y",
+                "IsGlobal": false
               },
               "Value": 5
             }
@@ -36,7 +39,8 @@
         {
           "_Type": "FunctionCall",
           "Symbol": {
-            "Name": "printf"
+            "Name": "printf",
+            "IsGlobal": false
           },
           "Parameters": [
             {
@@ -50,7 +54,8 @@
             {
               "_Type": "Variable",
               "Symbol": {
-                "Name": "y"
+                "Name": "y",
+                "IsGlobal": false
               },
               "Range": {
                 "Start": 63,

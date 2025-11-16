@@ -2,7 +2,8 @@
   "FunctionDeclarations": [
     {
       "Symbol": {
-        "Name": "main"
+        "Name": "main",
+        "IsGlobal": false
       },
       "Parameters": [],
       "Body": [],
@@ -13,13 +14,14 @@
     },
     {
       "Symbol": {
-        "Name": "example1"
+        "Name": "example1",
+        "IsGlobal": false
       },
       "Parameters": [
         {
-          "_Type": "Variable",
           "Symbol": {
-            "Name": "a"
+            "Name": "a",
+            "IsGlobal": false
           },
           "Range": {
             "Start": 0,
@@ -35,13 +37,14 @@
     },
     {
       "Symbol": {
-        "Name": "example2"
+        "Name": "example2",
+        "IsGlobal": false
       },
       "Parameters": [
         {
-          "_Type": "Variable",
           "Symbol": {
-            "Name": "a"
+            "Name": "a",
+            "IsGlobal": false
           },
           "Range": {
             "Start": 0,
@@ -49,9 +52,9 @@
           }
         },
         {
-          "_Type": "Variable",
           "Symbol": {
-            "Name": "b"
+            "Name": "b",
+            "IsGlobal": false
           },
           "Range": {
             "Start": 0,
@@ -59,9 +62,9 @@
           }
         },
         {
-          "_Type": "Variable",
           "Symbol": {
-            "Name": "c"
+            "Name": "c",
+            "IsGlobal": false
           },
           "Range": {
             "Start": 0,

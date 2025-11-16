@@ -1,29 +1,17 @@
-
-# arr[4]
 data $arr = { w 0 0 0 0 }
 
-export function w $main()
+export function l $main()
 {
 @start
-    %i_0 =l alloc8 8
-
-    # auto i = 0
-    storew 0, %i_0
-
-    # arr[(i + 1)] = 2
-    %i_1 =w loadw %i_0
-    %integer_2 =w add %i_1, 1
-    %integer_3 =l extuw %integer_2
-    %integer_4 =l add %arr_0, %integer_3
-    storew 2, %integer_4
+    %temp_0 =l alloc8 8
+    storew 0, %temp_0
+    %arr_1 =l loadl %temp_0
+    %arr_2 =l add %arr_1, 1
+    %arr_3 =l extuw %arr_2
+    %arr_4 =l add %arr_0, %arr_3
+    storel 2, %arr_4
 
     ret 0
 }
 
 
-# Data
-
-
-# Externs
-
-# - printf
