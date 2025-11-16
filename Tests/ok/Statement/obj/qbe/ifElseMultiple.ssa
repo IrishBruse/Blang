@@ -24,6 +24,7 @@ export function l $main()
             call $printf(l $string_2)
         @if_2_end
     @if_1_end
+
     ret 0
 }
 

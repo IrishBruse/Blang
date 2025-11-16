@@ -3,6 +3,7 @@ export function l $main()
 @start
 
     call $printf(l $string_0)
+
     ret 0
 }
 

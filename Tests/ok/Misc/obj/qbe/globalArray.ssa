@@ -6,6 +6,7 @@ export function l $main()
 
     %temp_0 =l loadl $arr
     call $printf(l $string_0, l %temp_0)
+
     ret 0
 }
 

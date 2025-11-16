@@ -17,6 +17,7 @@ export function l $main()
     storel %b_2, %temp_2
     %c_0 =l loadl %temp_2
     call $printf(l $string_1, l %c_0)
+
     ret 0
 }
 

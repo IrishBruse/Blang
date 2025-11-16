@@ -4,6 +4,7 @@ export function l $main()
 
     call $printf(l $string_0, l -2147483648)
     call $printf(l $string_0, l 2147483647)
+
     ret 0
 }
 

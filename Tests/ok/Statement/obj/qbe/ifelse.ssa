@@ -11,6 +11,7 @@ export function l $main()
     @if_1_else
         call $printf(l $string_1)
     @if_1_end
+
     ret 0
 }
 

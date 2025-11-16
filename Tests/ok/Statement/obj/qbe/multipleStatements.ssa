@@ -26,6 +26,7 @@ export function l $main()
     storel %i_6, %temp_1
     jmp @while_1_condition
 @while_1_end
+
     ret 0
 }
 

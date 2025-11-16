@@ -7,6 +7,7 @@ export function l $main()
     storel %Error, %temp_0
     %result_0 =l loadl %temp_0
     call $printf(l $string_0, l %result_0)
+
     ret 0
 }
 

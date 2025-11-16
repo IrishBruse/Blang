@@ -12,6 +12,7 @@ export function l $main()
     %b_0 =l loadl %temp_1
     %c_0 =l loadl %temp_2
     call $printf(l $string_0, l %a_0, l %b_0, l %c_0)
+
     ret 0
 }
 

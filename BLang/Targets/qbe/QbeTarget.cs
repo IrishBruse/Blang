@@ -112,7 +112,6 @@ public class QbeTarget : ITarget
 
         qbe.Data(array.Symbol.Name, data);
         qbe.AllocateMemoryReg(array.Symbol, "$" + array.Symbol.Name);
-
         qbe.WriteLine();
     }
 
@@ -128,7 +127,6 @@ public class QbeTarget : ITarget
         string valueReg = VisitExpression(array.Value);
 
         qbe.Storel(valueReg, addrReg);
-        qbe.WriteLine();
     }
 
     public void VisitVariableAssignment(GlobalVariableDecleration variableAssignment)
@@ -216,6 +214,7 @@ public class QbeTarget : ITarget
             qbe.Label("start");
             qbe.WriteLine();
             EmitBody(node.Body);
+            qbe.WriteLine();
             qbe.Ret(name == "main" ? 0 : null);
         }
         EndScope();

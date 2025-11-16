@@ -8,6 +8,7 @@ export function l $main()
     @if_1_body
         call $printf(l $string_0)
     @if_1_end
+
     ret 0
 }
 

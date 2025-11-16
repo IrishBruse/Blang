@@ -16,6 +16,7 @@ export function l $main()
         call $printf(l $string_0, l %a_4)
     @if_1_end
     call $printf(l $string_0, l 123)
+
     ret 0
 }
 
