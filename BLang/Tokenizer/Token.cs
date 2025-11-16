@@ -170,10 +170,6 @@ public enum BinaryOperator
     BitwiseShiftRight,
 
     ArrayIndexing,
-
-    // Alias
-    AddressOf = BitwiseAnd,
-    PointerDereference = Multiplication,
 }
 
 public static class Extensions
@@ -241,11 +237,11 @@ public static class Extensions
             BinaryOperator.Decrement => "--",
 
             BinaryOperator.BitwiseOr => "|",
-            BinaryOperator.BitwiseComplement => throw new NotImplementedException(),
-            BinaryOperator.BitwiseAnd => throw new NotImplementedException(),
-            BinaryOperator.BitwiseXOr => throw new NotImplementedException(),
-            BinaryOperator.BitwiseShiftLeft => throw new NotImplementedException(),
-            BinaryOperator.BitwiseShiftRight => throw new NotImplementedException(),
+            BinaryOperator.BitwiseComplement => "~",
+            BinaryOperator.BitwiseAnd => "&",
+            BinaryOperator.BitwiseXOr => "^",
+            BinaryOperator.BitwiseShiftLeft => "<<",
+            BinaryOperator.BitwiseShiftRight => ">>",
 
             BinaryOperator.ArrayIndexing => "[?]",
 

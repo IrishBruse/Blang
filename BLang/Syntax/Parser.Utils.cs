@@ -84,7 +84,7 @@ public partial class Parser
             content = Colors.Gray(content);
         }
 
-        Console.WriteLine($"{type,-20} {content,-20}");
+        Log($"{type,-20} {content,-20}");
     }
 
     [StackTraceHidden]

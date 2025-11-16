@@ -40,20 +40,20 @@ public class Tester
 
         if (failed.Count > 0 && !Options.UpdateSnapshots)
         {
-            Console.WriteLine();
-            Console.WriteLine($"{tests.Length - passed} Tests failed:");
-            Console.WriteLine();
+            Log("");
+            Log($"{tests.Length - passed} Tests failed:");
+            Log("");
             foreach (string item in failed)
             {
                 _ = TestFile(item);
-                Console.WriteLine();
+                Log("");
             }
         }
 
-        Console.WriteLine();
-        Console.WriteLine($"Tests finished in {sw.Elapsed.TotalSeconds:0.00}s");
-        Console.WriteLine($"{passed}/{tests.Length} Passed");
-        Console.WriteLine();
+        Log("");
+        Log($"Tests finished in {sw.Elapsed.TotalSeconds:0.00}s");
+        Log($"{passed}/{tests.Length} Passed");
+        Log("");
     }
 
     public static bool TestFile(string testFile)
@@ -152,7 +152,7 @@ public class Tester
         }
         else
         {
-            Console.WriteLine("Unknown folderType " + folderType);
+            Log("Unknown folderType " + folderType);
         }
     }
 
@@ -181,7 +181,7 @@ public class Tester
         }
         else
         {
-            Console.WriteLine("Unkown folderType " + folderType);
+            Log("Unkown folderType " + folderType);
         }
 
         double ms = timer.ElapsedTicks / 1000000.0;

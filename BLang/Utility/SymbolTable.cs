@@ -1,7 +1,5 @@
 namespace BLang.Utility;
 
-using System;
-using System.Collections.Generic;
 using BLang.Exceptions;
 using BLang.Tokenizer;
 
@@ -20,27 +18,18 @@ public class SymbolTable
 
     public void EnterScope(string name)
     {
-        scopes.Push([]);
+        scopes.Push(new());
         scopeNames.Push(name);
-        Log("");
-        Log($"{name}");
-        Log($"{{");
+
+        Log($"{name}:");
         CurrentScopeDepth++;
     }
 
     public void ExitScope()
     {
-        if (scopes.Count > 1)
-        {
-            _ = scopes.Pop();
-            _ = scopeNames.Pop();
-            CurrentScopeDepth--;
-            Log($"}}");
-        }
-        else
-        {
-            throw new InvalidOperationException("Cannot exit global scope.");
-        }
+        _ = scopes.Pop();
+        _ = scopeNames.Pop();
+        CurrentScopeDepth--;
     }
 
     public Symbol Add(Token token)
@@ -63,7 +52,7 @@ public class SymbolTable
             throw new InvalidOperationException($"Symbol '{name}' already declared in current scope.");
         }
         currentScope.Add(name, symbol);
-        Log($"+ {symbol.Name}");
+        Log($"{symbol.Name}");
 
         return symbol;
     }
@@ -83,9 +72,9 @@ public class SymbolTable
 
     public void Log(string message)
     {
-        if (Options.Symbols)
+        if (Options.Symbols && Options.Verbose > 1)
         {
-            Globals.Log(new string(' ', CurrentScopeDepth * 2) + message, "SYM", ConsoleColor.DarkGray);
+            Globals.Log(new string(' ', CurrentScopeDepth * 2) + message, null, ConsoleColor.DarkGray);
         }
     }
 
@@ -93,5 +82,10 @@ public class SymbolTable
     {
         scopes.Clear();
         scopeNames.Clear();
+
+        scopes.Push(new());
+        scopeNames.Push("global");
+
+        CurrentScopeDepth = 0;
     }
 }

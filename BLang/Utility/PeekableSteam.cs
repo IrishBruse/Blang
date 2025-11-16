@@ -1,10 +1,6 @@
 namespace BLang.Utility;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
-
 
 /// <summary>
 /// A stream wrapper that adds the ability to peek ahead at the underlying stream's data

@@ -1,7 +1,5 @@
 namespace BLang.Utility;
 
-using System;
-
 public readonly struct Result<T>
 {
     private readonly T value;

@@ -104,7 +104,7 @@ public class QbeTarget : ITarget
     {
         qbe.Comment($"{array.Symbol.Name}[{array.Size}]");
         Expression[] values = array.Values;
-        string data = "w";
+        string data = "l";
         for (int i = 0; i < array.Size; i++)
         {
             data += " " + (i < values.Length ? values[i] : 0);
@@ -214,6 +214,7 @@ public class QbeTarget : ITarget
         BeginScope();
         {
             qbe.Label("start");
+            qbe.WriteLine();
             EmitBody(node.Body);
             qbe.Ret(name == "main" ? 0 : null);
         }

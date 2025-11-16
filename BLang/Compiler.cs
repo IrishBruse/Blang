@@ -2,8 +2,8 @@ namespace BLang;
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using BLang.Ast;
+using System.IO;
 using BLang.Exceptions;
 using BLang.Targets.qbe;
 using BLang.Tokenizer;
@@ -80,7 +80,7 @@ public static class Compiler
         };
 
         Result<EmitOutput> result = target.Emit(unit, data);
-        if (result.IsFailure) return data.File + " Failed to emit " + result.Error;
+        if (result.IsFailure) return $"{data.File} Emit Error:\n{result.Error}";
 
         if (Options.Verbose >= 2) Debug($"Emitting Complete ({Timer.Elapsed.TotalMilliseconds}ms)");
 

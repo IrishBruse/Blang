@@ -10,7 +10,7 @@ public class Globals
 {
     private static void Print(string? message, string? prefix, ConsoleColor? color = null)
     {
-        if (!string.IsNullOrEmpty(message))
+        if (message != null)
         {
             if (color != null) Console.ForegroundColor = (ConsoleColor)color;
             foreach (string line in message.Split("\n"))

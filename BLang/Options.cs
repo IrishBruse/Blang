@@ -9,6 +9,8 @@ public static class Options
     public static bool Ast { get; set; }
     public static bool Tokens { get; set; }
     public static bool Symbols { get; set; }
+    public static bool Memory { get; set; }
+
     public static CompilationTarget Target { get; set; } = CompilationTarget.Qbe;
 
     // Test Flags

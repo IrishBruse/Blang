@@ -23,7 +23,10 @@ public partial class Parser(CompilerContext data)
 
         try
         {
-            return ParseCompilationUnit();
+            symbols.EnterScope("global");
+            CompilationUnit unit = ParseCompilationUnit();
+            symbols.ExitScope();
+            return unit;
         }
         catch (Exception e)
         {
@@ -117,6 +120,7 @@ public partial class Parser(CompilerContext data)
     {
         // Identifier,
         Symbol symbol = symbols.Add(identifier.Content);
+        symbol.IsGlobal = true;
 
         int? arraySize = null;
         bool isArray = false;

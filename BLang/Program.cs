@@ -33,6 +33,11 @@ public class Program
         Description = "Print symbol table",
     };
 
+    private static Option<bool> MemoryFlag = new("--memory")
+    {
+        Description = "Output memory registers in output comments",
+    };
+
     private static Argument<string> BuildFileArg = new("file")
     {
         Description = "Path to b file to build",
@@ -179,6 +184,7 @@ public class Program
     {
         rootCommand.Add(TokensFlag);
         rootCommand.Add(SymbolsFlag);
+        rootCommand.Add(MemoryFlag);
         rootCommand.Add(AstFlag);
 
         rootCommand.Add(VerboseFlag);
@@ -196,6 +202,7 @@ public class Program
         Options.Ast = parseResult.GetValue(AstFlag);
         Options.Tokens = parseResult.GetValue(TokensFlag);
         Options.Symbols = parseResult.GetValue(SymbolsFlag);
+        Options.Memory = parseResult.GetValue(MemoryFlag);
 
         Options.UpdateSnapshots = parseResult.GetValue(UpdateSnapshotFlag);
     }
