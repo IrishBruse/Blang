@@ -7,6 +7,6 @@
 
 profile.json
 profile.chromium.json
-node_modules/**
+**/node_modules/**
 coveragereport
 misc/coverage.cobertura.xml

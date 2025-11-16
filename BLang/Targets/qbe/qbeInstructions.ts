@@ -1,4 +1,4 @@
-export default {
+export const instructions = {
     "Arithmetic and Bits": {
         add: {
             name: "Add",
@@ -143,7 +143,6 @@ export default {
                 value: "int",
                 address: "Val",
             },
-            ret: "Reg",
         },
         stores: {
             name: "Stores",
@@ -152,16 +151,14 @@ export default {
                 value: "int",
                 address: "Val",
             },
-            ret: "Reg",
         },
         storel: {
             name: "Storel",
             description: "Stores a long (64-bit) integer value into memory.",
             args: {
-                value: "int",
+                value: "string",
                 address: "Val",
             },
-            ret: "Reg",
         },
         storew: {
             name: "Storew",
@@ -179,7 +176,6 @@ export default {
                 value: "int",
                 address: "Val",
             },
-            ret: "Reg",
         },
         storeb: {
             name: "Storeb",
@@ -188,7 +184,6 @@ export default {
                 value: "int",
                 address: "Val",
             },
-            ret: "Reg",
         },
         loadd: {
             name: "Loadd",

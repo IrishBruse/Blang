@@ -1,0 +1,12 @@
+{
+    "name": "qbe",
+    "version": "1.0.0",
+    "description": "",
+    "license": "ISC",
+    "author": "",
+    "type": "module",
+    "scripts": {},
+    "devDependencies": {
+        "@types/node": "^24.10.1"
+    }
+}

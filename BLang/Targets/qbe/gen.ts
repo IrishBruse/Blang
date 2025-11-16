@@ -1,7 +1,9 @@
-import { writeFileSync } from "node:fs";
-import instructions from "./qbeInstructions.ts";
+import { existsSync, writeFileSync } from "fs";
+import { instructions } from "./qbeInstructions.ts";
 
-process.chdir("BLang/Targets/qbe");
+if (existsSync("BLang/")) {
+    process.chdir("BLang/Targets/qbe");
+}
 
 let text = "";
 let indentLevel = 0;
@@ -63,7 +65,7 @@ function GenGroup(groupName: string, group: any) {
             .join(", ");
 
         if (instruction?.ret === "Reg" && !instruction?.retSize) {
-            parameters += ", Size regType = Size.W";
+            parameters += ", Size regType = Size.L";
         }
 
         const returnType = instruction?.ret ?? "void";

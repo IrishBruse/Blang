@@ -3,6 +3,7 @@ namespace BLang.Targets.qbe;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using BLang.Exceptions;
 using BLang.Utility;
 
 public partial class QbeOutput()
@@ -12,6 +13,8 @@ public partial class QbeOutput()
 
     public StringBuilder Text { get; set; } = new();
     private int Depth { get; set; }
+
+    private readonly Dictionary<Symbol, string> memoryAddresses = [];
 
     public void Indent(int? spaces = null)
     {
@@ -33,7 +36,6 @@ public partial class QbeOutput()
     private void Write(string value)
     {
         _ = Text.AppendLine(Space + value);
-        labelLast = false;
     }
 
     public void BeginScope()
@@ -53,13 +55,21 @@ public partial class QbeOutput()
         _ = Text.AppendLine();
     }
 
-    public void Comment(params string[] message)
+    public void Comment(string message)
     {
-        if (!labelLast)
+        if (Options.Verbose > 1)
         {
             WriteLine();
+            Write("# " + message);
         }
-        Write("# " + string.Join(' ', message));
+    }
+
+    public void DebugComment(string message)
+    {
+        if (Options.Memory)
+        {
+            Write("#  " + message);
+        }
     }
 
     public void Clear()
@@ -82,21 +92,19 @@ public partial class QbeOutput()
 
     // QBE
 
-    private bool labelLast;
     public void Label(string value)
     {
         Unindent();
         Write("@" + value);
         Indent();
-        labelLast = true;
     }
 
-    public void Function(string name, string returnType = "w", params string[] args)
+    public void Function(string name, string returnType = "l", params string[] args)
     {
-        Write($"function {returnType} ${name}()");
+        Write($"function {returnType} ${name}({string.Join(", ", args)})");
     }
 
-    public void ExportFunction(string name, string returnType = "w", params string[] args)
+    public void ExportFunction(string name, string returnType = "l", params string[] args)
     {
         Write($"export function {returnType} ${name}()");
     }
@@ -116,27 +124,76 @@ public partial class QbeOutput()
         Write($"data ${name} = {{ {value}, b 0 }}");
     }
 
-    private string? tempRegName;
-    public void SetTempRegName(Symbol sym)
-    {
-        tempRegName = sym.Name;
-    }
-    public void SetTempRegName(string name)
-    {
-        tempRegName = name;
-    }
-
-    private int tempRegCounter;
-    public string GetTempReg()
-    {
-        string name = tempRegName ?? "temp";
-        return "%" + name + "_" + tempRegCounter++;
-    }
-
     /// <summary> Stores a word (32-bit) integer value into memory. </summary>
     public void Storew(int value, string address)
     {
         Storew(value.ToString(), address);
+    }
+
+    /// <summary> Stores a long (64-bit) integer value into memory. </summary>
+    public void Storel(int value, string address)
+    {
+        Storel(value.ToString(), address);
+    }
+
+    private Symbol? currentReg;
+    public void SetRegisterName(Symbol sym)
+    {
+        currentReg = sym;
+    }
+
+    public string GetTempReg()
+    {
+        if (currentReg == null)
+        {
+            currentReg = new("temp");
+        }
+        return GetMemoryRegister(currentReg, false);
+    }
+
+    public string GetMemoryRegister(Symbol symbol, bool increment = true)
+    {
+        SetRegisterName(symbol);
+
+        int currentVersion = 0;
+        if (ssaVersionCounters.TryGetValue(symbol, out int value))
+        {
+            currentVersion = value;
+        }
+
+        ssaVersionCounters[symbol] = currentVersion + 1;
+
+        if (Options.Memory)
+        {
+            string comment = $"# {(increment ? "Write" : "Read")}: %{symbol.Name}_{currentVersion}";
+            if (increment)
+            {
+                comment += $" -> %{symbol.Name}_{currentVersion + 1}";
+            }
+            Write(comment);
+        }
+
+        return $"%{symbol.Name}_{currentVersion}";
+    }
+
+    public void ClearMemoryRegisters()
+    {
+        ssaVersionCounters.Clear();
+        memoryAddresses.Clear();
+    }
+
+    public void AllocateMemoryReg(Symbol symbol, string reg)
+    {
+        memoryAddresses[symbol] = reg;
+    }
+
+    public string GetMemoryAddress(Symbol symbol)
+    {
+        if (memoryAddresses.TryGetValue(symbol, out string? address))
+        {
+            return address;
+        }
+        throw new CompilerException($"Memory address for symbol {symbol.Name} not found.");
     }
 }
 
