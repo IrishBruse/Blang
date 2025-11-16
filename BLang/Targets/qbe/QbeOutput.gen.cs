@@ -718,6 +718,12 @@ public partial class QbeOutput
     /// <summary> Returns from the current function, optionally passing a value to the caller. </summary>
     public void Ret(int? returnValue)
     {
+        if (returnValue == null)
+        {
+            Write($"ret");
+            return;
+        }
+
         Write($"ret {returnValue}");
     }
 

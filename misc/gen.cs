@@ -91,19 +91,44 @@ public class QbeCodeGenerator
             WriteLine($"public {returnType} {name}({parameterString})");
             WriteLine("{");
             Indent();
-            if (returnType != "void")
-                WriteLine("Reg reg = GetTempReg();");
-            if (instruction?.overrideBody != null)
-                WriteLine(instruction.overrideBody);
-            else
-            {
-                WriteInstruction(mnemonic, argsList, instruction);
-            }
-            if (returnType != "void")
-                WriteLine("return reg;");
+            WriteInstructionBody(mnemonic, instruction, argsList, returnType);
             Dedent();
             WriteLine("}");
             WriteLine();
+        }
+    }
+
+    private void WriteInstructionBody(string mnemonic, InstructionDefinition instruction, List<KeyValuePair<string, string>> argsList, string returnType)
+    {
+        if (mnemonic == "ret")
+        {
+            WriteLine("if (returnValue == null)");
+            WriteLine("{");
+            WriteLine("    Write($\"ret\");");
+            WriteLine("    return;");
+            WriteLine("}");
+            WriteLine("");
+            WriteLine("Write($\"ret {returnValue}\");");
+            return;
+        }
+
+        if (returnType != "void")
+        {
+            WriteLine("Reg reg = GetTempReg();");
+        }
+
+        if (instruction?.overrideBody != null)
+        {
+            WriteLine(instruction.overrideBody);
+        }
+        else
+        {
+            WriteInstruction(mnemonic, argsList, instruction);
+        }
+
+        if (returnType != "void")
+        {
+            WriteLine("return reg;");
         }
     }
 

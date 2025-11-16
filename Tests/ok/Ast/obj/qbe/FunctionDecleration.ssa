@@ -9,14 +9,14 @@ function w $example1(l %a_0)
 {
 @start
 
-    ret 
+    ret
 }
 
 function w $example2(l %a_0, l %b_0, l %c_0)
 {
 @start
 
-    ret 
+    ret
 }
 
 

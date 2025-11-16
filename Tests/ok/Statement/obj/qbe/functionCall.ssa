@@ -11,7 +11,7 @@ function w $other()
 @start
 
     call $printf(l $string_0)
-    ret 
+    ret
 }
 
 data $string_0 = { b "Pass\n", b 0 }
