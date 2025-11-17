@@ -3,7 +3,6 @@ namespace BLang.Targets.qbe;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using BLang.Exceptions;
 using BLang.Utility;
 
 public partial class QbeOutput()
@@ -13,8 +12,6 @@ public partial class QbeOutput()
 
     public StringBuilder Text { get; set; } = new();
     private int Depth { get; set; }
-
-    private readonly Dictionary<Symbol, string> memoryAddresses = [];
 
     public void Indent(int? spaces = null)
     {
@@ -152,52 +149,49 @@ public partial class QbeOutput()
 
     public string WriteRegister(Symbol symbol)
     {
-        SetRegisterName(symbol);
+        int currentVersion = -1;
+        if (ssaVersionCounters.TryGetValue(symbol, out int value))
+        {
+            currentVersion = value;
+        }
 
-        int currentVersion = 0;
-        // if (ssaVersionCounters.TryGetValue(symbol, out int value))
-        // {
-        //     currentVersion = value;
-        // }
+        if (symbol.IsGlobal)
+        {
+            return $"${symbol}";
+        }
+
+        currentVersion += 1;
+
+        ssaVersionCounters[symbol] = currentVersion;
+
+        string reg = $"%{symbol.Name}_{currentVersion}";
 
         if (Options.Memory)
         {
-            Write($"# Reg(W): %{symbol.Name}_{currentVersion} -> %{symbol.Name}_{currentVersion + 1}");
+            Write($"# Write: {reg}");
         }
 
-        return "write";
+        return reg;
     }
 
     public string ReadRegister(Symbol symbol)
     {
-        SetRegisterName(symbol);
+        int currentVersion = 0;
+        if (ssaVersionCounters.TryGetValue(symbol, out int value))
+        {
+            currentVersion = value;
+        }
 
-        return "read";
+        string reg;
 
-        // int currentVersion = 0;
-        // if (ssaVersionCounters.TryGetValue(symbol, out int value))
-        // {
-        //     currentVersion = value;
-        // }
+        reg = $"%{symbol.Name}";
 
-        // ssaVersionCounters[symbol] = currentVersion + 1;
+        if (Options.Memory)
+        {
+            Write($"# Read: {reg}");
+        }
 
-        // if (Options.Memory)
-        // {
-        //     string comment = $"# {(increment ? "Write" : "Read")}: %{symbol.Name}_{currentVersion}";
-        //     if (increment)
-        //     {
-        //         comment += $" -> %{symbol.Name}_{currentVersion + 1}";
-        //     }
-        //     Write(comment);
-        // }
-
-        // if (symbol.IsGlobal && currentVersion == -1)
-        // {
-        //     return $"${symbol.Name}";
-        // }
-
-        // return $"%{symbol.Name}_{currentVersion}";
+        return reg;
     }
 
     public void CreateGlobalRegister(Symbol symbol)
@@ -207,13 +201,15 @@ public partial class QbeOutput()
             throw new ArgumentException(symbol.Name + " is not a global variable");
         }
 
-        ssaVersionCounters[symbol] = -1;
+        if (Options.Memory)
+        {
+            Write("");
+        }
     }
 
     public void ClearMemoryRegisters()
     {
         ssaVersionCounters.Clear();
-        memoryAddresses.Clear();
     }
 }
 

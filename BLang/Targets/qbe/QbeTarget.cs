@@ -118,12 +118,13 @@ public class QbeTarget : ITarget
     {
         string idxReg = VisitExpression(array.Index);
 
+        string valueReg = VisitExpression(array.Value);
+
         qbe.Comment($"ArrayAssignment: {array.Symbol}[{array.Index}] = {array.Value}");
 
-        string addrReg = qbe.GetRegister(array.Symbol, false);
+        string addrReg = qbe.WriteRegister(array.Symbol);
         addrReg = qbe.Add(addrReg, idxReg);
 
-        string valueReg = VisitExpression(array.Value);
 
         qbe.Storel(valueReg, addrReg);
     }
@@ -136,7 +137,7 @@ public class QbeTarget : ITarget
         qbe.Comment("VariableAssignment " + $"{variableAssignment.Symbol} = {value}");
 
         string result = VisitExpression(value);
-        string memoryAddressReg = qbe.GetRegister(variableAssignment.Symbol);
+        string memoryAddressReg = qbe.ReadRegister(variableAssignment.Symbol);
         qbe.Storel(result, memoryAddressReg);
     }
 
@@ -193,7 +194,7 @@ public class QbeTarget : ITarget
         {
             string[] parameters = node.Parameters.Select(v =>
             {
-                _ = qbe.GetRegister(v.Symbol, true);
+                _ = qbe.WriteRegister(v.Symbol);// TODO: verify write is right
                 string reg = v.Symbol.Name;
                 return $"l %{reg}_0";
             }).ToArray();
@@ -282,8 +283,9 @@ public class QbeTarget : ITarget
     {
         foreach (VariableAssignment variable in autoDeclaration.Variables)
         {
-            qbe.SetRegisterName(variable.Symbol);
             qbe.Comment($"AutoStatement: auto {variable.Symbol} = {variable.Value}");
+
+            qbe.SetRegisterName(variable.Symbol);
             string reg = qbe.Alloc8(8);
             qbe.Storel(variable.Value, reg);
         }
@@ -291,9 +293,7 @@ public class QbeTarget : ITarget
 
     private void VisitFunctionCall(FunctionCall node)
     {
-        qbe.Comment("FunctionCall");
-
-        qbe.Comment("call " + node.Symbol.Name);
+        qbe.Comment("FunctionCall: "+node.Symbol);
 
         string parameters = PassParameterValue(node.Parameters);
         qbe.Call(node.Symbol.ToString(), parameters);
@@ -319,13 +319,13 @@ public class QbeTarget : ITarget
                 case Variable v:
                     qbe.SetRegisterName(v.Symbol);
 
-                    reg = qbe.Loadl(qbe.GetRegister(v.Symbol));
+                    reg = qbe.Loadl(qbe.ReadRegister(v.Symbol));
                     registers.Add($"l {reg}");
                     break;
 
                 case ArrayIndexExpression array:
                     qbe.Comment(array.ToString());
-                    string memReg = qbe.GetRegister(array.Variable.Symbol);
+                    string memReg = qbe.ReadRegister(array.Variable.Symbol);
                     string arg = qbe.Loadl(memReg, Size.L);
                     if (array.Index is IntValue i && i.Value != 0)
                     {
@@ -379,9 +379,9 @@ public class QbeTarget : ITarget
 
     private string VisitVariable(Variable variable)
     {
-        string memoryAddressReg = qbe.GetRegister(variable.Symbol, false);
-
         qbe.Comment("VisitVariable: " + variable.Symbol);
+
+        string memoryAddressReg = qbe.ReadRegister(variable.Symbol);
         return qbe.Loadl(memoryAddressReg);
     }
 
@@ -394,7 +394,7 @@ public class QbeTarget : ITarget
             throw new ParserException("Address-of operator only supported for variables.");
         }
 
-        return qbe.GetRegister(var.Symbol);
+        return qbe.ReadRegister(var.Symbol);
     }
 
     private string VisitPointerDereferenceExpression(PointerDereferenceExpression pointer)
@@ -406,7 +406,7 @@ public class QbeTarget : ITarget
             throw new ParserException("Pointer dereference operator only supported for variables.");
         }
 
-        string memReg = qbe.GetRegister(variable.Symbol);
+        string memReg = qbe.ReadRegister(variable.Symbol);
         qbe.Comment("Load Pointer");
         string addressReg = qbe.Loadl(memReg, Size.L);
         qbe.Comment("Dereferece Pointer");
@@ -422,7 +422,7 @@ public class QbeTarget : ITarget
         Expression index = array.Index;
         string indexReg = VisitExpression(index);
 
-        string memReg = qbe.GetRegister(variable.Symbol);
+        string memReg = qbe.ReadRegister(variable.Symbol);
         qbe.Comment("TODO: Load Array " + indexReg);
         string addressReg = qbe.Loadl(memReg, Size.L);
         qbe.Comment("TODO: Dereferece Array");

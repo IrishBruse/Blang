@@ -74,6 +74,8 @@ public class Tester
 
     private static void UpdateSnapshot(string testFile)
     {
+        testFile = Path.GetRelativePath(Environment.CurrentDirectory, testFile);
+
         string folderType = testFile.Split("/")[1];
         (string astPreviousOutput, string stdPreviousOutput) = LoadTestContent(testFile);
 
@@ -160,6 +162,8 @@ public class Tester
 
     private static bool CompareSnapshot(string testFile)
     {
+        testFile = Path.GetRelativePath(Environment.CurrentDirectory, testFile);
+
         string folderType = testFile.Split("/")[1];
         string? error = null;
 
@@ -199,6 +203,7 @@ public class Tester
     private static bool CompareSuccess(string testFile, string folderType, CompileOutput output, ref string? error)
     {
         (string astOutput, string stdOutput) = LoadTestContent(testFile);
+        bool passed = output.Success;
         if (!output.Success)
         {
             error = output.Error;
@@ -213,6 +218,7 @@ public class Tester
             {
                 error += $"ExitCode: {runOutput.ExitCode}\n";
                 error += "\n";
+                passed = false;
             }
 
             if (folderType != "example")
@@ -223,13 +229,15 @@ public class Tester
 
                     error += $"""
                 {Path.ChangeExtension(testFile, ".ast.json")}:{line}
-                Expected Ast:
+
+                Expected:
                 {line1}
                 Recieved:
                 {line2}
 
                 """.Trim();
                     error += "\n";
+                    passed = false;
                 }
 
                 if (!stdOutput.Equals(runOutput.StdOut, StringComparison.Ordinal))
@@ -238,18 +246,19 @@ public class Tester
 
                     error += $"""
                 {Path.ChangeExtension(testFile, ".out")}:{line}
-                Expected Output:
+                Expected:
                 {line1}
                 Recieved:
                 {line2}
 
                 """.Trim();
                     error += "\n";
+                    passed = false;
                 }
             }
         }
 
-        return output.Success;
+        return passed;
     }
 
     private static bool CompareError(string testFile, CompileOutput res, ref string? error)
