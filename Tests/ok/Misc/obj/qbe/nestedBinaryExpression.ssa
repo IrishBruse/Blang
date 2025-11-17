@@ -2,30 +2,30 @@ export function l $main()
 {
 @start
 
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
-    %temp_1 =l alloc8 8
-    storew 0, %temp_1
-    %temp_2 =l alloc8 8
-    storew 0, %temp_2
-    %temp_3 =l alloc8 8
-    storew 0, %temp_3
-    %temp_4 =l alloc8 8
-    storew 0, %temp_4
-    storel 5, %temp_1
-    storel 3, %temp_2
-    storel 2, %temp_3
-    storel 1, %temp_4
-    %result_0 =l loadl %temp_1
-    %result_1 =l loadl %temp_2
-    %result_2 =l add %result_0, %result_1
-    %result_3 =l loadl %temp_3
-    %result_4 =l loadl %temp_4
-    %result_5 =l sub %result_3, %result_4
-    %result_6 =l mul %result_2, %result_5
-    storel %result_6, %temp_0
-    %result_7 =l loadl %temp_0
-    call $printf(l $string_0, l %result_7)
+    %result_0 =l alloc8 8
+    storew 0, %result_0
+    %a_0 =l alloc8 8
+    storew 0, %a_0
+    %b_0 =l alloc8 8
+    storew 0, %b_0
+    %c_0 =l alloc8 8
+    storew 0, %c_0
+    %d_0 =l alloc8 8
+    storew 0, %d_0
+    storel 5, %a_0
+    storel 3, %b_0
+    storel 2, %c_0
+    storel 1, %d_0
+    %result_1 =l loadl %a_0
+    %result_2 =l loadl %b_0
+    %result_3 =l add %result_1, %result_2
+    %result_4 =l loadl %c_0
+    %result_5 =l loadl %d_0
+    %result_6 =l sub %result_4, %result_5
+    %result_7 =l mul %result_3, %result_6
+    storel %result_7, %result_0
+    %result_8 =l loadl %result_0
+    call $printf(l $string_0, l %result_8)
 
     ret 0
 }

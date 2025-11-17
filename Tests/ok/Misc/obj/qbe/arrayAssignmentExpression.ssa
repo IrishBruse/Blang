@@ -1,27 +1,47 @@
+# GlobalArray: arr[5]
 data $arr = { l 0 0 0 0 0 }
 
+# FunctionDecleration
 export function l $main()
 {
 @start
 
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
-    %temp_1 =l alloc8 8
-    storew 0, %temp_1
-    %temp_2 =l alloc8 8
-    storew 0, %temp_2
-    storel 2, %temp_0
-    storel 10, %temp_1
-    storel 20, %temp_2
-    %arr_1 =l loadl %temp_0
-    %arr_2 =l extuw %arr_1
-    %arr_3 =l add %arr_0, %arr_2
-    %arr_4 =l loadl %temp_1
-    %arr_5 =l loadl %temp_2
-    %arr_6 =l add %arr_4, %arr_5
-    storel %arr_6, %arr_3
+    # ExternalStatement
+    # AutoStatement
+    # auto i = 0
+    %i_0 =l alloc8 8
+    storew 0, %i_0
+    # AutoStatement
+    # auto x = 0
+    %x_0 =l alloc8 8
+    storew 0, %x_0
+    # AutoStatement
+    # auto y = 0
+    %y_0 =l alloc8 8
+    storew 0, %y_0
+    # VariableAssignment i = 2
+    storel 2, %i_0
+    # VariableAssignment x = 10
+    storel 10, %x_0
+    # VariableAssignment y = 20
+    storel 20, %y_0
+    # VisitVariable: i
+    %y_1 =l loadl %i_0
+    # ArrayAssignment: arr[i] = (x + y)
+    $arr_1 =l extuw %y_1
+    $arr_2 =l add $arr, $arr_1
+    # VisitVariable: x
+    $arr_3 =l loadl %x_0
+    # VisitVariable: y
+    $arr_4 =l loadl %y_0
+    # VisitBinaryExpression: +
+    $arr_5 =l add $arr_3, $arr_4
+    storel $arr_5, $arr_2
 
     ret 0
 }
 
+# Data
 
+# Externs
+# - printf

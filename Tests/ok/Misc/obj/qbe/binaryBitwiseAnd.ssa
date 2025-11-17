@@ -1,15 +1,26 @@
+# FunctionDecleration
 export function l $main()
 {
 @start
 
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
-    storel %Error, %temp_0
-    %result_0 =l loadl %temp_0
-    call $printf(l $string_0, l %result_0)
+    # ExternalStatement
+    # AutoStatement
+    # auto result = 0
+    %result_0 =l alloc8 8
+    storew 0, %result_0
+    # VariableAssignment result = (5 & 3)
+    # VisitBinaryExpression: &
+    storel %BitwiseAnd, %result_0
+    # FunctionCall
+    # call printf
+    %result_1 =l loadl %result_0
+    call $printf(l $string_0, l %result_1)
 
     ret 0
 }
 
+# Data
 data $string_0 = { b "%d\n", b 0 }
 
+# Externs
+# - printf

@@ -6,10 +6,6 @@ public record Symbol(string Name)
 
     public override string ToString()
     {
-        if (IsGlobal)
-        {
-            return "global_" + Name;
-        }
         return Name;
     }
 }

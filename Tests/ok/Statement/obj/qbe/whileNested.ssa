@@ -2,33 +2,33 @@ export function l $main()
 {
 @start
 
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
-    %temp_1 =l alloc8 8
-    storew 0, %temp_1
-    storel 0, %temp_0
+    %i_0 =l alloc8 8
+    storew 0, %i_0
+    %j_0 =l alloc8 8
+    storew 0, %j_0
+    storel 0, %i_0
 @while_1_condition
-    %i_0 =l loadl %temp_0
-    %i_1 =l csltl %i_0, 3
-    jnz %i_1, @while_1_body, @while_1_end
+    %i_1 =l loadl %i_0
+    %i_2 =l csltl %i_1, 3
+    jnz %i_2, @while_1_body, @while_1_end
 @while_1_body
-    storel 0, %temp_1
+    storel 0, %j_0
 @while_2_condition
-    %j_0 =l loadl %temp_1
-    %j_1 =l csltl %j_0, 2
-    jnz %j_1, @while_2_body, @while_2_end
+    %j_1 =l loadl %j_0
+    %j_2 =l csltl %j_1, 2
+    jnz %j_2, @while_2_body, @while_2_end
 @while_2_body
-    %i_2 =l loadl %temp_0
-    %j_2 =l loadl %temp_1
-    call $printf(l $string_0, l %i_2, l %j_2)
-    %j_3 =l loadl %temp_1
-    %j_4 =l add %j_3, 1
-    storel %j_4, %temp_1
+    %i_3 =l loadl %i_0
+    %j_3 =l loadl %j_0
+    call $printf(l $string_0, l %i_3, l %j_3)
+    %j_4 =l loadl %j_0
+    %j_5 =l add %j_4, 1
+    storel %j_5, %j_0
     jmp @while_2_condition
 @while_2_end
-    %i_3 =l loadl %temp_0
-    %i_4 =l add %i_3, 1
-    storel %i_4, %temp_0
+    %i_4 =l loadl %i_0
+    %i_5 =l add %i_4, 1
+    storel %i_5, %i_0
     jmp @while_1_condition
 @while_1_end
 

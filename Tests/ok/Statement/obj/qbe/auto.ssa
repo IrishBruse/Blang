@@ -2,9 +2,9 @@ export function l $main()
 {
 @start
 
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
-    storel 123, %temp_0
+    %foo_0 =l alloc8 8
+    storew 0, %foo_0
+    storel 123, %foo_0
 
     ret 0
 }

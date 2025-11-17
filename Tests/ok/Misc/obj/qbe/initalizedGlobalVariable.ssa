@@ -1,6 +1,12 @@
+# GlobalVariable
+# variable
 data $variable = { l 3 }
 
+# FunctionDecleration
 export function l $main()
 {
 @start
 
+    # ExternalStatement
+    # FunctionCall
+    # call printf

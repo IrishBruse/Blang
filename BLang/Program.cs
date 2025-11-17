@@ -18,6 +18,11 @@ public class Program
         Description = "Very Verbose output",
     };
 
+    private static Option<bool> VeryVeryVerboseFlag = new("-vvv")
+    {
+        Description = "Very Very Verbose output",
+    };
+
     private static Option<bool> AstFlag = new("--ast")
     {
         Description = "Dump compiler ast information",
@@ -189,6 +194,7 @@ public class Program
 
         rootCommand.Add(VerboseFlag);
         rootCommand.Add(VeryVerboseFlag);
+        rootCommand.Add(VeryVeryVerboseFlag);
     }
 
     private static void ParseFlags(ParseResult parseResult)
@@ -197,6 +203,7 @@ public class Program
 
         verboseLevel = parseResult.GetValue(VerboseFlag) ? 1 : verboseLevel;
         verboseLevel = parseResult.GetValue(VeryVerboseFlag) ? 2 : verboseLevel;
+        verboseLevel = parseResult.GetValue(VeryVeryVerboseFlag) ? 3 : verboseLevel;
 
         Options.Verbose = verboseLevel;
         Options.Ast = parseResult.GetValue(AstFlag);

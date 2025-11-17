@@ -2,18 +2,18 @@ export function l $main()
 {
 @start
 
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
-    storel 0, %temp_0
+    %a_0 =l alloc8 8
+    storew 0, %a_0
+    storel 0, %a_0
     @if_1_condition
-        %a_0 =l loadl %temp_0
-        %a_1 =l add %a_0, 1000
-        %a_2 =l mul 100, 2
-        %a_3 =l csltl %a_1, %a_2
-        jnz %a_3, @if_1_body, @if_1_end
+        %a_1 =l loadl %a_0
+        %a_2 =l add %a_1, 1000
+        %a_3 =l mul 100, 2
+        %a_4 =l csltl %a_2, %a_3
+        jnz %a_4, @if_1_body, @if_1_end
     @if_1_body
-        %a_4 =l loadl %temp_0
-        call $printf(l $string_0, l %a_4)
+        %a_5 =l loadl %a_0
+        call $printf(l $string_0, l %a_5)
     @if_1_end
     call $printf(l $string_0, l 123)
 

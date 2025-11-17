@@ -20,6 +20,8 @@ public class Tester
     {
         List<string> failed = new();
 
+        int verboseLevel = Options.Verbose;
+
         Options.Verbose = 0;
 
         Stopwatch sw = Stopwatch.StartNew();
@@ -36,7 +38,7 @@ public class Tester
             }
         }
 
-        Options.Verbose = 1;
+        Options.Verbose = Math.Max(1, verboseLevel);
 
         if (failed.Count > 0 && !Options.UpdateSnapshots)
         {

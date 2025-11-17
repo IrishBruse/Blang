@@ -1,6 +1,11 @@
+# GlobalVariable
+# variable
 data $variable = { l 0 }
 
+# FunctionDecleration
 export function l $main()
 {
 @start
 
+    # ExternalStatement
+    # VariableAssignment variable = 6

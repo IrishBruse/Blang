@@ -18,16 +18,11 @@ public class QbeTarget : ITarget
     private readonly Dictionary<string, string> strings = [];
     private readonly HashSet<Symbol> externs = [];
 
-    private SymbolTable symbolTable = new();
-
     private int conditionIndex;
     private QbeOutput qbe = new();
 
     public Result<EmitOutput> Emit(CompilationUnit unit, CompilerContext data)
     {
-        symbolTable = data.Symbols;
-
-        symbolTable.Clear();
         qbe.Clear();
 
         string file = data.File;
@@ -80,6 +75,7 @@ public class QbeTarget : ITarget
 
                 default: break;
             }
+            qbe.WriteLine();
         }
 
         foreach (FunctionDecleration funcDecl in node.FunctionDeclarations)
@@ -94,15 +90,20 @@ public class QbeTarget : ITarget
 
     private void VisitGlobalVariable(GlobalVariableDecleration variable)
     {
-        qbe.Comment(variable.Symbol.Name);
+        qbe.Comment("GlobalVariable: " + variable.Symbol);
+
+        qbe.CreateGlobalRegister(variable.Symbol);
+
         string value = variable.Value == null ? "l 0" : "l " + (variable.Value as IntValue)!.Value;
         qbe.Data(variable.Symbol.Name, value);
-        qbe.WriteLine();
     }
 
     private void VisitGlobalArray(GlobalArrayDeclaration array)
     {
-        qbe.Comment($"{array.Symbol.Name}[{array.Size}]");
+        qbe.Comment($"GlobalArray: {array.Symbol.Name}[{array.Size}]");
+
+        qbe.CreateGlobalRegister(array.Symbol);
+
         Expression[] values = array.Values;
         string data = "l";
         for (int i = 0; i < array.Size; i++)
@@ -111,18 +112,16 @@ public class QbeTarget : ITarget
         }
 
         qbe.Data(array.Symbol.Name, data);
-        qbe.AllocateMemoryReg(array.Symbol, "$" + array.Symbol.Name);
-        qbe.WriteLine();
     }
 
     private void VisitArrayAssignment(ArrayAssignmentStatement array)
     {
-        qbe.Comment($"{array.Symbol}[{array.Index}] = {array.Value}");
-        string addrReg = qbe.GetMemoryRegister(array.Symbol, false);
-
         string idxReg = VisitExpression(array.Index);
-        string temp = qbe.Extuw(idxReg);
-        addrReg = qbe.Add(addrReg, temp, Size.L);
+
+        qbe.Comment($"ArrayAssignment: {array.Symbol}[{array.Index}] = {array.Value}");
+
+        string addrReg = qbe.GetRegister(array.Symbol, false);
+        addrReg = qbe.Add(addrReg, idxReg);
 
         string valueReg = VisitExpression(array.Value);
 
@@ -132,18 +131,19 @@ public class QbeTarget : ITarget
     public void VisitVariableAssignment(GlobalVariableDecleration variableAssignment)
     {
         qbe.SetRegisterName(variableAssignment.Symbol);
-
         Expression value = variableAssignment.Value;
-        qbe.Comment($"{variableAssignment.Symbol} = {value}");
+
+        qbe.Comment("VariableAssignment " + $"{variableAssignment.Symbol} = {value}");
 
         string result = VisitExpression(value);
-        string memoryAddressReg = qbe.GetMemoryAddress(variableAssignment.Symbol);
+        string memoryAddressReg = qbe.GetRegister(variableAssignment.Symbol);
         qbe.Storel(result, memoryAddressReg);
     }
 
     private void GenerateDataSection()
     {
         qbe.Comment("Data");
+
         foreach ((string value, string name) in strings)
         {
             qbe.DataString(name, value);
@@ -153,6 +153,7 @@ public class QbeTarget : ITarget
     private void GenerateExternsSection()
     {
         qbe.Comment("Externs");
+
         foreach (Symbol external in externs)
         {
             qbe.Comment($"- {external.Name}");
@@ -172,28 +173,18 @@ public class QbeTarget : ITarget
             // TODO: Goto
             // TODO: Label
             case FunctionCall s: VisitFunctionCall(s); break;
-
             case ArrayAssignmentStatement s: VisitArrayAssignment(s); break;
             default: throw new ParserException(node.ToString());
         }
-    }
-
-    private void BeginScope()
-    {
-        qbe.BeginScope();
-    }
-
-    private void EndScope()
-    {
-        qbe.EndScope();
     }
 
     // Statements
 
     public void VisitFunctionDecleration(FunctionDecleration node)
     {
-        string name = node.Symbol.Name;
+        qbe.Comment("FunctionDecleration");
 
+        string name = node.Symbol.Name;
         if (name == "main")
         {
             qbe.ExportFunction(name);
@@ -202,7 +193,7 @@ public class QbeTarget : ITarget
         {
             string[] parameters = node.Parameters.Select(v =>
             {
-                _ = qbe.GetMemoryRegister(v.Symbol, true);
+                _ = qbe.GetRegister(v.Symbol, true);
                 string reg = v.Symbol.Name;
                 return $"l %{reg}_0";
             }).ToArray();
@@ -234,6 +225,8 @@ public class QbeTarget : ITarget
 
     public void VisitExternalStatement(ExternalStatement node)
     {
+        qbe.Comment("ExternalStatement");
+
         foreach (Symbol extrn in node.Externals)
         {
             _ = externs.Add(extrn);
@@ -242,6 +235,8 @@ public class QbeTarget : ITarget
 
     public void VisitWhileStatement(WhileStatement node)
     {
+        qbe.Comment("WhileStatement");
+
         qbe.Comment("while " + node.Condition);
         string labelPrefix = $"while_{++conditionIndex}_";
         qbe.Label($"{labelPrefix}condition");
@@ -255,6 +250,8 @@ public class QbeTarget : ITarget
 
     public void VisitIfStatement(IfStatement node)
     {
+        qbe.Comment("IfStatement");
+
         qbe.Comment("if " + node.Condition);
         qbe.Indent();
 
@@ -281,19 +278,21 @@ public class QbeTarget : ITarget
         qbe.Unindent();
     }
 
-    public void VisitAutoStatement(AutoStatement autoDeclaration)
+    private void VisitAutoStatement(AutoStatement autoDeclaration)
     {
         foreach (VariableAssignment variable in autoDeclaration.Variables)
         {
-            qbe.Comment($"auto {variable.Symbol} = {variable.Value}");
-            string reg = qbe.Alloc8(8, Size.L);
-            qbe.AllocateMemoryReg(variable.Symbol, reg);
-            qbe.Storew(variable.Value, reg);
+            qbe.SetRegisterName(variable.Symbol);
+            qbe.Comment($"AutoStatement: auto {variable.Symbol} = {variable.Value}");
+            string reg = qbe.Alloc8(8);
+            qbe.Storel(variable.Value, reg);
         }
     }
 
-    public void VisitFunctionCall(FunctionCall node)
+    private void VisitFunctionCall(FunctionCall node)
     {
+        qbe.Comment("FunctionCall");
+
         qbe.Comment("call " + node.Symbol.Name);
 
         string parameters = PassParameterValue(node.Parameters);
@@ -320,13 +319,13 @@ public class QbeTarget : ITarget
                 case Variable v:
                     qbe.SetRegisterName(v.Symbol);
 
-                    reg = qbe.Loadl(qbe.GetMemoryAddress(v.Symbol));
+                    reg = qbe.Loadl(qbe.GetRegister(v.Symbol));
                     registers.Add($"l {reg}");
                     break;
 
                 case ArrayIndexExpression array:
                     qbe.Comment(array.ToString());
-                    string memReg = qbe.GetMemoryAddress(array.Variable.Symbol);
+                    string memReg = qbe.GetRegister(array.Variable.Symbol);
                     string arg = qbe.Loadl(memReg, Size.L);
                     if (array.Index is IntValue i && i.Value != 0)
                     {
@@ -356,9 +355,9 @@ public class QbeTarget : ITarget
         {
             Variable variable => VisitVariable(variable),
             IntValue number => number.Value.ToString(),
-            AddressOfExpression address => GenerateAddressOfExpressionIR(address),
-            PointerDereferenceExpression pointer => GeneratePointerDereferenceExpressionIR(pointer),
-            ArrayIndexExpression array => GenerateArrayIndexExpressionIR(array),
+            AddressOfExpression address => VisitAddressOfExpression(address),
+            PointerDereferenceExpression pointer => VisitPointerDereferenceExpression(pointer),
+            ArrayIndexExpression array => VisitArrayIndexExpression(array),
             BinaryExpression binary => VisitBinaryExpression(binary),
             _ => throw new ParserException($"Unknown expression type {expr.GetType()}: {expr}"),
         };
@@ -380,44 +379,50 @@ public class QbeTarget : ITarget
 
     private string VisitVariable(Variable variable)
     {
-        string memoryAddressReg = qbe.GetMemoryAddress(variable.Symbol);
+        string memoryAddressReg = qbe.GetRegister(variable.Symbol, false);
+
+        qbe.Comment("VisitVariable: " + variable.Symbol);
         return qbe.Loadl(memoryAddressReg);
     }
 
-    private string GenerateAddressOfExpressionIR(AddressOfExpression address)
+    private string VisitAddressOfExpression(AddressOfExpression address)
     {
+        qbe.Comment("VisitAddressOfExpression: " + address);
 
         if (address.Expr is not Variable var)
         {
             throw new ParserException("Address-of operator only supported for variables.");
         }
 
-        return qbe.GetMemoryRegister(var.Symbol);
+        return qbe.GetRegister(var.Symbol);
     }
 
-    private string GeneratePointerDereferenceExpressionIR(PointerDereferenceExpression pointer)
+    private string VisitPointerDereferenceExpression(PointerDereferenceExpression pointer)
     {
+        qbe.Comment("VisitAddressOfExpression: " + pointer);
 
         if (pointer.Expr is not Variable variable)
         {
             throw new ParserException("Pointer dereference operator only supported for variables.");
         }
 
-        string memReg = qbe.GetMemoryRegister(variable.Symbol);
+        string memReg = qbe.GetRegister(variable.Symbol);
         qbe.Comment("Load Pointer");
         string addressReg = qbe.Loadl(memReg, Size.L);
         qbe.Comment("Dereferece Pointer");
         return qbe.Loadl(addressReg);
     }
 
-    private string GenerateArrayIndexExpressionIR(ArrayIndexExpression array)
+    private string VisitArrayIndexExpression(ArrayIndexExpression array)
     {
+        qbe.Comment("VisitArrayIndexExpression: " + array);
+
         Variable variable = array.Variable;
 
         Expression index = array.Index;
         string indexReg = VisitExpression(index);
 
-        string memReg = qbe.GetMemoryAddress(variable.Symbol);
+        string memReg = qbe.GetRegister(variable.Symbol);
         qbe.Comment("TODO: Load Array " + indexReg);
         string addressReg = qbe.Loadl(memReg, Size.L);
         qbe.Comment("TODO: Dereferece Array");
@@ -430,7 +435,8 @@ public class QbeTarget : ITarget
         string rightOp = VisitExpression(binary.Right);
 
         BinaryOperator binOperator = binary.Operation;
-        qbe.Comment(binOperator.ToText());
+        qbe.Comment("VisitBinaryExpression: " + binOperator.ToText());
+
         return binOperator switch
         {
             BinaryOperator.Addition => qbe.Add(leftOp, rightOp),
@@ -441,9 +447,9 @@ public class QbeTarget : ITarget
             BinaryOperator.LessThanEqual => qbe.Cslel(leftOp, rightOp),
             BinaryOperator.Modulo => qbe.Rem(leftOp, rightOp),
             BinaryOperator.Multiplication => qbe.Mul(leftOp, rightOp),
-            BinaryOperator.BitwiseShiftLeft => "%Error",
-            BinaryOperator.BitwiseShiftRight => "%Error",
-            BinaryOperator.BitwiseAnd => "%Error",
+            BinaryOperator.BitwiseShiftLeft => "%BitwiseShiftLeft",
+            BinaryOperator.BitwiseShiftRight => "%BitwiseShiftRight",
+            BinaryOperator.BitwiseAnd => "%BitwiseAnd",
 
             _ => throw new ParserException("Unknown operator " + binary.Operation),
         };
@@ -471,4 +477,13 @@ public class QbeTarget : ITarget
         _ = Directory.CreateDirectory(Path.Combine(projectDirectory, "bin", target));
     }
 
+    private void BeginScope()
+    {
+        qbe.BeginScope();
+    }
+
+    private void EndScope()
+    {
+        qbe.EndScope();
+    }
 }

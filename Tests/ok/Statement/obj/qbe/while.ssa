@@ -2,19 +2,19 @@ export function l $main()
 {
 @start
 
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
-    storel 0, %temp_0
+    %i_0 =l alloc8 8
+    storew 0, %i_0
+    storel 0, %i_0
 @while_1_condition
-    %i_0 =l loadl %temp_0
-    %i_1 =l csltl %i_0, 10
-    jnz %i_1, @while_1_body, @while_1_end
+    %i_1 =l loadl %i_0
+    %i_2 =l csltl %i_1, 10
+    jnz %i_2, @while_1_body, @while_1_end
 @while_1_body
-    %i_2 =l loadl %temp_0
-    call $printf(l $string_0, l %i_2)
-    %i_3 =l loadl %temp_0
-    %i_4 =l add %i_3, 1
-    storel %i_4, %temp_0
+    %i_3 =l loadl %i_0
+    call $printf(l $string_0, l %i_3)
+    %i_4 =l loadl %i_0
+    %i_5 =l add %i_4, 1
+    storel %i_5, %i_0
     jmp @while_1_condition
 @while_1_end
 

@@ -2,21 +2,21 @@ export function l $main()
 {
 @start
 
-    %temp_0 =l alloc8 8
-    storew 0, %temp_0
-    storel 2, %temp_0
+    %x_0 =l alloc8 8
+    storew 0, %x_0
+    storel 2, %x_0
     @if_1_condition
-        %x_0 =l loadl %temp_0
-        %x_1 =l ceql %x_0, 1
-        jnz %x_1, @if_1_body, @if_1_else
+        %x_1 =l loadl %x_0
+        %x_2 =l ceql %x_1, 1
+        jnz %x_2, @if_1_body, @if_1_else
     @if_1_body
         call $printf(l $string_0)
         jmp @if_1_end
     @if_1_else
         @if_2_condition
-            %x_2 =l loadl %temp_0
-            %x_3 =l ceql %x_2, 2
-            jnz %x_3, @if_2_body, @if_2_else
+            %x_3 =l loadl %x_0
+            %x_4 =l ceql %x_3, 2
+            jnz %x_4, @if_2_body, @if_2_else
         @if_2_body
             call $printf(l $string_1)
             jmp @if_2_end

@@ -57,9 +57,8 @@ public partial class QbeOutput()
 
     public void Comment(string message)
     {
-        if (Options.Verbose > 1)
+        if (Options.Verbose > 0)
         {
-            WriteLine();
             Write("# " + message);
         }
     }
@@ -68,7 +67,7 @@ public partial class QbeOutput()
     {
         if (Options.Memory)
         {
-            Write("#  " + message);
+            Write("# " + message);
         }
     }
 
@@ -148,52 +147,73 @@ public partial class QbeOutput()
         {
             currentReg = new("temp");
         }
-        return GetMemoryRegister(currentReg, false);
+        return WriteRegister(currentReg);
     }
 
-    public string GetMemoryRegister(Symbol symbol, bool increment = true)
+    public string WriteRegister(Symbol symbol)
     {
         SetRegisterName(symbol);
 
         int currentVersion = 0;
-        if (ssaVersionCounters.TryGetValue(symbol, out int value))
-        {
-            currentVersion = value;
-        }
-
-        ssaVersionCounters[symbol] = currentVersion + 1;
+        // if (ssaVersionCounters.TryGetValue(symbol, out int value))
+        // {
+        //     currentVersion = value;
+        // }
 
         if (Options.Memory)
         {
-            string comment = $"# {(increment ? "Write" : "Read")}: %{symbol.Name}_{currentVersion}";
-            if (increment)
-            {
-                comment += $" -> %{symbol.Name}_{currentVersion + 1}";
-            }
-            Write(comment);
+            Write($"# Reg(W): %{symbol.Name}_{currentVersion} -> %{symbol.Name}_{currentVersion + 1}");
         }
 
-        return $"%{symbol.Name}_{currentVersion}";
+        return "write";
+    }
+
+    public string ReadRegister(Symbol symbol)
+    {
+        SetRegisterName(symbol);
+
+        return "read";
+
+        // int currentVersion = 0;
+        // if (ssaVersionCounters.TryGetValue(symbol, out int value))
+        // {
+        //     currentVersion = value;
+        // }
+
+        // ssaVersionCounters[symbol] = currentVersion + 1;
+
+        // if (Options.Memory)
+        // {
+        //     string comment = $"# {(increment ? "Write" : "Read")}: %{symbol.Name}_{currentVersion}";
+        //     if (increment)
+        //     {
+        //         comment += $" -> %{symbol.Name}_{currentVersion + 1}";
+        //     }
+        //     Write(comment);
+        // }
+
+        // if (symbol.IsGlobal && currentVersion == -1)
+        // {
+        //     return $"${symbol.Name}";
+        // }
+
+        // return $"%{symbol.Name}_{currentVersion}";
+    }
+
+    public void CreateGlobalRegister(Symbol symbol)
+    {
+        if (!symbol.IsGlobal)
+        {
+            throw new ArgumentException(symbol.Name + " is not a global variable");
+        }
+
+        ssaVersionCounters[symbol] = -1;
     }
 
     public void ClearMemoryRegisters()
     {
         ssaVersionCounters.Clear();
         memoryAddresses.Clear();
-    }
-
-    public void AllocateMemoryReg(Symbol symbol, string reg)
-    {
-        memoryAddresses[symbol] = reg;
-    }
-
-    public string GetMemoryAddress(Symbol symbol)
-    {
-        if (memoryAddresses.TryGetValue(symbol, out string? address))
-        {
-            return address;
-        }
-        throw new CompilerException($"Memory address for symbol {symbol.Name} not found.");
     }
 }
 
