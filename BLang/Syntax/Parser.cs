@@ -23,9 +23,7 @@ public partial class Parser(CompilerContext data)
 
         try
         {
-            symbols.EnterScope("global");
             CompilationUnit unit = ParseCompilationUnit();
-            symbols.ExitScope();
             return unit;
         }
         catch (Exception e)
@@ -44,7 +42,8 @@ public partial class Parser(CompilerContext data)
     private CompilationUnit ParseCompilationUnit()
     {
         List<FunctionDecleration> functions = [];
-        List<GlobalVariable> globals = [];
+        List<GlobalVariableDecleration> globalVariables = [];
+        List<GlobalArrayDeclaration> globalArrays = [];
 
         SourceRange start = TokenPosition;
 
@@ -54,14 +53,19 @@ public partial class Parser(CompilerContext data)
 
             // Definition
             //     FunctionDecleration
+            //     GlobalArrayDecleration
             //     GlobalVariableDecleration
             if (Peek(TokenType.OpenParenthesis))
             {
                 functions.Add(ParseFunctionDecleration(identifier));
             }
+            else if (Peek(TokenType.OpenBracket))
+            {
+                globalArrays.Add(ParseGlobalArrayDecleration(identifier));
+            }
             else
             {
-                globals.Add(ParseGlobalVariableDecleration(identifier));
+                globalVariables.Add(ParseGlobalVariableDecleration(identifier));
             }
 
             EatComments();
@@ -72,7 +76,7 @@ public partial class Parser(CompilerContext data)
             throw new InvalidTokenException("Garbage token encountered");
         }
 
-        return new(functions.ToArray(), globals.ToArray())
+        return new(functions.ToArray(), globalVariables.ToArray(), globalArrays.ToArray())
         {
             Range = Range(start, TokenPosition),
         };
@@ -82,7 +86,6 @@ public partial class Parser(CompilerContext data)
     //     (Identifier, '(', (Identifier, (',', Identifier)*)?, ')', Block)
     private FunctionDecleration ParseFunctionDecleration(Token identifier)
     {
-        symbols.EnterScope(identifier.Content);
         Symbol symbol = symbols.Add(identifier.Content);
 
         SourceRange start = identifier.Range;
@@ -107,7 +110,6 @@ public partial class Parser(CompilerContext data)
 
         Statement[] body = ParseBlock();
 
-        symbols.ExitScope();
         return new FunctionDecleration(symbol, parameters.ToArray(), body)
         {
             Range = Range(start, TokenPosition),
@@ -115,28 +117,14 @@ public partial class Parser(CompilerContext data)
     }
 
     // GlobalVariableDecleration
-    //     (Identifier, ('[', Constant?, ']')?, (Ival, (',', Ival)*)?, ';')
-    private GlobalVariable ParseGlobalVariableDecleration(Token identifier)
+    //     (Identifier, (Ival)?, ';')
+    private GlobalVariableDecleration ParseGlobalVariableDecleration(Token identifier)
     {
         // Identifier,
-        Symbol symbol = symbols.Add(identifier.Content);
+        Symbol symbol = symbols.GetOrAdd(identifier);
         symbol.IsGlobal = true;
 
         int? arraySize = null;
-        bool isArray = false;
-
-        // ('[', Constant?, ']')?,
-        if (TryEat(TokenType.OpenBracket)) // '['
-        {
-            isArray = true;
-
-            // Constant?
-            if (TryEat(TokenType.IntegerLiteral, out Token? token))
-            {
-                arraySize = token.Number;
-            }
-            _ = Eat(TokenType.CloseBracket); // ']'
-        }
 
         List<Expression> values = new();
 
@@ -162,19 +150,60 @@ public partial class Parser(CompilerContext data)
 
         _ = Eat(TokenType.Semicolon);
 
-        if (isArray)
+        return new GlobalVariableDecleration(symbol, valueCount == 1 ? values[0] : new IntValue(0)) { Range = Range(identifier, TokenPosition) };
+    }
+
+
+    // GlobalArrayDeclaration
+    //     (Identifier, '[', Constant?, ']', (Ival, (',', Ival)*)?, ';')
+    private GlobalArrayDeclaration ParseGlobalArrayDecleration(Token identifier)
+    {
+        // Identifier,
+        Symbol symbol = symbols.GetOrAdd(identifier);
+        symbol.IsGlobal = true;
+
+        int? arraySize = null;
+
+        // '[', Constant?, ']',
+        _ = Eat(TokenType.OpenBracket);
+
+        // Constant?
+        if (TryEat(TokenType.IntegerLiteral, out Token? token))
         {
-            int size = valueCount;
-            if (valueCount < arraySize)
+            arraySize = token.Number;
+        }
+        _ = Eat(TokenType.CloseBracket); // ']'
+
+        List<Expression> values = new();
+
+        int valueCount = 0;
+
+        // (Ival, (',', Ival)*)?,
+        if (Peek(TokenType.IntegerLiteral))
+        {
+            values.Add(new IntValue(EatInt()));
+            valueCount++;
+
+            while (TryEat(TokenType.Comma))
             {
-                size = arraySize.Value;
+                values.Add(new IntValue(EatInt()));
+                valueCount++;
             }
-            return new GlobalArrayDeclaration(symbol, values.ToArray(), size) { Range = Range(identifier, TokenPosition) };
+
+            if (arraySize != null && arraySize < valueCount)
+            {
+                throw new ParserException($"Array of size {arraySize} contains {valueCount} elements");
+            }
         }
-        else
+
+        _ = Eat(TokenType.Semicolon);
+
+        int size = valueCount;
+        if (valueCount < arraySize)
         {
-            return new GlobalVariableDecleration(symbol, valueCount == 1 ? values[0] : new IntValue(0)) { Range = Range(identifier, TokenPosition) };
+            size = arraySize.Value;
         }
+        return new GlobalArrayDeclaration(symbol, values.ToArray(), size) { Range = Range(identifier, TokenPosition) };
     }
 
     // Block

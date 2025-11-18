@@ -142,69 +142,54 @@ public partial class QbeOutput()
     {
         if (currentReg == null)
         {
-            currentReg = new("temp");
+            throw new Exception("test");
         }
-        return WriteRegister(currentReg);
+        return WriteRegister(currentReg!);
+    }
+
+    public string GetMemoryAllocation(Symbol symbol)
+    {
+        string reg = $"%{symbol.Name}";
+
+        if (symbol.IsGlobal)
+        {
+            reg = $"${symbol.Name}";
+        }
+
+        if (Options.Memory) Write($"# ReadAddress: {reg}");
+        return reg;
     }
 
     public string WriteRegister(Symbol symbol)
     {
-        int currentVersion = -1;
-        if (ssaVersionCounters.TryGetValue(symbol, out int value))
-        {
-            currentVersion = value;
-        }
-
-        if (symbol.IsGlobal)
-        {
-            return $"${symbol}";
-        }
+        int currentVersion = ssaVersionCounters.GetValueOrDefault(symbol, 0);
 
         currentVersion += 1;
-
         ssaVersionCounters[symbol] = currentVersion;
 
         string reg = $"%{symbol.Name}_{currentVersion}";
 
-        if (Options.Memory)
-        {
-            Write($"# Write: {reg}");
-        }
-
+        if (Options.Memory) Write($"# Write: {reg}");
         return reg;
     }
 
     public string ReadRegister(Symbol symbol)
     {
-        int currentVersion = 0;
-        if (ssaVersionCounters.TryGetValue(symbol, out int value))
-        {
-            currentVersion = value;
-        }
+        int currentVersion = ssaVersionCounters.GetValueOrDefault(symbol, 0);
 
         string reg;
-
-        reg = $"%{symbol.Name}";
-
-        if (Options.Memory)
+        if (currentVersion > 0)
         {
-            Write($"# Read: {reg}");
+            reg = $"%{symbol.Name}_{currentVersion}";
+        }
+        else
+        {
+            reg = $"%{symbol.Name}";
         }
 
+
+        if (Options.Memory) Write($"# Read: {reg}");
         return reg;
-    }
-
-    public void CreateGlobalRegister(Symbol symbol)
-    {
-        if (!symbol.IsGlobal)
-        {
-            throw new ArgumentException(symbol.Name + " is not a global variable");
-        }
-
-        if (Options.Memory)
-        {
-            Write("");
-        }
     }
 
     public void ClearMemoryRegisters()

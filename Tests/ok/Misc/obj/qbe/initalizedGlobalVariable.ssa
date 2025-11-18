@@ -1,12 +1,14 @@
-# GlobalVariable
-# variable
 data $variable = { l 3 }
 
-# FunctionDecleration
 export function l $main()
 {
 @start
 
-    # ExternalStatement
-    # FunctionCall
-    # call printf
+    %variable_1 =l loadl $variable
+    call $printf(l $string_0, l %variable_1)
+
+    ret 0
+}
+
+data $string_0 = { b "variable %d\n", b 0 }
+

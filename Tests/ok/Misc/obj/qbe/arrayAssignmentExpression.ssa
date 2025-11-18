@@ -1,47 +1,26 @@
-# GlobalArray: arr[5]
 data $arr = { l 0 0 0 0 0 }
 
-# FunctionDecleration
 export function l $main()
 {
 @start
 
-    # ExternalStatement
-    # AutoStatement
-    # auto i = 0
-    %i_0 =l alloc8 8
-    storew 0, %i_0
-    # AutoStatement
-    # auto x = 0
-    %x_0 =l alloc8 8
-    storew 0, %x_0
-    # AutoStatement
-    # auto y = 0
-    %y_0 =l alloc8 8
-    storew 0, %y_0
-    # VariableAssignment i = 2
-    storel 2, %i_0
-    # VariableAssignment x = 10
-    storel 10, %x_0
-    # VariableAssignment y = 20
-    storel 20, %y_0
-    # VisitVariable: i
-    %y_1 =l loadl %i_0
-    # ArrayAssignment: arr[i] = (x + y)
-    $arr_1 =l extuw %y_1
-    $arr_2 =l add $arr, $arr_1
-    # VisitVariable: x
-    $arr_3 =l loadl %x_0
-    # VisitVariable: y
-    $arr_4 =l loadl %y_0
-    # VisitBinaryExpression: +
-    $arr_5 =l add $arr_3, $arr_4
-    storel $arr_5, $arr_2
+    %i =l alloc8 8
+    storel 0, %i
+    %x =l alloc8 8
+    storel 0, %x
+    %y =l alloc8 8
+    storel 0, %y
+    storel 2, %i
+    storel 10, %x
+    storel 20, %y
+    %y_1 =l loadl %i
+    %y_2 =l loadl %x
+    %y_3 =l loadl %y
+    %y_4 =l add %y_2, %y_3
+    %y_5 =l add $arr, %y_1
+    storel %y_4, %y_5
 
     ret 0
 }
 
-# Data
 
-# Externs
-# - printf

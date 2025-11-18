@@ -1,20 +1,29 @@
+
+# FunctionDecleration
 export function l $main()
 {
 @start
 
+    # VisitFunctionCall: other()
     call $other()
 
     ret 0
 }
 
+# FunctionDecleration
 function w $other()
 {
 @start
 
+    # ExternalStatement
+    # VisitFunctionCall: printf("Pass\n")
     call $printf(l $string_0)
 
     ret
 }
 
+# Data
 data $string_0 = { b "Pass\n", b 0 }
 
+# Externs
+# - printf

@@ -1,5 +1,4 @@
 data $A = { l 0 }
-
 data $B = { l 2 }
 
 export function l $main()

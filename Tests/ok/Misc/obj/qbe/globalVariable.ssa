@@ -1,15 +1,19 @@
-# GlobalVariable
-# foo
 data $foo = { l 0 }
-
-# GlobalVariable
-# bar
 data $bar = { l 3 }
 
-# FunctionDecleration
 export function l $main()
 {
 @start
 
-    # ExternalStatement
-    # VariableAssignment foo = 1
+    storel 1, $foo
+    %foo_1 =l loadl $foo
+    call $printf(l $string_0, l %foo_1)
+    %bar_1 =l loadl $bar
+    call $printf(l $string_1, l %bar_1)
+
+    ret 0
+}
+
+data $string_0 = { b "foo %d\n", b 0 }
+data $string_1 = { b "bar %d\n", b 0 }
+

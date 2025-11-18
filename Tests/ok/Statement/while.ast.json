@@ -16,8 +16,8 @@
             }
           ],
           "Range": {
-            "Start": 15,
-            "End": 28
+            "Start": 13,
+            "End": 26
           }
         },
         {
@@ -32,8 +32,8 @@
             }
           ],
           "Range": {
-            "Start": 36,
-            "End": 43
+            "Start": 32,
+            "End": 39
           }
         },
         {
@@ -46,13 +46,13 @@
             "_Type": "IntValue",
             "Value": 0,
             "Range": {
-              "Start": 51,
-              "End": 54
+              "Start": 46,
+              "End": 49
             }
           },
           "Range": {
-            "Start": 49,
-            "End": 50
+            "Start": 44,
+            "End": 45
           }
         },
         {
@@ -66,21 +66,21 @@
                 "IsGlobal": false
               },
               "Range": {
-                "Start": 68,
-                "End": 69
+                "Start": 62,
+                "End": 63
               }
             },
             "Right": {
               "_Type": "IntValue",
               "Value": 10,
               "Range": {
-                "Start": 70,
-                "End": 72
+                "Start": 64,
+                "End": 66
               }
             },
             "Range": {
-              "Start": 68,
-              "End": 72
+              "Start": 62,
+              "End": 66
             }
           },
           "Body": [
@@ -95,8 +95,8 @@
                   "_Type": "StringValue",
                   "Value": "%d ",
                   "Range": {
-                    "Start": 97,
-                    "End": 102
+                    "Start": 89,
+                    "End": 94
                   }
                 },
                 {
@@ -106,14 +106,14 @@
                     "IsGlobal": false
                   },
                   "Range": {
-                    "Start": 104,
-                    "End": 105
+                    "Start": 96,
+                    "End": 97
                   }
                 }
               ],
               "Range": {
-                "Start": 90,
-                "End": 107
+                "Start": 82,
+                "End": 99
               }
             },
             {
@@ -145,31 +145,53 @@
                   }
                 },
                 "Range": {
-                  "Start": 118,
-                  "End": 120
+                  "Start": 109,
+                  "End": 111
                 }
               },
               "Range": {
-                "Start": 117,
-                "End": 118
+                "Start": 108,
+                "End": 109
               }
             }
           ],
           "Range": {
-            "Start": 61,
-            "End": 128
+            "Start": 55,
+            "End": 118
+          }
+        },
+        {
+          "_Type": "FunctionCall",
+          "Symbol": {
+            "Name": "printf",
+            "IsGlobal": false
+          },
+          "Parameters": [
+            {
+              "_Type": "StringValue",
+              "Value": "\\n",
+              "Range": {
+                "Start": 130,
+                "End": 134
+              }
+            }
+          ],
+          "Range": {
+            "Start": 123,
+            "End": 136
           }
         }
       ],
       "Range": {
         "Start": 0,
-        "End": 131
+        "End": 138
       }
     }
   ],
   "GlobalVariables": [],
+  "GlobalArrays": [],
   "Range": {
     "Start": 0,
-    "End": 131
+    "End": 138
   }
 }

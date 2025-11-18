@@ -90,7 +90,7 @@
               "_Type": "Variable",
               "Symbol": {
                 "Name": "bar",
-                "IsGlobal": false
+                "IsGlobal": true
               },
               "Range": {
                 "Start": 99,
@@ -112,7 +112,6 @@
   ],
   "GlobalVariables": [
     {
-      "$type": "GlobalVariableDecleration",
       "Symbol": {
         "Name": "foo",
         "IsGlobal": true
@@ -131,7 +130,6 @@
       }
     },
     {
-      "$type": "GlobalVariableDecleration",
       "Symbol": {
         "Name": "bar",
         "IsGlobal": true
@@ -150,6 +148,7 @@
       }
     }
   ],
+  "GlobalArrays": [],
   "Range": {
     "Start": 0,
     "End": 114

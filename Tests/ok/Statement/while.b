@@ -9,4 +9,5 @@ main()
         printf("%d ", i);
         i++;
     }
+    printf("\n");
 }

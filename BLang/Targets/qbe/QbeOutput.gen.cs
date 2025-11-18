@@ -4,6 +4,7 @@ using FunctionSymbol = string;
 using Label = string;
 using Reg = string;
 using Val = string;
+using Address = string;
 
 public partial class QbeOutput
 {
@@ -248,25 +249,25 @@ public partial class QbeOutput
     }
 
     /// <summary> Allocates memory on the stack with 4-byte alignment. </summary>
-    public Reg Alloc4(int sizeInBytes, Size regType = Size.L)
+    public Address Alloc4(int sizeInBytes, Size regType = Size.L)
     {
-        Reg reg = GetTempReg();
+        Address reg = GetMemoryAllocation(currentReg!);
         Write($"{reg} ={ToChar(regType)} alloc4 {sizeInBytes}");
         return reg;
     }
 
     /// <summary> Allocates memory on the stack with 8-byte alignment. </summary>
-    public Reg Alloc8(int sizeInBytes, Size regType = Size.L)
+    public Address Alloc8(int sizeInBytes, Size regType = Size.L)
     {
-        Reg reg = GetTempReg();
+        Address reg = GetMemoryAllocation(currentReg!);
         Write($"{reg} ={ToChar(regType)} alloc8 {sizeInBytes}");
         return reg;
     }
 
     /// <summary> Allocates memory on the stack with 16-byte alignment. </summary>
-    public Reg Alloc16(int sizeInBytes, Size regType = Size.L)
+    public Address Alloc16(int sizeInBytes, Size regType = Size.L)
     {
-        Reg reg = GetTempReg();
+        Address reg = GetMemoryAllocation(currentReg!);
         Write($"{reg} ={ToChar(regType)} alloc16 {sizeInBytes}");
         return reg;
     }

@@ -81,7 +81,7 @@ public class QbeCodeGenerator
                 .Select(static arg => $"{arg.Value} {arg.Key}")
                 .ToList();
 
-            if (instruction?.ret == "Reg" && instruction?.retSize == null)
+            if ((instruction?.ret == "Reg" || instruction?.ret == "Address") && instruction?.retSize == null)
                 parameters.Add("Size regType = Size.L");
 
             string parameterString = string.Join(", ", parameters);
@@ -112,7 +112,11 @@ public class QbeCodeGenerator
             return;
         }
 
-        if (returnType != "void")
+        if (returnType == "Address")
+        {
+            WriteLine("Address reg = GetMemoryAllocation(currentReg!);");
+        }
+        else if (returnType != "void")
         {
             WriteLine("Reg reg = GetTempReg();");
         }
@@ -141,7 +145,7 @@ public class QbeCodeGenerator
 
         if (instruction?.retSize != null)
             _ = instructionString.Append($"{{reg}} ={instruction.retSize} ");
-        else if (instruction?.ret == "Reg")
+        else if (instruction?.ret == "Reg" || instruction?.ret == "Address")
         {
             _ = instructionString.Append("{reg} ={ToChar(regType)} ");
         }
@@ -184,6 +188,7 @@ public class QbeCodeGenerator
         WriteLine("using Label = string;");
         WriteLine("using Reg = string;");
         WriteLine("using Val = string;");
+        WriteLine("using Address = string;");
         WriteLine();
 
         WriteLine("public partial class QbeOutput");

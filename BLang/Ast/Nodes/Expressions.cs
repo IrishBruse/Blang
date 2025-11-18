@@ -19,6 +19,11 @@ public abstract record Expression() : AstNode;
 
 public record StringValue(string Value) : Expression
 {
+    public override string ToSource()
+    {
+        return '"' + Value + '"';
+    }
+
     public override string ToString()
     {
         return Value.ToString();
@@ -27,6 +32,11 @@ public record StringValue(string Value) : Expression
 
 public record IntValue(int Value) : Expression
 {
+    public override string ToSource()
+    {
+        return Value.ToString();
+    }
+
     public override string ToString()
     {
         return Value.ToString();
@@ -35,6 +45,11 @@ public record IntValue(int Value) : Expression
 
 public record Variable(Symbol Symbol) : Expression
 {
+    public override string ToSource()
+    {
+        return Symbol.Name;
+    }
+
     public override string ToString()
     {
         return Symbol.Name;
@@ -48,6 +63,11 @@ public record Variable(Symbol Symbol) : Expression
 
 public record BinaryExpression(BinaryOperator Operation, Expression Left, Expression Right) : Expression
 {
+    public override string ToSource()
+    {
+        return ToString();
+    }
+
     public override string ToString()
     {
         string ret = "";
@@ -85,6 +105,11 @@ public record BinaryExpression(BinaryOperator Operation, Expression Left, Expres
 
 public record AddressOfExpression(Expression Expr) : Expression
 {
+    public override string ToSource()
+    {
+        return ToString();
+    }
+
     public override string ToString()
     {
         return "&" + Expr.ToString();
@@ -93,6 +118,11 @@ public record AddressOfExpression(Expression Expr) : Expression
 
 public record PointerDereferenceExpression(Expression Expr) : Expression
 {
+    public override string ToSource()
+    {
+        return ToString();
+    }
+
     public override string ToString()
     {
         return "*" + Expr.ToString();
@@ -101,6 +131,11 @@ public record PointerDereferenceExpression(Expression Expr) : Expression
 
 public record ArrayIndexExpression(Variable Variable, Expression Index) : Expression
 {
+    public override string ToSource()
+    {
+        return ToString();
+    }
+
     public override string ToString()
     {
         return Variable.ToString() + $"[{Index}]";
@@ -109,15 +144,25 @@ public record ArrayIndexExpression(Variable Variable, Expression Index) : Expres
 
 public record CallExpression(Expression Callee, Expression[] Parameters) : Expression
 {
+    public override string ToSource()
+    {
+        return ToString();
+    }
+
     public override string ToString()
     {
-        string args = string.Join(", ", Parameters.Select(p => p.ToString()));
+        string args = string.Join(", ", Parameters.Select(static p => p.ToString()));
         return $"{Callee}({args})";
     }
 }
 
 public record AssignmentExpression(BinaryOperator Operation, Expression Left, Expression Right) : Expression
 {
+    public override string ToSource()
+    {
+        return ToString();
+    }
+
     public override string ToString()
     {
         if (Operation == BinaryOperator.None)

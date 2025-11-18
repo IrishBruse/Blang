@@ -4,8 +4,8 @@ export function l $main()
 {
 @start
 
-    %temp_0 =l loadl $arr
-    call $printf(l $string_0, l %temp_0)
+    %arr_1 =l loadl $arr
+    call $printf(l $string_0, l %arr_1)
 
     ret 0
 }

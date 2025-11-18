@@ -1,12 +1,13 @@
+
 export function l $main()
 {
 @start
 
-    %result_0 =l alloc8 8
-    storew 0, %result_0
+    %result =l alloc8 8
+    storel 0, %result
     %result_1 =l sub 100, 30
-    storel %result_1, %result_0
-    %result_2 =l loadl %result_0
+    storel %result_1, %result
+    %result_2 =l loadl %result
     call $printf(l $string_0, l %result_2)
 
     ret 0

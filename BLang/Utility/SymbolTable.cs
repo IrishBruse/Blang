@@ -5,31 +5,11 @@ using BLang.Tokenizer;
 
 public class SymbolTable
 {
-    private readonly Stack<Dictionary<string, Symbol>> scopes;
-    private readonly Stack<string> scopeNames;
+    private readonly Dictionary<string, Symbol> symbols;
 
     public SymbolTable()
     {
-        scopes = new Stack<Dictionary<string, Symbol>>();
-        scopeNames = new Stack<string>();
-    }
-
-    public int CurrentScopeDepth { get; private set; }
-
-    public void EnterScope(string name)
-    {
-        scopes.Push(new());
-        scopeNames.Push(name);
-
-        Log($"{name}:");
-        CurrentScopeDepth++;
-    }
-
-    public void ExitScope()
-    {
-        _ = scopes.Pop();
-        _ = scopeNames.Pop();
-        CurrentScopeDepth--;
+        symbols = new();
     }
 
     public Symbol Add(Token token)
@@ -43,49 +23,32 @@ public class SymbolTable
 
     public Symbol Add(string name)
     {
-        Symbol symbol = new(name);
-        Dictionary<string, Symbol> currentScope = scopes.Peek();
-        if (currentScope.ContainsKey(name))
+        if (symbols.TryGetValue(name, out Symbol? symbol))
         {
-            // Is this how shadowing works would i return a new symbol here
-            // or maybe it should work like a stack
-            throw new InvalidOperationException($"Symbol '{name}' already declared in current scope.");
+            return symbol;
         }
-        currentScope.Add(name, symbol);
-        Log($"{symbol.Name}");
 
+        symbol = new(name);
+        symbols.Add(name, symbol);
         return symbol;
+
+        // Symbol symbol = new(name);
+        // if (symbols.ContainsKey(name))
+        // {
+        //     throw new InvalidOperationException($"Symbol '{name}' already declared in current scope.");
+        // }
+        // symbols.Add(name, symbol);
+
+        // return symbol;
     }
 
     public Symbol GetOrAdd(Token token)
     {
-        foreach (Dictionary<string, Symbol> scope in scopes)
+        if (symbols.TryGetValue(token.Content, out Symbol? symbol))
         {
-            if (scope.TryGetValue(token.Content, out Symbol? symbol))
-            {
-                return symbol;
-            }
+            return symbol;
         }
 
         return Add(token);
-    }
-
-    public void Log(string message)
-    {
-        if (Options.Symbols && Options.Verbose > 1)
-        {
-            Globals.Log(new string(' ', CurrentScopeDepth * 2) + message, null, ConsoleColor.DarkGray);
-        }
-    }
-
-    public void Clear()
-    {
-        scopes.Clear();
-        scopeNames.Clear();
-
-        scopes.Push(new());
-        scopeNames.Push("global");
-
-        CurrentScopeDepth = 0;
     }
 }

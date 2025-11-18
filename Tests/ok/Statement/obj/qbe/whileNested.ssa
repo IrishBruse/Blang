@@ -1,34 +1,35 @@
+
 export function l $main()
 {
 @start
 
-    %i_0 =l alloc8 8
-    storew 0, %i_0
-    %j_0 =l alloc8 8
-    storew 0, %j_0
-    storel 0, %i_0
+    %i =l alloc8 8
+    storel 0, %i
+    %j =l alloc8 8
+    storel 0, %j
+    storel 0, %i
 @while_1_condition
-    %i_1 =l loadl %i_0
+    %i_1 =l loadl %i
     %i_2 =l csltl %i_1, 3
     jnz %i_2, @while_1_body, @while_1_end
 @while_1_body
-    storel 0, %j_0
+    storel 0, %j
 @while_2_condition
-    %j_1 =l loadl %j_0
+    %j_1 =l loadl %j
     %j_2 =l csltl %j_1, 2
     jnz %j_2, @while_2_body, @while_2_end
 @while_2_body
-    %i_3 =l loadl %i_0
-    %j_3 =l loadl %j_0
+    %i_3 =l loadl %i
+    %j_3 =l loadl %j
     call $printf(l $string_0, l %i_3, l %j_3)
-    %j_4 =l loadl %j_0
+    %j_4 =l loadl %j
     %j_5 =l add %j_4, 1
-    storel %j_5, %j_0
+    storel %j_5, %j
     jmp @while_2_condition
 @while_2_end
-    %i_4 =l loadl %i_0
+    %i_4 =l loadl %i
     %i_5 =l add %i_4, 1
-    storel %i_5, %i_0
+    storel %i_5, %i
     jmp @while_1_condition
 @while_1_end
 

@@ -1,15 +1,16 @@
+
 export function l $main()
 {
 @start
 
-    %x_0 =l alloc8 8
-    storew 0, %x_0
-    %y_0 =l alloc8 8
-    storew 0, %y_0
-    storel 5, %x_0
-    storel 3, %y_0
-    %y_1 =l loadl %x_0
-    %y_2 =l loadl %y_0
+    %x =l alloc8 8
+    storel 0, %x
+    %y =l alloc8 8
+    storel 0, %y
+    storel 5, %x
+    storel 3, %y
+    %y_1 =l loadl %x
+    %y_2 =l loadl %y
     %y_3 =l add %y_1, %y_2
     call $printf(l $string_0, l %y_3)
 

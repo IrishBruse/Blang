@@ -61,7 +61,6 @@
   ],
   "GlobalVariables": [
     {
-      "$type": "GlobalVariableDecleration",
       "Symbol": {
         "Name": "variable",
         "IsGlobal": true
@@ -80,6 +79,7 @@
       }
     }
   ],
+  "GlobalArrays": [],
   "Range": {
     "Start": 0,
     "End": 85

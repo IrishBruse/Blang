@@ -184,9 +184,9 @@
       }
     }
   ],
-  "GlobalVariables": [
+  "GlobalVariables": [],
+  "GlobalArrays": [
     {
-      "$type": "GlobalArrayDeclaration",
       "Symbol": {
         "Name": "arr",
         "IsGlobal": true

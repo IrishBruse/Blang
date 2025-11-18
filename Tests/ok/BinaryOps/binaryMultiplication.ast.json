@@ -44,10 +44,10 @@
           },
           "Value": {
             "_Type": "BinaryExpression",
-            "Operation": 118,
+            "Operation": 102,
             "Left": {
               "_Type": "IntValue",
-              "Value": 5,
+              "Value": 6,
               "Range": {
                 "Start": 57,
                 "End": 58
@@ -55,7 +55,7 @@
             },
             "Right": {
               "_Type": "IntValue",
-              "Value": 3,
+              "Value": 7,
               "Range": {
                 "Start": 61,
                 "End": 62
@@ -111,6 +111,7 @@
     }
   ],
   "GlobalVariables": [],
+  "GlobalArrays": [],
   "Range": {
     "Start": 0,
     "End": 93

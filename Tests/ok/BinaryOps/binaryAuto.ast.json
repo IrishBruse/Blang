@@ -16,8 +16,8 @@
             }
           ],
           "Range": {
-            "Start": 13,
-            "End": 26
+            "Start": 14,
+            "End": 27
           }
         },
         {
@@ -32,8 +32,8 @@
             }
           ],
           "Range": {
-            "Start": 31,
-            "End": 43
+            "Start": 33,
+            "End": 45
           }
         },
         {
@@ -44,31 +44,31 @@
           },
           "Value": {
             "_Type": "BinaryExpression",
-            "Operation": 117,
+            "Operation": 105,
             "Left": {
               "_Type": "IntValue",
-              "Value": 5,
+              "Value": 10,
               "Range": {
-                "Start": 57,
-                "End": 58
+                "Start": 60,
+                "End": 62
               }
             },
             "Right": {
               "_Type": "IntValue",
-              "Value": 3,
+              "Value": 20,
               "Range": {
-                "Start": 61,
-                "End": 62
+                "Start": 65,
+                "End": 67
               }
             },
             "Range": {
-              "Start": 55,
-              "End": 62
+              "Start": 58,
+              "End": 67
             }
           },
           "Range": {
-            "Start": 48,
-            "End": 54
+            "Start": 51,
+            "End": 57
           }
         },
         {
@@ -82,8 +82,8 @@
               "_Type": "StringValue",
               "Value": "%d\\n",
               "Range": {
-                "Start": 75,
-                "End": 81
+                "Start": 115,
+                "End": 121
               }
             },
             {
@@ -93,26 +93,27 @@
                 "IsGlobal": false
               },
               "Range": {
-                "Start": 83,
-                "End": 89
+                "Start": 123,
+                "End": 129
               }
             }
           ],
           "Range": {
-            "Start": 68,
-            "End": 91
+            "Start": 108,
+            "End": 131
           }
         }
       ],
       "Range": {
         "Start": 0,
-        "End": 93
+        "End": 134
       }
     }
   ],
   "GlobalVariables": [],
+  "GlobalArrays": [],
   "Range": {
     "Start": 0,
-    "End": 93
+    "End": 134
   }
 }

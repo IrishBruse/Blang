@@ -60,38 +60,38 @@
               "_Type": "IntValue",
               "Value": 1,
               "Range": {
-                "Start": 61,
-                "End": 62
+                "Start": 63,
+                "End": 64
               }
             },
             "Range": {
               "Start": 59,
-              "End": 62
+              "End": 64
             }
           },
           "Value": {
             "_Type": "IntValue",
             "Value": 2,
             "Range": {
-              "Start": 64,
-              "End": 67
+              "Start": 66,
+              "End": 69
             }
           },
           "Range": {
             "Start": 55,
-            "End": 68
+            "End": 70
           }
         }
       ],
       "Range": {
         "Start": 9,
-        "End": 70
+        "End": 72
       }
     }
   ],
-  "GlobalVariables": [
+  "GlobalVariables": [],
+  "GlobalArrays": [
     {
-      "$type": "GlobalArrayDeclaration",
       "Symbol": {
         "Name": "arr",
         "IsGlobal": true
@@ -106,6 +106,6 @@
   ],
   "Range": {
     "Start": 0,
-    "End": 70
+    "End": 72
   }
 }

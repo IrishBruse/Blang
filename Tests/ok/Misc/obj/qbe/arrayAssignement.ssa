@@ -4,18 +4,12 @@ export function l $main()
 {
 @start
 
-    # Write: %i_0 -> %i_1
-    %i_0 =l alloc8 8
-    storel 0, %i_0
-    # Read: %i_1
-    # Write: %i_2 -> %i_3
-    %i_2 =l loadl %i_1
-    # Write: %i_3 -> %i_4
-    %i_3 =l add %i_2, 1
-    # Read: %arr_-1
-    # Write: %arr_0 -> %arr_1
-    %arr_0 =l add $arr, %i_3
-    storel 2, %arr_0
+    %i =l alloc8 8
+    storel 0, %i
+    %i_1 =l loadl %i
+    %i_2 =l add %i_1, 1
+    %i_3 =l add $arr, %i_2
+    storel 2, %i_3
 
     ret 0
 }

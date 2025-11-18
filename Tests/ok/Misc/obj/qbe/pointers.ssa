@@ -1,39 +1,35 @@
+
 # FunctionDecleration
 export function l $main()
 {
 @start
 
     # ExternalStatement
-    # AutoStatement
-    # auto a = 0
-    %a_0 =l alloc8 8
-    storew 0, %a_0
-    # auto b = 0
-    %b_0 =l alloc8 8
-    storew 0, %b_0
-    # auto c = 0
-    %c_0 =l alloc8 8
-    storew 0, %c_0
-    # VariableAssignment a = 12
-    storel 12, %a_0
-    # FunctionCall
-    # call printf
-    %a_1 =l loadl %a_0
+    # VisitAutoStatement: auto a, b, c;
+    %a =l alloc8 8
+    storel 0, %a
+    %b =l alloc8 8
+    storel 0, %b
+    %c =l alloc8 8
+    storel 0, %c
+    # VisitVariableAssignment: a = 12
+    storel 12, %a
+    # VisitFunctionCall: printf("a %d\n", a)
+    %a_1 =l loadl %a
     call $printf(l $string_0, l %a_1)
-    # VariableAssignment b = &a
+    # VisitVariableAssignment: b = &a
     # VisitAddressOfExpression: &a
-    storel %a_2, %b_0
-    # VariableAssignment c = *b
-    # VisitAddressOfExpression: *b
+    storel %a_1, %b
+    # VisitVariableAssignment: c = *b
+    # VisitPointerDereferenceExpression: *b
     # Load Pointer
-    %b_2 =l loadl %b_1
+    %c_1 =l loadl %b
     # Dereferece Pointer
-    %b_3 =l loadl %b_2
-    storel %b_3, %c_0
-    # FunctionCall
-    # call printf
-    %c_1 =l loadl %c_0
-    call $printf(l $string_1, l %c_1)
+    %c_2 =l loadl %c_1
+    storel %c_2, %c
+    # VisitFunctionCall: printf("c %d\n", c)
+    %c_3 =l loadl %c
+    call $printf(l $string_1, l %c_3)
 
     ret 0
 }

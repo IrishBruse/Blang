@@ -1,3 +1,5 @@
+
+# FunctionDecleration
 export function l $main()
 {
 @start
@@ -6,6 +8,7 @@ export function l $main()
     ret 0
 }
 
+# FunctionDecleration
 function w $example1(l %a_0)
 {
 @start
@@ -14,6 +17,7 @@ function w $example1(l %a_0)
     ret
 }
 
+# FunctionDecleration
 function w $example2(l %a_0, l %b_0, l %c_0)
 {
 @start
@@ -22,4 +26,6 @@ function w $example2(l %a_0, l %b_0, l %c_0)
     ret
 }
 
+# Data
 
+# Externs

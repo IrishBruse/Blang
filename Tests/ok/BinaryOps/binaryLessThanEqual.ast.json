@@ -44,26 +44,26 @@
           },
           "Value": {
             "_Type": "BinaryExpression",
-            "Operation": 102,
+            "Operation": 107,
             "Left": {
               "_Type": "IntValue",
-              "Value": 6,
+              "Value": 10,
               "Range": {
                 "Start": 57,
-                "End": 58
+                "End": 59
               }
             },
             "Right": {
               "_Type": "IntValue",
-              "Value": 7,
+              "Value": 20,
               "Range": {
-                "Start": 61,
-                "End": 62
+                "Start": 63,
+                "End": 65
               }
             },
             "Range": {
               "Start": 55,
-              "End": 62
+              "End": 65
             }
           },
           "Range": {
@@ -82,8 +82,8 @@
               "_Type": "StringValue",
               "Value": "%d\\n",
               "Range": {
-                "Start": 75,
-                "End": 81
+                "Start": 78,
+                "End": 84
               }
             },
             {
@@ -93,26 +93,27 @@
                 "IsGlobal": false
               },
               "Range": {
-                "Start": 83,
-                "End": 89
+                "Start": 86,
+                "End": 92
               }
             }
           ],
           "Range": {
-            "Start": 68,
-            "End": 91
+            "Start": 71,
+            "End": 94
           }
         }
       ],
       "Range": {
         "Start": 0,
-        "End": 93
+        "End": 96
       }
     }
   ],
   "GlobalVariables": [],
+  "GlobalArrays": [],
   "Range": {
     "Start": 0,
-    "End": 93
+    "End": 96
   }
 }

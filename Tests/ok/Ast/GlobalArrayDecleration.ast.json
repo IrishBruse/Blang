@@ -13,9 +13,9 @@
       }
     }
   ],
-  "GlobalVariables": [
+  "GlobalVariables": [],
+  "GlobalArrays": [
     {
-      "$type": "GlobalArrayDeclaration",
       "Symbol": {
         "Name": "A",
         "IsGlobal": true
@@ -28,7 +28,6 @@
       }
     },
     {
-      "$type": "GlobalArrayDeclaration",
       "Symbol": {
         "Name": "B",
         "IsGlobal": true
@@ -58,7 +57,6 @@
       }
     },
     {
-      "$type": "GlobalArrayDeclaration",
       "Symbol": {
         "Name": "C",
         "IsGlobal": true

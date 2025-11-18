@@ -1,7 +1,5 @@
 data $A = { l 0 0 0 }
-
 data $B = { l 1 2 }
-
 data $C = { l 1 2 3 0 }
 
 export function l $main()

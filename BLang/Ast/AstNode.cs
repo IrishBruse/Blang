@@ -7,4 +7,6 @@ using BLang.Utility;
 public abstract record AstNode
 {
     public SourceRange Range = SourceRange.Zero;
+
+    public abstract string ToSource();
 }
